@@ -13,6 +13,8 @@ const supabaseHost = process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // "npm run dev:rede": permite abrir o servidor de desenvolvimento pelo celular na mesma rede Wi-Fi
+  allowedDevOrigins: ["192.168.*.*", "10.*.*.*", "172.*.*.*", "*.local"],
   serverExternalPackages: ["@react-pdf/renderer", "bcryptjs"],
   experimental: {
     // Upload de fotos de produto pelo painel (até 10 imagens de 5 MB, validadas no StorageService)

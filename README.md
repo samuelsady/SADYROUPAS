@@ -63,13 +63,14 @@ Páginas, Server Actions, APIs e, no futuro, a IA da V3 **só** acessam dados at
 
 ## Rodando localmente
 
+> **Windows, passo a passo detalhado (sem publicar nada): veja [LOCAL.md](LOCAL.md).**
+
 Requisitos: Node 20+ e PostgreSQL 14+.
 
 ```bash
 npm install
 cp .env.example .env          # ajuste DATABASE_URL e gere AUTH_SECRET (openssl rand -base64 48)
-npm run db:migrate            # cria as tabelas e as restrições
-npm run db:seed               # dados de desenvolvimento
+npm run setup                 # cria as tabelas e os dados de demonstração
 npm run dev                   # http://localhost:3000
 ```
 
@@ -82,6 +83,8 @@ O seed usa as **informações reais da loja** (endereço, telefones, horários) 
 | Comando | O que faz |
 |---|---|
 | `npm run dev` | Servidor de desenvolvimento |
+| `npm run dev:rede` | Igual, acessível pelo celular na mesma rede Wi-Fi |
+| `npm run setup` | Primeira instalação: migrations + dados de demonstração |
 | `npm run build` / `npm start` | Build e servidor de produção |
 | `npm run lint` / `npm run typecheck` | Qualidade |
 | `npm test` | Testes (exige um banco de teste, veja abaixo) |

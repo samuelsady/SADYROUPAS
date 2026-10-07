@@ -5,6 +5,7 @@
   "description": "Sistema Sady Roupas — site, catálogo, agendamento, clientes, agenda, estoque, WhatsApp e impressão.",
   "scripts": {
     "dev": "next dev",
+    "dev:rede": "next dev -H 0.0.0.0",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
@@ -16,7 +17,8 @@
     "db:seed": "tsx --conditions=react-server prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
     "print-agent": "node print-agent/agent.mjs",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "setup": "prisma migrate deploy && npm run db:seed"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
