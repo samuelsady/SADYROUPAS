@@ -16,6 +16,7 @@ Você só precisa da sua conta no GitHub e de uma conta na [Vercel](https://verc
 | `AUTH_SECRET` | um texto longo e aleatório (mínimo 32 caracteres). Pode gerar em https://generate-secret.vercel.app/48 |
 | `SEED_ON_DEPLOY` | `1` |
 | `SEED_ADMIN_PASSWORD` | a senha que você vai usar no painel (mínimo 8 caracteres) |
+| `PREVIEW_PASSWORD` | senha da **prévia privada**: o site inteiro pede essa senha e não aparece no Google |
 
 3. Clique em **Deploy**. O primeiro deploy **vai falhar** com a mensagem *"DATABASE_URL não configurada"*. Isso é esperado: ainda falta criar o banco no passo 2.
 
@@ -29,12 +30,37 @@ Durante esse deploy, o sistema cria as tabelas, as regras contra conflito de hor
 
 ## 3. Acessar
 
+Ao abrir o endereço, o navegador pede **usuário e senha** (modo prévia). Use qualquer usuário (ex.: `sady`) e a senha de `PREVIEW_PASSWORD`. O navegador lembra a senha depois da primeira vez.
+
 - **Site:** o endereço que a Vercel mostrar (ex.: `https://sadyroupas.vercel.app`).
 - **Painel:** `/admin`, entrando com **admin@sadyroupas.com.br** (ou **atendimento@sadyroupas.com.br**) e a senha de `SEED_ADMIN_PASSWORD`.
 
 > Os dados iniciais também incluem **clientes, peças físicas e agendamentos de teste**, para você explorar o painel. Antes de usar de verdade, eles precisam ser apagados.
 
-## 4. Depois do primeiro acesso
+## 4. Fazer mudanças depois de publicado
+
+Cada alteração enviada para a branch `main` do GitHub vira uma nova versão no ar **automaticamente** (1 a 2 minutos). Você só pede as mudanças. Os dados do banco (clientes, agendamentos, peças) **não são apagados** a cada atualização; mudanças no banco são aplicadas pelas migrations no build.
+
+Para testar uma mudança antes de ela ir para o endereço principal, ela pode ser enviada para outra branch: a Vercel cria um **link de pré-visualização** separado, protegido pelo login da Vercel. Esse link usa o **mesmo banco**; para um banco separado de testes, crie outro banco na Neon e conecte só ao ambiente *Preview*.
+
+## 5. Lançar oficialmente (quando quiser)
+
+1. Em **Settings → Environment Variables**, remova `PREVIEW_PASSWORD` e faça um **Redeploy**. O site fica aberto ao público.
+2. Domínio próprio (opcional): registre `sadyroupas.com.br` no [registro.br](https://registro.br) (cerca de R$ 40 por ano) e adicione em **Settings → Domains**. A Vercel mostra o que configurar no registro.br. Sem domínio, o endereço gratuito `…vercel.app` continua funcionando.
+3. Apague os dados de teste antes de começar a usar com clientes reais.
+
+## Custos
+
+| Item | Custo |
+|---|---|
+| Vercel (plano Hobby) | gratuito |
+| Banco Neon (plano Free) | gratuito (0,5 GB, suficiente para começar) |
+| Domínio `.com.br` | opcional, cerca de R$ 40 por ano no registro.br |
+| WhatsApp Business Platform | só quando ativar o envio real: a Meta cobra por conversa iniciada pela empresa |
+
+> O plano Hobby da Vercel é para uso não comercial. Quando o sistema estiver atendendo a loja de verdade, a Vercel recomenda o plano Pro (cerca de US$ 20 por mês). Para testar e apresentar, o Hobby atende.
+
+## 6. Depois do primeiro acesso
 
 - Em **Settings → Environment Variables**, remova `SEED_ON_DEPLOY`.
 - Quando for usar de verdade, configure também:
