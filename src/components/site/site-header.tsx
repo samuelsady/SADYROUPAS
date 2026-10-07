@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LinkButton } from "@/components/ui/button";
 import { Wordmark } from "@/components/ui/wordmark";
+import { FittingBag } from "./fitting-bag";
 import { MobileNav } from "./mobile-nav";
 
 export const SITE_NAV = [
@@ -24,7 +25,8 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
+          <FittingBag />
           <LinkButton href="/agendamento" variant="gold" size="md" className="hidden sm:inline-flex">
             Agendar atendimento
           </LinkButton>

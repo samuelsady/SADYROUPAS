@@ -58,8 +58,9 @@ export async function saveScheduleAction(_prev: ActionState, fd: FormData): Prom
         simultaneousSlots: z.coerce.number().int().min(1).max(10),
         minLeadMinutes: z.coerce.number().int().min(0).max(10080),
         maxAdvanceDays: z.coerce.number().int().min(1).max(365),
+        selfServiceCutoffHours: z.coerce.number().int().min(0).max(168),
       })
-      .parse(Object.fromEntries(["slotDurationMin", "slotBufferMin", "simultaneousSlots", "minLeadMinutes", "maxAdvanceDays"].map((k) => [k, formStr(fd, k)])));
+      .parse(Object.fromEntries(["slotDurationMin", "slotBufferMin", "simultaneousSlots", "minLeadMinutes", "maxAdvanceDays", "selfServiceCutoffHours"].map((k) => [k, formStr(fd, k)])));
     const hours = Array.from({ length: 7 }, (_, weekday) => {
       const isOpen = formBool(fd, `open_${weekday}`);
       const openTime = formStr(fd, `from_${weekday}`) ?? "09:00";

@@ -12,6 +12,8 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { requirePageUser } from "@/lib/auth/session";
 import { CatalogService } from "@/services/catalog.service";
 import { StorageService } from "@/services/storage/storage.service";
+import { InventoryService } from "@/services/inventory.service";
+import { inventoryStatusLabel, V1_INVENTORY_STATUSES } from "@/lib/labels";
 import { removeImageAction, saveProductAction, uploadImagesAction } from "../../_actions/catalog";
 
 export const metadata: Metadata = { title: "Produto" };
@@ -19,7 +21,7 @@ export const metadata: Metadata = { title: "Produto" };
 export default async function ProductEditPage({ params }: { params: Promise<{ id: string }> }) {
   await requirePageUser("catalog.manage");
   const { id } = await params;
-  const [p, categories] = await Promise.all([CatalogService.adminGet(id), CatalogService.categories()]);
+  const [p, categories, matrix] = await Promise.all([CatalogService.adminGet(id), CatalogService.categories(), InventoryService.sizeMatrix(id)]);
   return (
     <>
       <PageHeader
@@ -57,6 +59,34 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
               </SimpleForm>
             </div>
           </Card>
+          {matrix.length > 0 && (
+            <Card>
+              <CardHeader title="Disponibilidade por tamanho" />
+              <div className="overflow-x-auto p-4">
+                <table className="w-full text-center text-xs">
+                  <thead>
+                    <tr className="text-muted"><th className="py-1.5 text-left">Tam.</th>{V1_INVENTORY_STATUSES.map((s) => <th key={s} className="px-1 font-semibold">{inventoryStatusLabel[s]}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {matrix.map((row) => (
+                      <tr key={row.size} className="border-t border-line">
+                        <td className="py-2 text-left text-sm font-semibold">{row.size}</td>
+                        {V1_INVENTORY_STATUSES.map((s) => {
+                          const n = row.counts[s] ?? 0;
+                          return (
+                            <td key={s} className="px-1 py-2">
+                              <Link href={`/admin/estoque?produto=${p.id}&tamanho=${encodeURIComponent(row.size)}&status=${s}`} className={`inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 font-semibold tabular-nums ${n === 0 ? "text-muted/40" : s === "AVAILABLE" ? "bg-emerald-50 text-emerald-800" : s === "UNAVAILABLE" ? "bg-red-50 text-red-800" : "bg-ivory text-ink"}`}>{n}</Link>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {matrix.some((r) => !r.counts.AVAILABLE) && <p className="mt-2 text-left text-xs text-red-700">Há tamanhos sem nenhuma peça disponível agora.</p>}
+              </div>
+            </Card>
+          )}
           <Card>
             <CardHeader title="Peças físicas" description={`${p.items.length} peça(s) ativa(s)`} action={<LinkButton href={`/admin/estoque/novo?produto=${p.id}`} size="sm" variant="outline"><Plus className="h-3.5 w-3.5" /> Peça</LinkButton>} />
             {p.items.length === 0 ? <p className="px-5 py-5 text-sm text-muted">Nenhuma peça cadastrada.</p> : (

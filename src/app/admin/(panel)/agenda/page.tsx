@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Shirt } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
 import { AppointmentActions } from "@/components/admin/appointment-actions";
 import { AppointmentStatusBadge } from "@/components/admin/status-badges";
@@ -100,6 +100,11 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
                       <div className="min-w-0">
                         <p className="font-semibold">{a.customer.name}</p>
                         <p className="text-xs text-muted">{a.service.name} · até {toTimeKey(a.endsAt, tz)}</p>
+                        {a.items.length > 0 && (
+                          <p className={cn("mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold", a.items.every((i) => i.inventoryItemId) ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-900")}>
+                            <Shirt className="h-3 w-3" /> {a.items.filter((i) => i.inventoryItemId).length}/{a.items.length} peças separadas
+                          </p>
+                        )}
                         {a.notes && <p className="mt-1 text-xs text-ink/70">“{a.notes}”</p>}
                       </div>
                     </Link>
@@ -145,7 +150,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
                     <li key={a.id}>
                       <Link href={`/admin/agendamentos/${a.id}`} className={cn("block rounded-md border-l-4 bg-ivory/70 px-2 py-1.5 text-xs hover:bg-ivory", toneBorder[appointmentStatusTone[a.status]], a.status === "CANCELLED" && "opacity-50 line-through")}>
                         <span className="font-mono font-semibold">{toTimeKey(a.startsAt, tz)}</span> {a.customer.name}
-                        <span className="block truncate text-[10px] text-muted">{a.service.name}</span>
+                        <span className="block truncate text-[10px] text-muted">{a.service.name}{a.items.length > 0 ? ` · ${a.items.length} peça(s)` : ""}</span>
                       </Link>
                     </li>
                   ))}

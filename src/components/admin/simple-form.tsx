@@ -5,6 +5,7 @@ import { FormAlert } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useActionForm } from "@/hooks/use-action-form";
 
+
 /** Formulário genérico ligado a uma Server Action, com mensagem de sucesso/erro. */
 export function SimpleForm({
   action, children, submitLabel = "Salvar", className,
@@ -14,12 +15,13 @@ export function SimpleForm({
   submitLabel?: string;
   className?: string;
 }) {
-  const { state, pending, onSubmit } = useActionForm(action);
+  // Sucesso vira aviso flutuante; erro continua visível junto ao formulário
+  const { state, pending, onSubmit } = useActionForm(action, { errors: false });
   return (
     <form onSubmit={onSubmit} className={className ?? "space-y-4"}>
       {children}
       <div className="col-span-full space-y-3">
-        <FormAlert state={state} />
+        {state && !state.ok && <FormAlert state={state} />}
         <div className="flex justify-end">
           <SubmitButton pending={pending} pendingText="Salvando…">{submitLabel}</SubmitButton>
         </div>

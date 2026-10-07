@@ -11,7 +11,7 @@ import { receiptPdf } from "@/services/print/receipt-pdf";
 export const GET = handler(async (_req: Request, { params }: { params: Promise<{ id: string }> }) => {
   await requireUser("print.manage");
   const { id } = await params;
-  const appointment = await db.appointment.findUnique({ where: { id }, include: { customer: true, service: true, product: { select: { name: true } } } });
+  const appointment = await db.appointment.findUnique({ where: { id }, include: { customer: true, service: true, product: { select: { name: true } }, items: { include: { product: { select: { name: true } } } } } });
   if (!appointment) throw notFound("Agendamento");
   const settings = await SettingsService.get();
   const content = buildAppointmentReceipt(appointmentReceiptData(appointment, settings), settings.printFormat as ReceiptFormat);

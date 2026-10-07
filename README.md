@@ -135,6 +135,25 @@ Um **produto** (ex.: *Terno Slim Preto*) tem várias **peças físicas**, cada u
 
 ---
 
+## Lista de provas → estoque
+
+1. No catálogo, o cliente escolhe o tamanho e toca em **"Quero provar"**. A lista fica no navegador (ícone de cabide no topo) e vai junto com o agendamento.
+2. O servidor revalida produtos e tamanhos e grava a lista em `AppointmentItem`. O comprovante impresso lista as peças.
+3. No painel, o dashboard mostra **"Peças para separar"** (hoje e amanhã) e a agenda mostra quantas peças de cada atendimento já foram separadas.
+4. Na ficha do agendamento, a equipe escolhe a peça física e toca em **Separar**. A peça fica **RESERVADA**, com o nome do cliente no histórico. A reserva é condicional ao status DISPONÍVEL, então duas pessoas nunca separam a mesma peça.
+5. Se o atendimento for **cancelado** ou o cliente **não comparecer**, as peças separadas voltam sozinhas para **DISPONÍVEL**.
+
+## Autoatendimento do cliente
+
+O link da confirmação, que também vai na mensagem de WhatsApp pela variável `{link}`, abre a página **"Meu agendamento"**, onde o cliente pode **remarcar** (mesmas regras de horário do site) ou **cancelar**. Isso vale até X horas antes do horário, configurável em **Configurações → Horários** (padrão: 3h). A equipe recebe um alerta no sino, e o cliente recebe a mensagem de alteração ou cancelamento.
+
+## Estoque no dia a dia
+
+- **Status direto na lista**: troque o status no próprio selo da linha.
+- **Ações em lote**: marque várias peças e altere status e/ou localização de uma vez. Cada peça recebe sua linha no histórico.
+- **Leitor de QR Code** (`/admin/estoque/leitor`): pela câmera do celular (Chrome/Android), por um leitor USB ou digitando o código. Abre a peça em **modo balcão**, com botões grandes para mudar o status em um toque.
+- **Grade tamanho × status** em cada produto e alerta de **tamanhos esgotados** no dashboard.
+
 ## WhatsApp
 
 ```

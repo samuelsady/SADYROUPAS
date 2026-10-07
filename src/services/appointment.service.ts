@@ -5,13 +5,14 @@ import { db, type Tx } from "@/database/client";
 import { isExclusionViolation, isRetryableTxError, isUniqueViolation } from "@/database/errors";
 import { runAfterResponse } from "@/lib/background";
 import { AppError, badRequest, conflict, notFound } from "@/lib/errors";
-import { publicBookingSchema, rescheduleSchema, staffBookingSchema } from "@/lib/schemas";
+import { customerCancelSchema, customerRescheduleSchema, publicBookingSchema, rescheduleSchema, staffBookingSchema } from "@/lib/schemas";
 import { formatDate, toDateKey, toTimeKey, zonedParts } from "@/utils/datetime";
 import { normalizePhone } from "@/utils/phone";
 import { formatAppointmentCode } from "@/utils/codes";
 import { AuditService, type Actor } from "./audit.service";
 import { AvailabilityService } from "./availability/availability.service";
 import { CustomerService } from "./customer.service";
+import { FittingService } from "./fitting.service";
 import { NotificationService } from "./notification/notification.service";
 import { PrintService } from "./print/print.service";
 import { SettingsService } from "./settings.service";
@@ -32,7 +33,25 @@ import { SettingsService } from "./settings.service";
 const SLOT_TAKEN = "Este horário acabou de ser reservado. Por favor, escolha outro.";
 const MAX_TX_ATTEMPTS = 3;
 
-const include = { customer: true, service: true, product: { select: { id: true, name: true, slug: true } } } as const;
+const include = {
+  customer: true,
+  service: true,
+  product: { select: { id: true, name: true, slug: true } },
+  items: {
+    orderBy: { createdAt: "asc" },
+    include: { product: { select: { id: true, name: true, slug: true } }, inventoryItem: { select: { code: true, status: true, location: true } } },
+  },
+} as const;
+
+type FittingItemInput = { productId: string; size: string | null };
+
+/** Cliente pode remarcar/cancelar pelo link até X horas antes (configurável). */
+function assertCustomerCanChange(a: { status: AppointmentStatus; startsAt: Date }, cutoffHours: number, now = new Date()) {
+  if (a.status !== "SCHEDULED" && a.status !== "CONFIRMED") throw badRequest("Este agendamento não pode mais ser alterado.");
+  if (a.startsAt.getTime() - now.getTime() < cutoffHours * 3_600_000) {
+    throw badRequest(`Alterações pelo site são possíveis até ${cutoffHours}h antes do horário. Fale com a loja pelo WhatsApp.`);
+  }
+}
 
 /** Transições permitidas de status. */
 const TRANSITIONS: Record<AppointmentStatus, AppointmentStatus[]> = {
@@ -77,6 +96,7 @@ type CreateParams = {
   notes?: string | null;
   internalNotes?: string | null;
   productId?: string | null;
+  items?: FittingItemInput[];
   source: AppointmentSource;
   staff: boolean;
   actor: Actor;
@@ -133,6 +153,7 @@ async function createInternal(p: CreateParams) {
           notes: p.notes ?? null,
           internalNotes: p.staff ? (p.internalNotes ?? null) : null,
           createdById: p.actor.userId,
+          ...(p.items?.length ? { items: { create: p.items } } : {}),
         },
         include,
       });
@@ -175,14 +196,28 @@ export const AppointmentService = {
   /** Agendamento feito pelo cliente no site (sem login). */
   async createFromWebsite(raw: unknown, actor: Actor) {
     const input = publicBookingSchema.parse(raw);
-    const product = input.productSlug ? await db.product.findFirst({ where: { slug: input.productSlug, active: true }, select: { id: true } }) : null;
+    // Lista de provas: só produtos ativos; tamanho só se existir no produto
+    const requested = [...input.items, ...(input.productSlug ? [{ slug: input.productSlug, size: null }] : [])];
+    const products = requested.length
+      ? await db.product.findMany({ where: { slug: { in: requested.map((r) => r.slug) }, active: true }, select: { id: true, slug: true, sizes: true } })
+      : [];
+    const items: FittingItemInput[] = [];
+    for (const r of requested) {
+      const product = products.find((p) => p.slug === r.slug);
+      if (!product) continue;
+      const size = r.size && product.sizes.includes(r.size) ? r.size : null;
+      // Sem duplicar o mesmo produto/tamanho; o produto "de interesse" sem tamanho não repete um já escolhido
+      if (items.some((i) => i.productId === product.id && (i.size === size || size === null))) continue;
+      items.push({ productId: product.id, size });
+    }
     return createInternal({
       customer: { name: input.name, whatsapp: input.whatsapp, email: input.email },
       serviceId: input.serviceId,
       date: input.date,
       time: input.time,
       notes: input.notes,
-      productId: product?.id ?? null,
+      productId: items[0]?.productId ?? null,
+      items,
       source: "WEBSITE",
       staff: false,
       actor,
@@ -207,14 +242,15 @@ export const AppointmentService = {
   },
 
   /** Reagendar / editar. Revalida disponibilidade ignorando o próprio agendamento. */
-  async update(id: string, raw: unknown, actor: Actor) {
+  async update(id: string, raw: unknown, actor: Actor, opts: { staff?: boolean } = {}) {
+    const staff = opts.staff ?? true;
     const input = rescheduleSchema.parse(raw);
     const current = await db.appointment.findUnique({ where: { id } });
     if (!current) throw notFound("Agendamento");
     if (current.status === "CANCELLED" || current.status === "NO_SHOW") throw badRequest("Reabra o agendamento antes de editá-lo.");
 
     const service = await db.service.findUnique({ where: { id: input.serviceId } });
-    if (!service || !service.active) throw badRequest("Serviço indisponível.");
+    if (!service || !service.active || (!staff && !service.publicBooking)) throw badRequest("Serviço indisponível.");
 
     const settings = await SettingsService.get();
     const timeChanged =
@@ -224,7 +260,7 @@ export const AppointmentService = {
 
     let slot: Awaited<ReturnType<typeof AvailabilityService.slotsForDay>>[number] | undefined;
     if (timeChanged) {
-      const slots = await AvailabilityService.slotsForDay(input.date, service, { staff: true, ignoreAppointmentId: id });
+      const slots = await AvailabilityService.slotsForDay(input.date, service, { staff, ignoreAppointmentId: id });
       slot = slots.find((s) => s.time === input.time);
       if (!slot) throw badRequest("Horário fora do expediente ou indisponível para este serviço.");
       if (!slot.available) throw conflict(SLOT_TAKEN);
@@ -296,6 +332,10 @@ export const AppointmentService = {
       db.$transaction(async (tx) => {
         const settings = await SettingsService.getInTx(tx);
         const appointment = await tx.appointment.update({ where: { id }, data, include });
+        // Cancelou ou não compareceu: peças separadas voltam a ficar disponíveis
+        if (to === "CANCELLED" || to === "NO_SHOW") {
+          await FittingService.releaseAllInTx(tx, id, actor, to === "CANCELLED" ? `Agendamento ${appointment.code} cancelado` : `Cliente não compareceu (${appointment.code})`);
+        }
         const notification = to === "CANCELLED" ? await NotificationService.enqueueAppointmentMessage(tx, "APPOINTMENT_CANCELLED", appointment, settings) : null;
         await AuditService.log(
           actor,
@@ -339,14 +379,62 @@ export const AppointmentService = {
 
   async getByPublicToken(token: string) {
     if (!/^[A-Za-z0-9_-]{10,64}$/.test(token)) return null;
-    return db.appointment.findUnique({ where: { publicToken: token }, include: { customer: { select: { name: true } }, service: true } });
+    return db.appointment.findUnique({
+      where: { publicToken: token },
+      include: {
+        customer: { select: { name: true } },
+        service: true,
+        items: { orderBy: { createdAt: "asc" }, include: { product: { select: { name: true, slug: true, images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } } } } } },
+      },
+    });
+  },
+
+  /** Autoatendimento: o cliente remarca pelo link da confirmação (mesmas regras do site). */
+  async rescheduleByCustomer(token: string, raw: unknown, actor: Actor) {
+    const input = customerRescheduleSchema.parse(raw);
+    const a = await this.getByPublicToken(token);
+    if (!a) throw notFound("Agendamento");
+    const settings = await SettingsService.get();
+    assertCustomerCanChange(a, settings.selfServiceCutoffHours);
+    const updated = await this.update(
+      a.id,
+      { serviceId: a.serviceId, date: input.date, time: input.time, notes: a.notes, internalNotes: a.internalNotes, productId: a.productId },
+      actor,
+      { staff: false },
+    );
+    await NotificationService.alert(db, {
+      event: "APPOINTMENT_UPDATED",
+      title: "Cliente remarcou pelo site",
+      body: `${updated.customer.name} — ${updated.code}: agora ${formatDate(updated.startsAt, settings.timezone)} às ${toTimeKey(updated.startsAt, settings.timezone)}`,
+      appointmentId: a.id,
+      customerId: a.customerId,
+    });
+    return updated;
+  },
+
+  /** Autoatendimento: o cliente cancela pelo link. Peças separadas são liberadas. */
+  async cancelByCustomer(token: string, raw: unknown, actor: Actor) {
+    const { reason } = customerCancelSchema.parse(raw);
+    const a = await this.getByPublicToken(token);
+    if (!a) throw notFound("Agendamento");
+    const settings = await SettingsService.get();
+    assertCustomerCanChange(a, settings.selfServiceCutoffHours);
+    const cancelled = await this.changeStatus(a.id, "CANCELLED", actor, { reason: `Cancelado pelo cliente${reason ? `: ${reason}` : ""}` });
+    await NotificationService.alert(db, {
+      event: "APPOINTMENT_CANCELLED",
+      title: "Cliente cancelou pelo site",
+      body: `${a.customer.name} — ${a.code} (${formatDate(a.startsAt, settings.timezone)} às ${toTimeKey(a.startsAt, settings.timezone)})`,
+      appointmentId: a.id,
+      customerId: a.customerId,
+    });
+    return cancelled;
   },
 
   async listRange(start: Date, end: Date, filter: { status?: AppointmentStatus[] } = {}) {
     return db.appointment.findMany({
       where: { startsAt: { gte: start, lt: end }, ...(filter.status ? { status: { in: filter.status } } : {}) },
       orderBy: [{ startsAt: "asc" }, { lane: "asc" }],
-      include: { customer: { select: { id: true, name: true, whatsapp: true } }, service: { select: { name: true } } },
+      include: { customer: { select: { id: true, name: true, whatsapp: true } }, service: { select: { name: true } }, items: { select: { inventoryItemId: true } } },
     });
   },
 

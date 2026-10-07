@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { InventoryStatus } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import QRCode from "qrcode";
@@ -14,16 +15,30 @@ import { inventoryStatusLabel, V1_INVENTORY_STATUSES } from "@/lib/labels";
 import { InventoryService } from "@/services/inventory.service";
 import { SettingsService } from "@/services/settings.service";
 import { formatDateTime } from "@/utils/datetime";
-import { changeItemStatusAction, deactivateItemAction, updateItemAction } from "../../_actions/inventory";
+import { changeItemStatusAction, deactivateItemAction, quickStatusAction, updateItemAction } from "../../_actions/inventory";
 import { PrintLabelButton } from "./print-label-button";
 
 export const metadata: Metadata = { title: "Peça" };
 
-const ACTION_LABEL: Record<string, string> = { CREATED: "Cadastrada", STATUS_CHANGED: "Status alterado", UPDATED: "Dados alterados", DEACTIVATED: "Baixada do estoque" };
+const ACTION_LABEL: Record<string, string> = {
+  CREATED: "Cadastrada",
+  STATUS_CHANGED: "Status alterado",
+  UPDATED: "Dados alterados",
+  DEACTIVATED: "Baixada do estoque",
+  RESERVED_FOR_APPOINTMENT: "Separada para atendimento",
+  RELEASED: "Liberada",
+};
 
-export default async function ItemPage({ params }: { params: Promise<{ code: string }> }) {
+const QUICK: { status: InventoryStatus; label: string }[] = [
+  { status: "AVAILABLE", label: "Disponível" },
+  { status: "RESERVED", label: "Reservar" },
+  { status: "RENTED", label: "Alugar / saiu" },
+  { status: "UNAVAILABLE", label: "Indisponível" },
+];
+
+export default async function ItemPage({ params, searchParams }: { params: Promise<{ code: string }>; searchParams: Promise<{ balcao?: string }> }) {
   await requirePageUser("inventory.manage");
-  const { code } = await params;
+  const [{ code }, { balcao }] = await Promise.all([params, searchParams]);
   const [item, settings] = await Promise.all([InventoryService.getByCode(decodeURIComponent(code)), SettingsService.get()]);
   const tz = settings.timezone;
   // QR Code aponta para esta ficha (V2: leitura no balcão para retirada/devolução)
@@ -32,6 +47,21 @@ export default async function ItemPage({ params }: { params: Promise<{ code: str
   return (
     <>
       <PageHeader back={{ href: "/admin/estoque", label: "Estoque" }} title={<span className="flex items-center gap-3"><span className="font-mono">{item.code}</span><InventoryStatusBadge status={item.status} /></span>} description={<Link href={`/admin/catalogo/${item.product.id}`} className="hover:text-ink">{item.product.name} · {item.product.category.name}</Link>} />
+      <Card className={`mb-6 p-4 ${balcao ? "pop-in ring-2 ring-gold/60" : ""}`}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex-1">
+            <p className="text-sm font-semibold">Ações rápidas</p>
+            <p className="text-xs text-muted">{balcao ? "Peça lida pelo QR Code. " : ""}Um toque muda o status e registra no histórico.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:flex">
+            {QUICK.filter((q) => q.status !== item.status).map((q) => (
+              <ActionButton key={q.status} action={quickStatusAction} fields={{ code: item.code, status: q.status }} variant={q.status === "AVAILABLE" ? "primary" : "outline"} size="md">{q.label}</ActionButton>
+            ))}
+          </div>
+        </div>
+        {balcao && <Link href="/admin/estoque/leitor" className="mt-3 inline-block text-xs font-semibold text-gold-dark hover:underline">← Ler outra peça</Link>}
+      </Card>
+
       <div className="grid grid-cols-1 gap-6 [&>*]:min-w-0 xl:grid-cols-[1fr_1.2fr]">
         <div className="space-y-6">
           <Card className="flex gap-5 p-5">

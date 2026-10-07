@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { InventoryStatus } from "@prisma/client";
-import { Plus } from "lucide-react";
+import { Plus, ScanLine } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
 import { Pagination } from "@/components/admin/pagination";
+import { InventoryTable } from "@/components/admin/inventory-table";
 import { InventoryStatusBadge } from "@/components/admin/status-badges";
-import { Table, Td, Th } from "@/components/admin/table";
 import { LinkButton } from "@/components/ui/button";
 import { Card, EmptyState } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/form";
@@ -35,7 +35,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <PageHeader title="Estoque" description="Cada peça física tem código próprio, status, localização e histórico." actions={<LinkButton href="/admin/estoque/novo"><Plus className="h-4 w-4" /> Cadastrar peças</LinkButton>} />
+      <PageHeader title="Estoque" description="Mude o status direto na lista ou selecione várias peças para alterar em lote." actions={<><LinkButton href="/admin/estoque/leitor" variant="outline"><ScanLine className="h-4 w-4" /> Ler QR Code</LinkButton><LinkButton href="/admin/estoque/novo"><Plus className="h-4 w-4" /> Cadastrar peças</LinkButton></>} />
       <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
         <Link href={href({ status: undefined })} className={cn("rounded-xl border bg-white p-4", !status ? "border-ink" : "border-line")}>
           <p className="text-xs font-semibold text-muted">Todas</p>
@@ -64,22 +64,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
           <button className="h-11 rounded-md bg-ink px-4 text-sm font-semibold text-ivory">Filtrar</button>
         </form>
         {data.items.length === 0 ? <EmptyState title="Nenhuma peça encontrada" /> : (
-          <Table>
-            <thead><tr><Th>Código</Th><Th>Produto</Th><Th>Tam.</Th><Th>Cor</Th><Th>Status</Th><Th>Localização</Th><Th className="text-right">Locações</Th></tr></thead>
-            <tbody>
-              {data.items.map((i) => (
-                <tr key={i.id} className="hover:bg-ivory/50">
-                  <Td><Link href={`/admin/estoque/${i.code}`} className="font-mono text-xs font-semibold hover:text-gold-dark">{i.code}</Link></Td>
-                  <Td><Link href={`/admin/catalogo/${i.product.id}`} className="hover:text-gold-dark">{i.product.name}</Link><span className="block text-[11px] text-muted">{i.product.category.name}</span></Td>
-                  <Td className="font-semibold">{i.size}</Td>
-                  <Td className="text-xs">{i.color}</Td>
-                  <Td><InventoryStatusBadge status={i.status} /></Td>
-                  <Td className="text-xs text-muted">{i.location ?? "—"}</Td>
-                  <Td className="text-right tabular-nums">{i.rentalCount}</Td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <InventoryTable rows={data.items.map((i) => ({ id: i.id, code: i.code, size: i.size, color: i.color, status: i.status, location: i.location, rentalCount: i.rentalCount, product: { id: i.product.id, name: i.product.name, category: i.product.category.name } }))} />
         )}
         <Pagination page={data.page} pages={data.pages} total={data.total} hrefFor={(p) => href({ page: String(p) })} />
       </Card>

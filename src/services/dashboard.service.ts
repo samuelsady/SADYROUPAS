@@ -1,6 +1,7 @@
 import "server-only";
 import { db } from "@/database/client";
 import { addDaysKey, dayRangeUtc, startOfMonthKey, todayKey } from "@/utils/datetime";
+import { FittingService } from "./fitting.service";
 import { InventoryService } from "./inventory.service";
 import { PrintService } from "./print/print.service";
 import { SettingsService } from "./settings.service";
@@ -14,7 +15,7 @@ export const DashboardService = {
     const monthStart = dayRangeUtc(startOfMonthKey(today), tz).start;
     const weekAgo = dayRangeUtc(addDaysKey(today, -6), tz).start;
 
-    const [todayAppointments, upcoming, customersTotal, customersNew, inventory, printPending, printFailed, whatsappFailed, printer] = await Promise.all([
+    const [todayAppointments, upcoming, customersTotal, customersNew, inventory, printPending, printFailed, whatsappFailed, printer, toSeparate, soldOut] = await Promise.all([
       db.appointment.findMany({
         where: { startsAt: { gte: start, lt: end } },
         orderBy: { startsAt: "asc" },
@@ -33,6 +34,9 @@ export const DashboardService = {
       db.printJob.count({ where: { status: "PRINT_FAILED" } }),
       db.notification.count({ where: { channel: "WHATSAPP", status: "FAILED", createdAt: { gte: weekAgo } } }),
       PrintService.printerState(now),
+      // Peças da lista de provas ainda não separadas (hoje e amanhã)
+      FittingService.pendingBetween(now, dayRangeUtc(addDaysKey(today, 1), tz).end),
+      InventoryService.soldOutSizes(6),
     ]);
 
     const by = (s: string) => todayAppointments.filter((a) => a.status === s).length;
@@ -44,6 +48,7 @@ export const DashboardService = {
     if (inventory.counts.UNAVAILABLE) alerts.push({ tone: "red", text: `${inventory.counts.UNAVAILABLE} peça(s) indisponível(is)`, href: "/admin/estoque?status=UNAVAILABLE" });
     if (printPending + printFailed) alerts.push({ tone: "amber", text: `${printPending + printFailed} impressão(ões) pendente(s)`, href: "/admin/impressoes" });
     if (whatsappFailed) alerts.push({ tone: "red", text: `${whatsappFailed} mensagem(ns) de WhatsApp com falha`, href: "/admin/notificacoes?status=FAILED" });
+    if (toSeparate.length) alerts.push({ tone: "gold", text: `${toSeparate.length} peça(s) para separar`, href: "/admin/agenda" });
     if (printer.state === "DESCONECTADA" && printPending) alerts.push({ tone: "amber", text: "Serviço de impressão desconectado", href: "/admin/impressoes" });
 
     return {
@@ -60,6 +65,8 @@ export const DashboardService = {
       customers: { total: customersTotal, newThisMonth: customersNew },
       inventory,
       print: { pending: printPending, failed: printFailed, printer },
+      toSeparate,
+      soldOut,
       alerts,
     };
   },

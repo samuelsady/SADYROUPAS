@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AlertTriangle, CalendarClock, CalendarPlus, CheckCircle2, Printer, UserPlus, Users, XCircle } from "lucide-react";
+import { AlertTriangle, CalendarClock, CalendarPlus, CheckCircle2, PackageX, Printer, Shirt, UserPlus, Users, XCircle } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
 import { AppointmentStatusBadge } from "@/components/admin/status-badges";
 import { LinkButton } from "@/components/ui/button";
@@ -86,6 +86,26 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </Card>
 
         <div className="space-y-6">
+          {data.toSeparate.length > 0 && (
+            <Card className="border-gold/40">
+              <CardHeader title={<span className="flex items-center gap-2"><Shirt className="h-4 w-4 text-gold" /> Peças para separar</span>} description="Listas de provas de hoje e amanhã" />
+              <ul className="divide-y divide-line">
+                {data.toSeparate.slice(0, 6).map((i) => (
+                  <li key={i.id}>
+                    <Link href={`/admin/agendamentos/${i.appointment.id}`} className="flex items-center justify-between gap-3 px-5 py-2.5 text-sm hover:bg-ivory/60">
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium">{i.product.name}{i.size ? ` · tam. ${i.size}` : ""}</span>
+                        <span className="block truncate text-xs text-muted">{i.appointment.customer.name}</span>
+                      </span>
+                      <span className="shrink-0 font-mono text-xs text-muted">{formatDate(i.appointment.startsAt, tz).slice(0, 5)} {toTimeKey(i.appointment.startsAt, tz)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              {data.toSeparate.length > 6 && <p className="border-t border-line px-5 py-2 text-xs text-muted">+{data.toSeparate.length - 6} outras</p>}
+            </Card>
+          )}
+
           <Card>
             <CardHeader title="Próximos horários" />
             {data.upcoming.length === 0 ? (
@@ -120,6 +140,22 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               ))}
             </div>
           </Card>
+
+          {data.soldOut.total > 0 && (
+            <Card>
+              <CardHeader title={<span className="flex items-center gap-2"><PackageX className="h-4 w-4 text-red-700" /> Tamanhos esgotados</span>} description={`${data.soldOut.total} produto/tamanho sem peça disponível agora`} />
+              <ul className="divide-y divide-line">
+                {data.soldOut.items.map((s) => (
+                  <li key={`${s.productId}-${s.size}`}>
+                    <Link href={`/admin/estoque?produto=${s.productId}&tamanho=${encodeURIComponent(s.size)}`} className="flex items-center justify-between gap-3 px-5 py-2.5 text-sm hover:bg-ivory/60">
+                      <span className="truncate">{s.name}</span>
+                      <Badge tone="red">Tam. {s.size}</Badge>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
 
           <Card className="flex items-center justify-between gap-3 p-5">
             <div className="flex items-center gap-3">

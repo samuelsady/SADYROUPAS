@@ -100,12 +100,14 @@ model StoreSettings {
   foundedAt    DateTime?
 
   // Agenda
-  timezone          String @default("America/Fortaleza")
-  slotDurationMin   Int    @default(30) // duração padrão de um atendimento
-  slotBufferMin     Int    @default(10) // intervalo entre atendimentos
-  simultaneousSlots Int    @default(1) // atendimentos simultâneos (lanes)
-  minLeadMinutes    Int    @default(60) // antecedência mínima para agendar pelo site
-  maxAdvanceDays    Int    @default(60) // até quantos dias à frente o site aceita
+  timezone               String @default("America/Fortaleza")
+  slotDurationMin        Int    @default(30) // duração padrão de um atendimento
+  slotBufferMin          Int    @default(10) // intervalo entre atendimentos
+  simultaneousSlots      Int    @default(1) // atendimentos simultâneos (lanes)
+  minLeadMinutes         Int    @default(60) // antecedência mínima para agendar pelo site
+  maxAdvanceDays         Int    @default(60) // até quantos dias à frente o site aceita
+  /// Cliente pode remarcar/cancelar pelo link até X horas antes do atendimento
+  selfServiceCutoffHours Int    @default(3)
 
   // WhatsApp
   whatsappEnabled     Boolean      @default(true)
@@ -259,17 +261,39 @@ model Appointment {
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
-  customer      Customer       @relation(fields: [customerId], references: [id])
-  service       Service        @relation(fields: [serviceId], references: [id])
-  product       Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
-  createdBy     User?          @relation("AppointmentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  customer      Customer          @relation(fields: [customerId], references: [id])
+  service       Service           @relation(fields: [serviceId], references: [id])
+  product       Product?          @relation(fields: [productId], references: [id], onDelete: SetNull)
+  createdBy     User?             @relation("AppointmentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   printJobs     PrintJob[]
   notifications Notification[]
   rental        Rental?
+  items         AppointmentItem[]
 
   @@index([startsAt])
   @@index([status, startsAt])
   @@index([customerId])
+}
+
+/// Lista de provas: peças (e tamanho) que o cliente quer experimentar.
+/// A equipe usa para separar as peças antes do atendimento e pode vincular
+/// a peça física reservada (InventoryItem).
+model AppointmentItem {
+  id              String   @id @default(cuid())
+  appointmentId   String
+  productId       String
+  size            String?
+  /// Peça física separada pela equipe para este atendimento
+  inventoryItemId String?
+  createdAt       DateTime @default(now())
+
+  appointment   Appointment    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  product       Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+
+  @@unique([appointmentId, productId, size])
+  @@index([appointmentId])
+  @@index([inventoryItemId])
 }
 
 // ----------------------------------------------------------------------------
@@ -310,11 +334,12 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  category     Category        @relation(fields: [categoryId], references: [id])
-  images       ProductImage[]
-  items        InventoryItem[]
-  appointments Appointment[]
-  kitItems     KitItem[]
+  category         Category          @relation(fields: [categoryId], references: [id])
+  images           ProductImage[]
+  items            InventoryItem[]
+  appointments     Appointment[]
+  kitItems         KitItem[]
+  appointmentItems AppointmentItem[]
 
   @@index([categoryId, active])
 }
@@ -388,11 +413,12 @@ model InventoryItem {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
-  product     Product            @relation(fields: [productId], references: [id])
-  history     InventoryHistory[]
-  rentalItems RentalItem[]
-  laundry     Laundry[]
-  maintenance Maintenance[]
+  product          Product            @relation(fields: [productId], references: [id])
+  history          InventoryHistory[]
+  rentalItems      RentalItem[]
+  appointmentItems AppointmentItem[]
+  laundry          Laundry[]
+  maintenance      Maintenance[]
 
   @@index([productId, size, status])
   @@index([status])

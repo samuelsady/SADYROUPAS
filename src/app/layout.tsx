@@ -17,8 +17,12 @@ export const viewport: Viewport = { themeColor: "#13110f", width: "device-width"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" data-scroll-behavior="smooth" className={`${cormorant.variable} ${manrope.variable}`}>
-      <body>{children}</body>
+    <html lang="pt-BR" data-scroll-behavior="smooth" suppressHydrationWarning className={`${cormorant.variable} ${manrope.variable}`}>
+      <body>
+        {/* Marca que o JS está ativo: animações de revelação só escondem conteúdo nesse caso */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        {children}
+      </body>
     </html>
   );
 }

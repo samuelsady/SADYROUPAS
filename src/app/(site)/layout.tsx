@@ -2,6 +2,7 @@ import { connection } from "next/server";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { WhatsAppFloat } from "@/components/site/whatsapp-float";
+import { Toaster } from "@/components/ui/toaster";
 import { SettingsService } from "@/services/settings.service";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
@@ -18,6 +19,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       </main>
       <SiteFooter settings={settings} hours={hours} />
       <WhatsAppFloat phone={settings.whatsapp} />
+      <Toaster />
     </>
   );
 }

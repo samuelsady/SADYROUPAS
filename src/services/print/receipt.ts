@@ -20,6 +20,8 @@ export type AppointmentReceiptData = {
   time: string; // HH:mm
   notes?: string | null;
   product?: string | null;
+  /** Lista de provas: "Terno Azul Dior (tam. 50)" */
+  fittingItems?: string[];
   createdAt: string; // dd/MM/yyyy HH:mm
   storePhone?: string | null;
   address?: string | null;
@@ -69,7 +71,11 @@ export function buildAppointmentReceipt(data: AppointmentReceiptData, format: Re
   field("Servico", data.service);
   field("Data", data.date);
   field("Horario", data.time);
-  field("Peca de interesse", data.product);
+  if (data.fittingItems?.length) {
+    out.push("Pecas para provar:");
+    for (const item of data.fittingItems) out.push(...wrapText(toAscii(`- ${item}`), w));
+    out.push("");
+  } else field("Peca de interesse", data.product);
   field("Observacoes", data.notes);
   field("Criado em", data.createdAt);
   out.push(rule, center(toAscii(data.companyName.toUpperCase()), w));

@@ -25,7 +25,12 @@ const HEARTBEAT_TIMEOUT_MS = 90_000;
 const STUCK_PRINTING_MS = 3 * 60_000;
 const MAX_ATTEMPTS = 3;
 
-type AppointmentForReceipt = Appointment & { customer: Customer; service: Service; product?: Pick<Product, "name"> | null };
+type AppointmentForReceipt = Appointment & {
+  customer: Customer;
+  service: Service;
+  product?: Pick<Product, "name"> | null;
+  items?: { size: string | null; product: Pick<Product, "name"> }[];
+};
 
 export function appointmentReceiptData(a: AppointmentForReceipt, settings: StoreSettings): AppointmentReceiptData {
   const tz = settings.timezone;
@@ -39,6 +44,7 @@ export function appointmentReceiptData(a: AppointmentForReceipt, settings: Store
     time: toTimeKey(a.startsAt, tz),
     notes: a.notes,
     product: a.product?.name ?? null,
+    fittingItems: a.items?.map((i) => `${i.product.name}${i.size ? ` (tam. ${i.size})` : ""}`),
     createdAt: formatDateTime(a.createdAt, tz),
     storePhone: settings.phone ? formatPhone(settings.phone) : null,
     address: settings.address,
@@ -62,7 +68,7 @@ export const PrintService = {
 
   async reprintAppointment(appointmentId: string, actor: Actor) {
     return db.$transaction(async (tx) => {
-      const appointment = await tx.appointment.findUnique({ where: { id: appointmentId }, include: { customer: true, service: true, product: { select: { name: true } } } });
+      const appointment = await tx.appointment.findUnique({ where: { id: appointmentId }, include: { customer: true, service: true, product: { select: { name: true } }, items: { include: { product: { select: { name: true } } } } } });
       if (!appointment) throw notFound("Agendamento");
       const settings = await SettingsService.getInTx(tx);
       const job = await this.enqueueAppointmentReceipt(tx, appointment, settings, actor.userId);

@@ -4,6 +4,7 @@ import { FileDown, MessageCircle, Pencil, Printer } from "lucide-react";
 import { ActionButton } from "@/components/admin/action-button";
 import { AppointmentActions } from "@/components/admin/appointment-actions";
 import { AppointmentForm } from "@/components/admin/appointment-form";
+import { FittingCard } from "@/components/admin/fitting-card";
 import { PageHeader } from "@/components/admin/page-header";
 import { AppointmentStatusBadge, NotificationStatusBadge, PrintStatusBadge } from "@/components/admin/status-badges";
 import { buttonClass } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { db } from "@/database/client";
 import { requirePageUser } from "@/lib/auth/session";
 import { appointmentSourceLabel, notificationEventLabel } from "@/lib/labels";
 import { AppointmentService } from "@/services/appointment.service";
+import { FittingService } from "@/services/fitting.service";
 import { SettingsService } from "@/services/settings.service";
 import { formatDate, formatDateTime, formatLongDateKey, toDateKey, toTimeKey } from "@/utils/datetime";
 import { formatPhone, whatsappLink } from "@/utils/phone";
@@ -25,12 +27,11 @@ export default async function AppointmentDetailPage({ params, searchParams }: { 
   const [a, settings] = await Promise.all([AppointmentService.get(id), SettingsService.get()]);
   const tz = settings.timezone;
   const editable = a.status === "SCHEDULED" || a.status === "CONFIRMED";
-  const [services, products] = editable
-    ? await Promise.all([
-        db.service.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" }, select: { id: true, name: true, durationMin: true } }),
-        db.product.findMany({ where: { active: true }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
-      ])
-    : [[], []];
+  const [services, products, candidates] = await Promise.all([
+    editable ? db.service.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" }, select: { id: true, name: true, durationMin: true } }) : [],
+    editable ? db.product.findMany({ where: { active: true }, orderBy: { name: "asc" }, select: { id: true, name: true } }) : [],
+    editable ? FittingService.candidates(a.items) : [],
+  ]);
   const wa = whatsappLink(a.customer.whatsapp, `Olá, ${a.customer.name.split(" ")[0]}! Aqui é da Sady Roupas, sobre seu atendimento de ${formatDate(a.startsAt, tz)} às ${toTimeKey(a.startsAt, tz)}.`);
 
   return (
@@ -61,6 +62,8 @@ export default async function AppointmentDetailPage({ params, searchParams }: { 
               {a.cancelReason && <div className="sm:col-span-2"><dt className="text-xs text-muted">Motivo do cancelamento</dt><dd>{a.cancelReason}</dd></div>}
             </dl>
           </Card>
+
+          <FittingCard appointmentId={a.id} items={a.items} candidates={candidates} products={products} editable={editable} />
 
           {editable && (
             <details className="group rounded-xl border border-line bg-white">

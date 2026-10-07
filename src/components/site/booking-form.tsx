@@ -2,10 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Check, Loader2 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Check, Loader2, Shirt, X } from "lucide-react";
 import { Field, Input, Textarea } from "@/components/ui/form";
 import { buttonClass } from "@/components/ui/button";
 import { useOpenDays, useSlots } from "@/hooks/use-availability";
+import { fittingList, useFittingList } from "@/hooks/use-fitting-list";
 import { cn } from "@/utils/cn";
 import { formatDateKey, monthName, weekdayName, weekdayOfKey } from "@/utils/datetime";
 
@@ -39,6 +42,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const fitting = useFittingList();
   const days = useOpenDays(serviceId, refreshKey);
   const slots = useSlots(serviceId, date, { refreshKey });
 
@@ -70,7 +74,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
       const res = await fetch("/api/public/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, serviceId, date, time, productSlug: product?.slug, company: honeypot }),
+        body: JSON.stringify({ ...form, serviceId, date, time, productSlug: product?.slug, items: fitting.map((f) => ({ slug: f.slug, size: f.size })), company: honeypot }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -81,7 +85,8 @@ export function BookingForm({ services, product, initialServiceId }: { services:
         if (json.issues) setErrors(Object.fromEntries(json.issues.map((i: { path: string; message: string }) => [i.path, i.message])));
         throw new Error(json.error ?? "Não foi possível concluir o agendamento.");
       }
-      router.push(`/agendamento/confirmado/${json.token}`);
+      fittingList.clear();
+      router.push(`/agendamento/confirmado/${json.token}?novo=1`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível concluir o agendamento.");
       setSubmitting(false);
@@ -92,10 +97,30 @@ export function BookingForm({ services, product, initialServiceId }: { services:
 
   return (
     <form onSubmit={submit} className="space-y-10" noValidate>
-      {product && (
+      {fitting.length > 0 ? (
+        <div className="rounded-lg border border-gold/30 bg-[#fbf6ec] p-4">
+          <p className="flex items-center gap-2 text-sm font-semibold"><Shirt className="h-4 w-4 text-gold-dark" /> Sua lista de provas ({fitting.length})</p>
+          <p className="mt-0.5 text-xs text-muted">Vamos separar estas peças antes do seu atendimento.</p>
+          <ul className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
+            {fitting.map((f) => (
+              <li key={`${f.slug}-${f.size}`} className="relative w-20 shrink-0 animate-fade-up">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-ink">
+                  {f.image && <Image src={f.image} alt="" fill sizes="80px" className="object-cover" />}
+                </div>
+                <p className="mt-1 truncate text-[11px] font-semibold" title={f.name}>{f.name.replace(/^Terno /, "")}</p>
+                <p className="text-[10px] text-muted">{f.size ? `Tam. ${f.size}` : "Tam. a definir"}</p>
+                <button type="button" onClick={() => fittingList.remove(f.slug, f.size)} aria-label={`Remover ${f.name}`} className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-white text-muted shadow ring-1 ring-line hover:text-red-700"><X className="h-3 w-3" /></button>
+              </li>
+            ))}
+          </ul>
+          <Link href="/catalogo" className="mt-2 inline-block text-xs font-semibold text-gold-dark hover:underline">+ adicionar mais peças</Link>
+        </div>
+      ) : product ? (
         <div className="rounded-lg border border-gold/30 bg-[#f8f1e4] px-4 py-3 text-sm">
           Peça de interesse: <strong>{product.name}</strong>
         </div>
+      ) : (
+        <p className="flex items-center gap-2 rounded-lg bg-ivory px-4 py-3 text-xs text-muted"><Shirt className="h-4 w-4 shrink-0 text-gold" /> Dica: no <Link href="/catalogo" className="font-semibold text-gold-dark hover:underline">catálogo</Link>, toque em “Quero provar” para separarmos as peças antes de você chegar.</p>
       )}
 
       <section>
@@ -140,14 +165,17 @@ export function BookingForm({ services, product, initialServiceId }: { services:
         <section className="animate-fade-up">
           <StepTitle n={3} title="Escolha o horário" done={Boolean(time)} />
           {slots.loading ? (
-            <p className="flex items-center gap-2 text-sm text-muted"><Loader2 className="h-4 w-4 animate-spin" /> Carregando horários…</p>
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6" aria-label="Carregando horários">
+              {Array.from({ length: 12 }, (_, i) => <div key={i} className="skeleton h-12 rounded-md" />)}
+            </div>
           ) : slots.slots.filter((s) => s.available).length === 0 ? (
             <p className="text-sm text-muted">Não há horários livres nesta data. Escolha outro dia.</p>
           ) : (
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-              {slots.slots.map((s) => (
+              {slots.slots.map((s, i) => (
                 <button key={s.time} type="button" disabled={!s.available} onClick={() => setTime(s.time)} aria-pressed={time === s.time}
-                  className={cn("h-12 rounded-md border text-sm font-semibold transition", time === s.time ? "border-ink bg-ink text-ivory" : s.available ? "border-line bg-white hover:border-ink/40" : "border-transparent bg-sand/40 text-muted/40 line-through")}>
+                  style={{ animationDelay: `${i * 18}ms` }}
+                  className={cn("h-12 rounded-md border text-sm font-semibold transition animate-fade-up active:scale-95", time === s.time ? "border-ink bg-ink text-ivory" : s.available ? "border-line bg-white hover:border-ink/40" : "border-transparent bg-sand/40 text-muted/40 line-through")}>
                   {s.time}
                 </button>
               ))}

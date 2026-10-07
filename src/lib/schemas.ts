@@ -51,6 +51,11 @@ export const publicBookingSchema = z.object({
   time: timeKeySchema,
   notes: optionalText(1000),
   productSlug: optionalText(120),
+  /** Lista de provas: peças (e tamanho) que o cliente quer experimentar */
+  items: z
+    .array(z.object({ slug: z.string().trim().min(1).max(120), size: optionalText(10) }))
+    .max(12, "No máximo 12 peças na lista de provas.")
+    .default([]),
   /** Honeypot anti-robô: humanos não veem este campo. */
   company: z.string().max(0, "Requisição inválida.").optional(),
 });
@@ -77,6 +82,9 @@ export const staffBookingSchema = z
     if (!v.name || v.name.length < 3) ctx.addIssue({ code: "custom", path: ["name"], message: "Informe o nome do cliente." });
     if (!v.whatsapp || !normalizePhone(v.whatsapp)) ctx.addIssue({ code: "custom", path: ["whatsapp"], message: "WhatsApp inválido." });
   });
+
+export const customerRescheduleSchema = z.object({ date: dateKeySchema, time: timeKeySchema });
+export const customerCancelSchema = z.object({ reason: optionalText(300) });
 
 export const rescheduleSchema = z.object({
   serviceId: idSchema,

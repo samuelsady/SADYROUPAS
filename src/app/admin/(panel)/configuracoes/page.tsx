@@ -123,12 +123,13 @@ async function ScheduleTab() {
   return (
     <Card className="max-w-4xl p-5 sm:p-7">
       <SimpleForm action={saveScheduleAction}>
-        <div className="grid gap-4 sm:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-6">
           <Field label="Duração (min)"><Input name="slotDurationMin" type="number" min={10} max={240} defaultValue={settings.slotDurationMin} /></Field>
           <Field label="Intervalo (min)"><Input name="slotBufferMin" type="number" min={0} max={120} defaultValue={settings.slotBufferMin} /></Field>
           <Field label="Simultâneos" hint="Atendentes"><Input name="simultaneousSlots" type="number" min={1} max={10} defaultValue={settings.simultaneousSlots} /></Field>
           <Field label="Antecedência (min)" hint="Site"><Input name="minLeadMinutes" type="number" min={0} defaultValue={settings.minLeadMinutes} /></Field>
           <Field label="Até (dias)" hint="Site"><Input name="maxAdvanceDays" type="number" min={1} max={365} defaultValue={settings.maxAdvanceDays} /></Field>
+          <Field label="Cliente altera até (h)" hint="Remarcar/cancelar"><Input name="selfServiceCutoffHours" type="number" min={0} max={168} defaultValue={settings.selfServiceCutoffHours} /></Field>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-sm">
@@ -230,7 +231,7 @@ async function TemplatesTab() {
             {!V1_WHATSAPP_EVENTS.includes(t.event) && <Badge tone="gray">V2</Badge>}
           </div>
           <SimpleForm action={saveTemplateAction.bind(null, t.event)}>
-            <Field label="Mensagem" hint="Variáveis: {nome} {data} {horario} {servico} {codigo} {loja}"><Textarea name="body" defaultValue={t.body} rows={6} maxLength={1500} /></Field>
+            <Field label="Mensagem" hint="Variáveis: {nome} {data} {horario} {servico} {codigo} {loja} {link} (página para o cliente remarcar/cancelar)"><Textarea name="body" defaultValue={t.body} rows={6} maxLength={1500} /></Field>
             <div className="grid grid-cols-[1fr_90px] gap-3">
               <Field label="Template aprovado na Meta" hint="Obrigatório em produção para iniciar conversa"><Input name="waTemplateName" defaultValue={t.waTemplateName ?? ""} placeholder="confirmacao_agendamento" /></Field>
               <Field label="Idioma"><Input name="waLanguage" defaultValue={t.waLanguage} /></Field>

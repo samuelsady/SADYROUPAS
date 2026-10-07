@@ -66,3 +66,29 @@ export async function deactivateItemAction(_prev: ActionState, fd: FormData): Pr
   revalidateInventory(code);
   redirect("/admin/estoque");
 }
+
+export async function bulkInventoryAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  try {
+    const user = await requireUser("inventory.manage");
+    const count = await InventoryService.bulkChange(
+      { codes: fd.getAll("codes").map(String), status: formStr(fd, "status") || undefined, location: formStr(fd, "location"), note: formStr(fd, "note") },
+      actorOf(user, await clientIp()),
+    );
+    revalidateInventory();
+    return { ok: true, message: `${count} peça(s) atualizada(s).` };
+  } catch (err) {
+    return toActionError(err);
+  }
+}
+
+export async function quickStatusAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  const code = formStr(fd, "code") ?? "";
+  try {
+    const user = await requireUser("inventory.manage");
+    await InventoryService.changeStatus(code, { status: formStr(fd, "status"), note: formStr(fd, "note") || null, customerName: formStr(fd, "customerName") || null }, actorOf(user, await clientIp()));
+  } catch (err) {
+    return toActionError(err);
+  }
+  revalidateInventory(code);
+  return { ok: true, message: `${code}: status atualizado.` };
+}

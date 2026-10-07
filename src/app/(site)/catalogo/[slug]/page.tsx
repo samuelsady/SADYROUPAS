@@ -4,11 +4,11 @@ import { notFound } from "next/navigation";
 import { CalendarCheck, Check, MessageCircle } from "lucide-react";
 import { LinkButton, buttonClass } from "@/components/ui/button";
 import { ProductCard } from "@/components/site/product-card";
+import { FittingPicker } from "@/components/site/fitting-picker";
 import { ProductGallery } from "@/components/site/product-gallery";
 import { CatalogService } from "@/services/catalog.service";
 import { SettingsService } from "@/services/settings.service";
 import { whatsappLink } from "@/utils/phone";
-import { cn } from "@/utils/cn";
 
 type Params = Promise<{ slug: string }>;
 
@@ -52,26 +52,11 @@ export default async function ProductPage({ params }: { params: Params }) {
             {product.colors.length > 0 && <div className="flex justify-between py-3.5"><dt className="text-muted">Cor</dt><dd className="font-medium">{product.colors.join(", ")}</dd></div>}
           </dl>
 
-          {product.sizes.length > 0 && (
-            <div className="mt-7">
-              <div className="flex items-baseline justify-between">
-                <h2 className="text-sm font-semibold">Tamanhos</h2>
-                {product.hasInventory && <span className="text-xs text-muted">Disponibilidade atual na loja</span>}
-              </div>
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {product.sizes.map((size) => {
-                  const available = product.availability[size] ?? 0;
-                  const known = product.hasInventory;
-                  return (
-                    <li key={size} className={cn("flex min-w-14 flex-col items-center rounded-md border px-3 py-2 text-sm font-semibold", !known || available > 0 ? "border-ink/20" : "border-line text-muted/60 line-through")} title={known ? (available > 0 ? "Disponível" : "Indisponível no momento") : undefined}>
-                      {size}
-                    </li>
-                  );
-                })}
-              </ul>
-              {product.hasInventory && <p className="mt-2 text-xs text-muted">Tamanhos riscados estão reservados ou alugados no momento. A confirmação final é feita no atendimento.</p>}
-            </div>
-          )}
+          <FittingPicker
+            product={{ slug: product.slug, name: product.name, image: product.images[0]?.url ?? null, sizes: product.sizes }}
+            availability={product.availability}
+            hasInventory={product.hasInventory}
+          />
 
           {product.details && (
             <div className="mt-7 rounded-lg bg-ivory p-4 text-sm leading-relaxed text-ink/80">

@@ -3,13 +3,13 @@ import type { NotificationEvent } from "@prisma/client";
 /**
  * Textos padrão das mensagens. Ficam no banco (NotificationTemplate) e podem
  * ser editados no painel; estes valores são usados no seed e como fallback.
- * Variáveis disponíveis: {nome} {data} {horario} {servico} {codigo} {loja} {telefone_loja}
+ * Variáveis disponíveis: {nome} {data} {horario} {servico} {codigo} {loja} {telefone_loja} {link}
  */
 export const DEFAULT_TEMPLATES: { event: NotificationEvent; name: string; body: string; waParams: string[] }[] = [
   {
     event: "APPOINTMENT_CREATED",
     name: "Confirmação de agendamento",
-    body: "Olá, {nome}! Seu atendimento na Sady Roupas foi confirmado.\n\n📅 Data: {data}\n🕐 Horário: {horario}\n📌 Serviço: {servico}\n🔖 Código: {codigo}\n\nEsperamos você!",
+    body: "Olá, {nome}! Seu atendimento na Sady Roupas foi confirmado.\n\n📅 Data: {data}\n🕐 Horário: {horario}\n📌 Serviço: {servico}\n🔖 Código: {codigo}\n\nPara ver, remarcar ou cancelar: {link}\n\nEsperamos você!",
     waParams: ["nome", "data", "horario", "servico", "codigo"],
   },
   {

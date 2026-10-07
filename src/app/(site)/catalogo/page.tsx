@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
 import { ProductCard } from "@/components/site/product-card";
+import { Reveal } from "@/components/ui/reveal";
 import { AutoSubmitSelect } from "@/components/site/auto-submit-select";
 import { EmptyState } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
@@ -96,7 +97,9 @@ export default async function CatalogPage({ searchParams }: { searchParams: SP }
         ) : (
           <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4">
             {products.map((p, i) => (
-              <ProductCard key={p.id} product={p} priority={i < 4} />
+              <Reveal key={p.id} delay={(i % 4) * 70}>
+                <ProductCard product={p} priority={i < 4} />
+              </Reveal>
             ))}
           </div>
         )}

@@ -33,6 +33,8 @@ function appointmentVars(a: AppointmentWithRelations, settings: StoreSettings): 
     codigo: a.code,
     loja: settings.companyName,
     telefone_loja: formatPhone(settings.whatsapp ?? settings.phone),
+    // Página do cliente para ver, remarcar ou cancelar
+    link: `${env.appUrl}/agendamento/confirmado/${a.publicToken}`,
   };
 }
 

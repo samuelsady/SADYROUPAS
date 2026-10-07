@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useRef } from "react";
+import { withToast } from "@/hooks/use-action-form";
 import type { ActionState } from "@/lib/action";
 import { SubmitButton } from "@/components/ui/submit-button";
 import type { ButtonSize, ButtonVariant } from "@/components/ui/button";
@@ -22,11 +23,8 @@ export function ActionButton({
   /** Pede um texto ao usuário (ex.: motivo do cancelamento) e envia no campo indicado */
   prompt?: { field: string; message: string };
 }) {
-  const [state, formAction] = useActionState(action, null);
+  const [, formAction] = useActionState(withToast(action), null);
   const ref = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (state && !state.ok) window.alert(state.error);
-  }, [state]);
   return (
     <form
       action={formAction}
