@@ -195,6 +195,8 @@ BACKEND → FILA (PrintJob) → SERVIÇO LOCAL (computador da loja) → IMPRESSO
 
 ## Deploy (Vercel + Supabase)
 
+> **Passo a passo simplificado (Vercel + Neon, ~10 min): veja [DEPLOY.md](DEPLOY.md).**
+
 1. Crie o projeto no **Supabase**. Copie a connection string do Postgres para `DATABASE_URL`, crie um bucket **público** `produtos` no Storage e copie a URL e a chave `service_role` para `SUPABASE_URL` e `STORAGE_KEY`.
 2. Importe o repositório na **Vercel** e configure as variáveis do `.env.example` (`AUTH_SECRET`, `APP_URL`, `PRINT_AGENT_TOKEN`, `CRON_SECRET`…).
 3. Aplique as migrations: `DATABASE_URL=… npm run db:deploy`.

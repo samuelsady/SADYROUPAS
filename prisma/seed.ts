@@ -35,7 +35,12 @@ async function main() {
   // Usuários
   // ---------------------------------------------------------------------------
   const adminEmail = (process.env.SEED_ADMIN_EMAIL ?? "admin@sadyroupas.com.br").toLowerCase();
+  // Em produção a senha do admin é obrigatória (o repositório é público: nada de senha padrão)
+  if (process.env.NODE_ENV === "production" && !process.env.SEED_ADMIN_PASSWORD) {
+    throw new Error("Defina SEED_ADMIN_PASSWORD (mínimo 8 caracteres) para criar o administrador em produção.");
+  }
   const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "sady2008";
+  if (adminPassword.length < 8) throw new Error("SEED_ADMIN_PASSWORD precisa ter pelo menos 8 caracteres.");
   await db.user.upsert({
     where: { email: adminEmail },
     create: { email: adminEmail, name: "Administrador", role: "ADMIN", passwordHash: await bcrypt.hash(adminPassword, 12) },
