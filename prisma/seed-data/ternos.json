@@ -1,0 +1,452 @@
+[
+ {
+  "name": "Terno Areia",
+  "model": null,
+  "color": "Bege",
+  "images": [
+   "areia-foto-1.jpg",
+   "areia-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Cobalto 1",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-cobalto-1-foto-1.jpg",
+   "azul-cobalto-1-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Cobalto 2",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-cobalto-2-foto-1.jpg",
+   "azul-cobalto-2-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Cobalto Via Santonny",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-cobalto-via-santonny-foto-1.jpg",
+   "azul-cobalto-via-santonny-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Dama",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-dama-foto-1.jpg",
+   "azul-dama-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Dior",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-dior-foto-1.jpg",
+   "azul-dior-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Marinho Lã Fria c/ Pesponto",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-marinho-la-fria-c-pressponto-foto-1.jpg",
+   "azul-marinho-la-fria-c-pressponto-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Marinho Noite Sanny",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-marinho-noite-sanny-foto-1.jpg",
+   "azul-marinho-noite-sanny-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Médio Via Santonny",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-me-dio-via-santonny-foto-1.jpg",
+   "azul-me-dio-via-santonny-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Poa 2",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-poa-2-foto-1.jpg",
+   "azul-poa-2-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Poa 3",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-poa-3-foto-1.jpg",
+   "azul-poa-3-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Poa 1",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-poa-1-foto-1.jpg",
+   "azul-poa-1-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Pontilhado",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-pontilhado-foto-1.jpg",
+   "azul-pontilhado-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Resumo Blue Desk 2",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-resumo-bluedesk-2-foto-1.jpg",
+   "azul-resumo-bluedesk-2-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Azul Risca Leve",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "azul-risca-leve-foto-1.jpg",
+   "azul-risca-leve-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Blazer com Calça Sarja 1",
+  "model": "Blazer e calça",
+  "color": "Azul",
+  "images": [
+   "blazer-com-calc-a-sarja-1-foto-1.jpg",
+   "blazer-com-calc-a-sarja-1-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Blazer com Calça Sarja 2",
+  "model": "Blazer e calça",
+  "color": "Azul",
+  "images": [
+   "blazer-com-calc-a-sarja-2-foto-1.jpg",
+   "blazer-com-calc-a-sarja-2-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Bonner 1",
+  "model": null,
+  "color": "Cinza",
+  "images": [
+   "bonner-1-foto-1.jpg",
+   "bonner-1-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Bonner 2",
+  "model": null,
+  "color": "Grafite",
+  "images": [
+   "bonner-2-foto-1.jpg",
+   "bonner-2-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Bonner 3",
+  "model": null,
+  "color": "Cinza",
+  "images": [
+   "bonner-3-foto-1.jpg",
+   "bonner-3-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Cinza Linho",
+  "model": null,
+  "color": "Cinza",
+  "images": [
+   "cinza-linho-foto-1.jpg",
+   "cinza-linho-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Dama Grafite",
+  "model": null,
+  "color": "Grafite",
+  "images": [
+   "dama-grafite-foto-1.jpg",
+   "dama-grafite-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Dior Bege",
+  "model": null,
+  "color": "Bege",
+  "images": [
+   "dior-bege-foto-1.jpg",
+   "dior-bege-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Dior Grafite",
+  "model": null,
+  "color": "Grafite",
+  "images": [
+   "dior-grafite-foto-1.jpg",
+   "dior-grafite-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Fio Marrom",
+  "model": null,
+  "color": "Marrom",
+  "images": [
+   "fio-marrom-foto-1.jpg",
+   "fio-marrom-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Grafite Lã Fria",
+  "model": null,
+  "color": "Grafite",
+  "images": [
+   "grafite-la-fria-foto-1.jpg",
+   "grafite-la-fria-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Kraft",
+  "model": null,
+  "color": "Bege",
+  "images": [
+   "kraft-foto-1.jpg",
+   "kraft-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Panamá Azul Marinho",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "panama-azul-marinho-foto-1.jpg",
+   "panama-azul-marinho-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Panamá Preto",
+  "model": null,
+  "color": "Preto",
+  "images": [
+   "panama-preto-foto-1.jpg",
+   "panama-preto-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Pixel Royal",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "pixel-royal-foto-1.jpg",
+   "pixel-royal-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Prada 2",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "prada-2-foto-1.jpg",
+   "prada-2-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Prada com Brilho I",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "prada-com-brilho-i-foto-1.jpg",
+   "prada-com-brilho-i-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Preto Maquinetado",
+  "model": null,
+  "color": "Preto",
+  "images": [
+   "preto-maquinetado-foto-1.jpg",
+   "preto-maquinetado-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Preto Resumo Slim",
+  "model": "Slim",
+  "color": "Preto",
+  "images": [
+   "preto-resumo-slim-foto-1.jpg",
+   "preto-resumo-slim-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Resumo Azul Grafite",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "resumo-azul-grafite-foto-1.jpg",
+   "resumo-azul-grafite-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Resumo Azul Marinho",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "resumo-azul-marinho-foto-1.jpg",
+   "resumo-azul-marinho-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Resumo Azul Marinho c/ Textura",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "resumo-azul-marinho-c-textura-foto-1.jpg",
+   "resumo-azul-marinho-c-textura-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Resumo Blue Desk Claro Azul Céu",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "resumo-bluedesk-claro-azul-ce-u-foto-1.jpg",
+   "resumo-bluedesk-claro-azul-ce-u-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Resumo Blue Dusk",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "resumo-bluedusk-foto-1.jpg",
+   "resumo-bluedusk-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Resumo Cinza Claro",
+  "model": null,
+  "color": "Cinza",
+  "images": [
+   "resumo-cinza-claro-foto-1.jpg",
+   "resumo-cinza-claro-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Resumo Cinza Lã Fria",
+  "model": null,
+  "color": "Cinza",
+  "images": [
+   "resumo-cinza-la-fria-foto-1.jpg",
+   "resumo-cinza-la-fria-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Resumo Preto Lã Fria",
+  "model": null,
+  "color": "Preto",
+  "images": [
+   "resumo-preto-la-fria-foto-1.jpg",
+   "resumo-preto-la-fria-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Resumo Preto Poa",
+  "model": null,
+  "color": "Preto",
+  "images": [
+   "resumo-preto-poa-foto-1.jpg",
+   "resumo-preto-poa-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Smoking Azul Summer",
+  "model": "Smoking",
+  "color": "Azul",
+  "images": [
+   "smoking-azul-summer-foto-1.jpg",
+   "smoking-azul-summer-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Smoking Summer Preto",
+  "model": "Smoking",
+  "color": "Preto",
+  "images": [
+   "smoking-summer-preto-foto-1.jpg",
+   "smoking-summer-preto-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Smoking Tradicional 1 Botão",
+  "model": "Smoking",
+  "color": "Preto",
+  "images": [
+   "smoking-tradicional-1-bota-o-foto-1.jpg",
+   "smoking-tradicional-1-bota-o-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Terracota",
+  "model": null,
+  "color": "Terracota",
+  "images": [
+   "terracota-foto-1.jpg",
+   "terracota-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Tropical Gola Summer",
+  "model": null,
+  "color": "Preto",
+  "images": [
+   "tropical-gola-summer-foto-1.jpg",
+   "tropical-gola-summer-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Via Santonny Blue Desk",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "via-santonny-blue-desk-foto-1.jpg",
+   "via-santonny-blue-desk-foto-2.jpg"
+  ]
+ },
+ {
+  "name": "Terno Via Santonny Azul Linho",
+  "model": null,
+  "color": "Azul",
+  "images": [
+   "via-santony-azul-linho-foto-1.jpg",
+   "via-santony-azul-linho-foto-2.jpg"
+  ]
+ }
+]

@@ -1,0 +1,768 @@
+// =============================================================================
+// Sady Roupas — modelo de dados
+// -----------------------------------------------------------------------------
+// O banco é a FONTE ÚNICA DA VERDADE. WhatsApp, impressão, agenda e catálogo
+// apenas leem e reagem ao que está aqui.
+//
+// Regras garantidas pelo próprio PostgreSQL (ver migrations/*/migration.sql):
+// - Appointment: EXCLUDE USING gist impede dois agendamentos ativos sobrepostos
+//   na mesma "lane" (capacidade de atendimento simultâneo da loja).
+// - RentalItem (V2): EXCLUDE USING gist impede a mesma peça física em duas
+//   locações com períodos sobrepostos.
+//
+// Organização:
+//   1. Acesso (User, Session de login, RateLimit)
+//   2. Configurações da loja
+//   3. Clientes
+//   4. Agenda (Service, BusinessHours, BlockedPeriod, Appointment)
+//   5. Catálogo (Category, Product, ProductImage, Kit)
+//   6. Estoque (InventoryItem, InventoryHistory)
+//   7. Comunicação (Notification, NotificationTemplate)
+//   8. Impressão (PrintJob, PrinterStatus)
+//   9. Auditoria
+//  10. V2 — Locações (Rental, RentalItem, Pickup, Return, ReturnItem,
+//      Laundry, Maintenance, Payment, LateFee)
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------------------------------
+// 1. Acesso
+// ----------------------------------------------------------------------------
+
+enum UserRole {
+  ADMIN // tudo, inclusive configurações e usuários
+  STAFF // operação do dia a dia (agenda, clientes, estoque, impressão)
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         UserRole  @default(STAFF)
+  active       Boolean   @default(true)
+  failedLogins Int       @default(0)
+  lockedUntil  DateTime?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  auditLogs        AuditLog[]
+  inventoryHistory InventoryHistory[]
+  appointments     Appointment[]      @relation("AppointmentCreatedBy")
+}
+
+/// Contador por janela de tempo para limitar requisições (login, agendamento
+/// público). Persistido no banco para funcionar em ambiente serverless.
+model RateLimit {
+  key         String   @id
+  windowStart DateTime
+  count       Int
+}
+
+/// Sequências numéricas legíveis (ex.: código SADY-2026-000124).
+/// Incrementadas dentro da transação — o lock da linha garante unicidade.
+model Counter {
+  key   String @id
+  value Int    @default(0)
+}
+
+// ----------------------------------------------------------------------------
+// 2. Configurações
+// ----------------------------------------------------------------------------
+
+enum WhatsAppMode {
+  SIMULATED // registra a mensagem, não envia (desenvolvimento / API não configurada)
+  PRODUCTION // envia pela WhatsApp Business Platform (Cloud API)
+}
+
+/// Linha única (id = "store") com as configurações editáveis no painel.
+model StoreSettings {
+  id String @id @default("store")
+
+  // Empresa
+  companyName  String    @default("Sady Roupas")
+  phone        String?
+  whatsapp     String? // somente dígitos, formato internacional: 5586988100001
+  email        String?
+  address      String?
+  instagram    String?
+  facebook     String?
+  mapsEmbedUrl String?
+  foundedAt    DateTime?
+
+  // Agenda
+  timezone               String @default("America/Fortaleza")
+  slotDurationMin        Int    @default(30) // duração padrão de um atendimento
+  slotBufferMin          Int    @default(10) // intervalo entre atendimentos
+  simultaneousSlots      Int    @default(1) // atendimentos simultâneos (lanes)
+  minLeadMinutes         Int    @default(60) // antecedência mínima para agendar pelo site
+  maxAdvanceDays         Int    @default(60) // até quantos dias à frente o site aceita
+  /// Cliente pode remarcar/cancelar pelo link até X horas antes do atendimento
+  selfServiceCutoffHours Int    @default(3)
+
+  // WhatsApp
+  whatsappEnabled     Boolean      @default(true)
+  whatsappMode        WhatsAppMode @default(SIMULATED)
+  reminderHoursBefore Int          @default(24)
+
+  // Impressão
+  autoPrintOnCreate Boolean @default(true)
+  printerName       String?
+  printFormat       String  @default("THERMAL_80MM") // THERMAL_58MM | THERMAL_80MM | A4
+
+  /// Políticas de locação (V2): prazo padrão, tolerância, multa por atraso.
+  /// JSON validado em src/lib/rental-policy.ts.
+  rentalPolicy Json?
+
+  updatedAt DateTime @updatedAt
+}
+
+// ----------------------------------------------------------------------------
+// 3. Clientes
+// ----------------------------------------------------------------------------
+
+model Customer {
+  id          String   @id @default(cuid())
+  name        String
+  /// Somente dígitos com DDI (ex.: 5586999990000). Identifica o cliente.
+  whatsapp    String   @unique
+  email       String?
+  notes       String?
+  /// Preferências livres (V2: estilo, cores, observações de prova)
+  preferences String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  measurements  CustomerMeasurement[]
+  appointments  Appointment[]
+  rentals       Rental[]
+  notifications Notification[]
+
+  @@index([name])
+}
+
+/// Medidas do cliente (V2 ativa no perfil completo). Uma linha por registro
+/// para manter histórico de alterações.
+model CustomerMeasurement {
+  id         String   @id @default(cuid())
+  customerId String
+  jacket     String? // paletó (ex.: 42)
+  pants      String? // calça (ex.: 40)
+  shirt      String? // camisa (ex.: G / 3)
+  shoe       String?
+  chest      Decimal? @db.Decimal(5, 1) // cm
+  waist      Decimal? @db.Decimal(5, 1)
+  hip        Decimal? @db.Decimal(5, 1)
+  sleeve     Decimal? @db.Decimal(5, 1)
+  inseam     Decimal? @db.Decimal(5, 1)
+  height     Decimal? @db.Decimal(5, 1)
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId, createdAt])
+}
+
+// ----------------------------------------------------------------------------
+// 4. Agenda
+// ----------------------------------------------------------------------------
+
+model Service {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  /// Duração específica; nulo = usa StoreSettings.slotDurationMin
+  durationMin   Int?
+  active        Boolean  @default(true)
+  /// Exibido no site público? (alguns serviços podem ser só internos)
+  publicBooking Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  appointments Appointment[]
+}
+
+/// Horário de funcionamento por dia da semana (0 = domingo ... 6 = sábado).
+model BusinessHours {
+  weekday    Int     @id
+  isOpen     Boolean @default(true)
+  openTime   String  @default("09:00") // HH:mm, horário local da loja
+  closeTime  String  @default("18:00")
+  /// Pausa opcional (ex.: almoço)
+  breakStart String?
+  breakEnd   String?
+}
+
+/// Períodos sem atendimento: feriados, dias fechados, compromissos internos.
+model BlockedPeriod {
+  id        String   @id @default(cuid())
+  startsAt  DateTime
+  endsAt    DateTime
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@index([startsAt, endsAt])
+}
+
+enum AppointmentStatus {
+  SCHEDULED // AGENDADO
+  CONFIRMED // CONFIRMADO
+  COMPLETED // CONCLUÍDO
+  CANCELLED // CANCELADO
+  NO_SHOW // NÃO_COMPARECEU
+}
+
+enum AppointmentSource {
+  WEBSITE
+  ADMIN
+  WHATSAPP
+  PHONE
+  WALK_IN
+}
+
+model Appointment {
+  id             String            @id @default(cuid())
+  /// Código legível: SADY-2026-000124
+  code           String            @unique
+  /// Token aleatório para a página pública de confirmação (evita enumeração por código)
+  publicToken    String            @unique
+  customerId     String
+  serviceId      String
+  /// Produto de interesse (veio do catálogo) — opcional
+  productId      String?
+  startsAt       DateTime
+  endsAt         DateTime
+  /// Fim do bloqueio na agenda (endsAt + intervalo). Usado pela exclusão no banco.
+  blockedUntil   DateTime
+  /// Posição de atendimento simultâneo (0..simultaneousSlots-1)
+  lane           Int               @default(0)
+  status         AppointmentStatus @default(SCHEDULED)
+  source         AppointmentSource @default(WEBSITE)
+  notes          String?
+  /// Observações internas (não aparecem para o cliente)
+  internalNotes  String?
+  cancelReason   String?
+  createdById    String?
+  confirmedAt    DateTime?
+  completedAt    DateTime?
+  cancelledAt    DateTime?
+  reminderSentAt DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  customer      Customer          @relation(fields: [customerId], references: [id])
+  service       Service           @relation(fields: [serviceId], references: [id])
+  product       Product?          @relation(fields: [productId], references: [id], onDelete: SetNull)
+  createdBy     User?             @relation("AppointmentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  printJobs     PrintJob[]
+  notifications Notification[]
+  rental        Rental?
+  items         AppointmentItem[]
+
+  @@index([startsAt])
+  @@index([status, startsAt])
+  @@index([customerId])
+}
+
+/// Lista de provas: peças (e tamanho) que o cliente quer experimentar.
+/// A equipe usa para separar as peças antes do atendimento e pode vincular
+/// a peça física reservada (InventoryItem).
+model AppointmentItem {
+  id              String   @id @default(cuid())
+  appointmentId   String
+  productId       String
+  size            String?
+  /// Peça física separada pela equipe para este atendimento
+  inventoryItemId String?
+  createdAt       DateTime @default(now())
+
+  appointment   Appointment    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  product       Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+
+  @@unique([appointmentId, productId, size])
+  @@index([appointmentId])
+  @@index([inventoryItemId])
+}
+
+// ----------------------------------------------------------------------------
+// 5. Catálogo
+// ----------------------------------------------------------------------------
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String?
+  sortOrder   Int       @default(0)
+  /// Categoria de acessório (gravata, cinto, capelo...) — usada em kits (V2)
+  isAccessory Boolean   @default(false)
+  products    Product[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  categoryId  String
+  description String?
+  /// Modelo/corte (Slim, Tradicional, Beca de formatura...)
+  model       String?
+  /// Cores disponíveis do produto (a peça física guarda a cor real)
+  colors      String[]
+  /// Tamanhos ofertados no catálogo
+  sizes       String[]
+  /// Informações adicionais (tecido, composição, cuidados)
+  details     String?
+  /// Valor de referência da locação (V2 / exibição opcional)
+  rentalPrice Decimal? @db.Decimal(10, 2)
+  showPrice   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category         Category          @relation(fields: [categoryId], references: [id])
+  images           ProductImage[]
+  items            InventoryItem[]
+  appointments     Appointment[]
+  kitItems         KitItem[]
+  appointmentItems AppointmentItem[]
+
+  @@index([categoryId, active])
+}
+
+model ProductImage {
+  id         String  @id @default(cuid())
+  productId  String
+  /// URL pública (Supabase Storage, /uploads local ou /catalogo do seed)
+  url        String
+  /// Caminho no storage, para exclusão
+  storageKey String?
+  alt        String?
+  sortOrder  Int     @default(0)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+}
+
+/// Kits (V2): ex.: Kit Formatura = Beca + Capelo + Faixa.
+model Kit {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  active      Boolean   @default(true)
+  items       KitItem[]
+}
+
+model KitItem {
+  id        String  @id @default(cuid())
+  kitId     String
+  productId String?
+  /// Item de checklist livre quando não é um produto do catálogo (ex.: "Cinto")
+  label     String
+  quantity  Int     @default(1)
+
+  kit     Kit      @relation(fields: [kitId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+// ----------------------------------------------------------------------------
+// 6. Estoque — PRODUTO x PEÇA FÍSICA
+// ----------------------------------------------------------------------------
+
+enum InventoryStatus {
+  AVAILABLE // DISPONÍVEL
+  RESERVED // RESERVADO
+  RENTED // ALUGADO
+  UNAVAILABLE // INDISPONÍVEL
+  // V2
+  INSPECTION // CONFERÊNCIA
+  LAUNDRY // LAVANDERIA
+  MAINTENANCE // MANUTENÇÃO
+  LOST // PERDIDO
+}
+
+/// Cada peça física é única: TER-PRE-042-001, TER-PRE-042-002...
+model InventoryItem {
+  id          String          @id @default(cuid())
+  code        String          @unique
+  productId   String
+  size        String
+  color       String
+  status      InventoryStatus @default(AVAILABLE)
+  /// Onde está fisicamente: arara, prateleira, cliente, lavanderia...
+  location    String?
+  rentalCount Int             @default(0)
+  notes       String?
+  acquiredAt  DateTime?
+  active      Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  product          Product            @relation(fields: [productId], references: [id])
+  history          InventoryHistory[]
+  rentalItems      RentalItem[]
+  appointmentItems AppointmentItem[]
+  laundry          Laundry[]
+  maintenance      Maintenance[]
+
+  @@index([productId, size, status])
+  @@index([status])
+}
+
+model InventoryHistory {
+  id           String           @id @default(cuid())
+  itemId       String
+  fromStatus   InventoryStatus?
+  toStatus     InventoryStatus?
+  /// CREATED | STATUS_CHANGED | UPDATED | RENTED | RETURNED | LAUNDRY_IN ...
+  action       String
+  note         String?
+  customerName String?
+  rentalId     String?
+  userId       String?
+  createdAt    DateTime         @default(now())
+
+  item InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([itemId, createdAt])
+}
+
+// ----------------------------------------------------------------------------
+// 7. Comunicação
+// ----------------------------------------------------------------------------
+
+enum NotificationChannel {
+  WHATSAPP
+  INTERNAL // alerta no painel (sino)
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  SIMULATED
+  FAILED
+  SKIPPED // canal desabilitado ou cliente sem contato
+}
+
+/// Eventos do sistema que geram comunicação.
+enum NotificationEvent {
+  APPOINTMENT_CREATED
+  APPOINTMENT_UPDATED
+  APPOINTMENT_CANCELLED
+  APPOINTMENT_REMINDER
+  PRINT_FAILED
+  // V2
+  RENTAL_CONFIRMED
+  PICKUP_REMINDER
+  RETURN_REMINDER
+  RETURN_OVERDUE
+  MAINTENANCE_STARTED
+  PAYMENT_PENDING
+}
+
+model Notification {
+  id                String              @id @default(cuid())
+  channel           NotificationChannel
+  event             NotificationEvent
+  status            NotificationStatus  @default(PENDING)
+  /// Destino (telefone) — vazio para INTERNAL
+  recipient         String?
+  title             String?
+  body              String
+  /// Para WhatsApp com template aprovado: nome + parâmetros usados
+  templateName      String?
+  templateLanguage  String?
+  templateParams    Json?
+  providerMessageId String?
+  error             String?
+  attempts          Int                 @default(0)
+  customerId        String?
+  appointmentId     String?
+  rentalId          String?
+  /// INTERNAL: lida no painel
+  readAt            DateTime?
+  sentAt            DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  customer    Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([channel, status, createdAt])
+  @@index([appointmentId])
+}
+
+/// Texto das mensagens por evento. Variáveis: {nome} {data} {horario} {servico} {codigo}.
+/// Em PRODUCTION, mensagens iniciadas pela empresa exigem template aprovado
+/// na Meta: preencha waTemplateName/waLanguage e a ordem de waParams.
+model NotificationTemplate {
+  id             String            @id @default(cuid())
+  event          NotificationEvent @unique
+  name           String
+  body           String
+  active         Boolean           @default(true)
+  waTemplateName String?
+  waLanguage     String            @default("pt_BR")
+  /// Ordem das variáveis do template aprovado, ex.: ["nome","data","horario","servico","codigo"]
+  waParams       String[]
+  updatedAt      DateTime          @updatedAt
+}
+
+// ----------------------------------------------------------------------------
+// 8. Impressão
+// ----------------------------------------------------------------------------
+
+enum PrintJobStatus {
+  PRINT_PENDING
+  PRINTING
+  PRINTED
+  PRINT_FAILED
+  CANCELLED
+}
+
+model PrintJob {
+  id            String         @id @default(cuid())
+  /// APPOINTMENT_RECEIPT | PICKUP_RECEIPT | RETURN_RECEIPT | INVENTORY_LABEL
+  kind          String         @default("APPOINTMENT_RECEIPT")
+  status        PrintJobStatus @default(PRINT_PENDING)
+  /// Conteúdo pronto para impressora térmica (texto monoespaçado)
+  content       String
+  format        String         @default("THERMAL_80MM")
+  appointmentId String?
+  rentalId      String?
+  attempts      Int            @default(0)
+  error         String?
+  /// Agente local que pegou o trabalho
+  agentId       String?
+  claimedAt     DateTime?
+  printedAt     DateTime?
+  requestedById String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+}
+
+/// Último estado informado pelo serviço local de impressão (heartbeat).
+model PrinterStatus {
+  agentId     String   @id
+  printerName String?
+  /// ONLINE | IDLE | ERROR (o painel considera DESCONECTADA sem heartbeat recente)
+  state       String
+  message     String?
+  hostname    String?
+  lastSeenAt  DateTime @default(now())
+}
+
+// ----------------------------------------------------------------------------
+// 9. Auditoria
+// ----------------------------------------------------------------------------
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  /// Nulo = sistema/site público
+  userId     String?
+  actorLabel String?
+  /// ex.: appointment.created, appointment.cancelled, print.reprinted
+  action     String
+  entity     String
+  entityId   String?
+  summary    String?
+  data       Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+// ----------------------------------------------------------------------------
+// 10. V2 — Locações (estrutura pronta; módulos desabilitados na V1)
+// ----------------------------------------------------------------------------
+
+enum RentalStatus {
+  QUOTE // ORÇAMENTO
+  RESERVED // RESERVADO
+  CONFIRMED // CONFIRMADO
+  PICKED_UP // RETIRADO
+  RETURNED // DEVOLVIDO
+  OVERDUE // ATRASADO
+  CANCELLED // CANCELADO
+  CLOSED // FINALIZADO
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  CANCELLED
+}
+
+model Rental {
+  id            String        @id @default(cuid())
+  /// Número sequencial legível (#000184)
+  number        Int           @unique
+  customerId    String
+  appointmentId String?       @unique
+  eventName     String?
+  eventDate     DateTime?     @db.Date
+  pickupDate    DateTime      @db.Date
+  returnDueDate DateTime      @db.Date
+  returnedAt    DateTime?
+  status        RentalStatus  @default(QUOTE)
+  total         Decimal       @default(0) @db.Decimal(10, 2)
+  discount      Decimal       @default(0) @db.Decimal(10, 2)
+  paid          Decimal       @default(0) @db.Decimal(10, 2)
+  paymentStatus PaymentStatus @default(PENDING)
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  customer    Customer     @relation(fields: [customerId], references: [id])
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  items       RentalItem[]
+  pickup      Pickup?
+  return      Return?
+  payments    Payment[]
+  lateFees    LateFee[]
+
+  @@index([status, returnDueDate])
+}
+
+/// Peça física reservada para a locação. A exclusão no banco impede a mesma
+/// peça em duas locações ativas com períodos sobrepostos.
+model RentalItem {
+  id              String   @id @default(cuid())
+  rentalId        String
+  inventoryItemId String
+  /// Período em que a peça fica comprometida (retirada → devolução + lavanderia)
+  reservedFrom    DateTime @db.Date
+  reservedUntil   DateTime @db.Date
+  /// false quando a locação é cancelada/finalizada (libera a exclusão)
+  active          Boolean  @default(true)
+  price           Decimal  @default(0) @db.Decimal(10, 2)
+
+  rental        Rental        @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  returnItems   ReturnItem[]
+
+  @@index([inventoryItemId])
+}
+
+model Pickup {
+  id         String   @id @default(cuid())
+  rentalId   String   @unique
+  /// Checklist conferido: [{label:"Paletó", checked:true}, ...]
+  checklist  Json
+  notes      String?
+  userId     String?
+  pickedUpAt DateTime @default(now())
+
+  rental Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+}
+
+model Return {
+  id         String   @id @default(cuid())
+  rentalId   String   @unique
+  notes      String?
+  userId     String?
+  returnedAt DateTime @default(now())
+
+  rental Rental       @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  items  ReturnItem[]
+}
+
+enum ReturnCondition {
+  RECEIVED // RECEBIDA (bom estado)
+  NOT_RECEIVED // NÃO RECEBIDA
+  DIRTY // SUJA
+  DAMAGED // DANIFICADA
+  LOST // PERDIDA
+}
+
+model ReturnItem {
+  id           String          @id @default(cuid())
+  returnId     String
+  rentalItemId String
+  condition    ReturnCondition
+  note         String?
+  photoUrl     String?
+
+  return     Return     @relation(fields: [returnId], references: [id], onDelete: Cascade)
+  rentalItem RentalItem @relation(fields: [rentalItemId], references: [id])
+}
+
+model Laundry {
+  id        String    @id @default(cuid())
+  itemId    String
+  enteredAt DateTime  @default(now())
+  leftAt    DateTime?
+  userId    String?
+  note      String?
+
+  item InventoryItem @relation(fields: [itemId], references: [id])
+}
+
+model Maintenance {
+  id          String    @id @default(cuid())
+  itemId      String
+  problem     String
+  description String?
+  photoUrl    String?
+  cost        Decimal?  @db.Decimal(10, 2)
+  /// OPEN | IN_PROGRESS | DONE
+  status      String    @default("OPEN")
+  userId      String?
+  startedAt   DateTime  @default(now())
+  finishedAt  DateTime?
+
+  item InventoryItem @relation(fields: [itemId], references: [id])
+}
+
+model Payment {
+  id         String   @id @default(cuid())
+  rentalId   String
+  amount     Decimal  @db.Decimal(10, 2)
+  /// PIX | CARD | CASH | TRANSFER
+  method     String
+  /// Integração futura (Mercado Pago, Asaas): id externo
+  externalId String?
+  notes      String?
+  userId     String?
+  paidAt     DateTime @default(now())
+
+  rental Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+}
+
+/// Multa por atraso (termo contratual — não é "juros").
+model LateFee {
+  id        String   @id @default(cuid())
+  rentalId  String
+  daysLate  Int
+  amount    Decimal  @db.Decimal(10, 2)
+  waived    Boolean  @default(false)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  rental Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+}
