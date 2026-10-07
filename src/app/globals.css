@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   Identidade Sady Roupas — preto, marfim e dourado (a partir do logotipo)
+   ========================================================================== */
+@theme {
+  --color-ink: #13110f;
+  --color-ink-2: #1d1a17;
+  --color-ink-3: #2a2622;
+  --color-ivory: #f7f3ec;
+  --color-paper: #fbfaf7;
+  --color-sand: #ebe4d8;
+  --color-line: #e6e0d6;
+  --color-muted: #6f675d;
+  --color-gold: #b8955a;
+  --color-gold-light: #d8bd88;
+  --color-gold-dark: #8f6f3b;
+
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-manrope), "Manrope", system-ui, sans-serif;
+
+  --ease-elegant: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-fade-up: fade-up 0.8s var(--ease-elegant) both;
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+  }
+  ::selection {
+    background: var(--color-gold-light);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.28em] text-gold;
+  }
+  .display {
+    @apply font-display font-medium tracking-tight;
+  }
+  .container-site {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+  .gold-rule {
+    @apply h-px w-12 bg-gold;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
