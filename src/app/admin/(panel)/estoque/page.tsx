@@ -38,7 +38,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
       <PageHeader title="Estoque" description="Mude o status direto na lista ou selecione várias peças para alterar em lote." actions={<><LinkButton href="/admin/estoque/leitor" variant="outline"><ScanLine className="h-4 w-4" /> Ler QR Code</LinkButton><LinkButton href="/admin/estoque/novo"><Plus className="h-4 w-4" /> Cadastrar peças</LinkButton></>} />
       <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
         <Link href={href({ status: undefined })} className={cn("rounded-xl border bg-white p-4", !status ? "border-ink" : "border-line")}>
-          <p className="text-xs font-semibold text-muted">Todas</p>
+          <p className="text-xs font-semibold text-muted-foreground">Todas</p>
           <p className="mt-1 text-2xl font-semibold tabular-nums">{stats.total}</p>
         </Link>
         {V1_INVENTORY_STATUSES.map((s) => (

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AlertTriangle, CalendarClock, CalendarPlus, CheckCircle2, PackageX, Printer, Shirt, UserPlus, Users, XCircle } from "lucide-react";
+import { AlertTriangle, CalendarClock, CalendarPlus, CheckCircle2, PackageCheck, PackageX, Printer, Shirt, Undo2, UserPlus, Users, XCircle } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
 import { AppointmentStatusBadge } from "@/components/admin/status-badges";
 import { LinkButton } from "@/components/ui/button";
@@ -20,7 +20,7 @@ function Stat({ label, value, icon: Icon, tone = "ink", href }: { label: string;
   const body = (
     <Card className="p-4 transition hover:border-ink/20 sm:p-5">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold text-muted">{label}</p>
+        <p className="text-xs font-semibold text-muted-foreground">{label}</p>
         <Icon className={cn("h-4 w-4", toneClass)} strokeWidth={1.75} />
       </div>
       <p className={cn("mt-2 text-3xl font-semibold tabular-nums", toneClass)}>{value}</p>
@@ -61,6 +61,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <Stat label="Cancelamentos hoje" value={data.counts.cancelled} icon={XCircle} tone="red" />
         <Stat label="Não compareceram" value={data.counts.noShow} icon={AlertTriangle} tone="gold" />
       </section>
+      <section aria-label="Locações hoje" className="mt-3 grid grid-cols-3 gap-3">
+        <Stat label="Retiradas para hoje" value={data.rentals.pickups} icon={PackageCheck} tone="gold" href="/admin/locacoes?aba=retiradas" />
+        <Stat label="Devoluções hoje" value={data.rentals.returns} icon={Undo2} href="/admin/locacoes?aba=devolucoes" />
+        <Stat label="Devoluções atrasadas" value={data.rentals.overdue} icon={AlertTriangle} tone="red" href="/admin/locacoes?aba=atrasadas" />
+      </section>
 
       <div className="mt-6 grid grid-cols-1 gap-6 [&>*]:min-w-0 xl:grid-cols-[1.6fr_1fr]">
         <Card>
@@ -74,8 +79,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   <Link href={`/admin/agendamentos/${a.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-ivory/60">
                     <span className="w-12 font-mono text-sm font-semibold tabular-nums">{toTimeKey(a.startsAt, tz)}</span>
                     <div className="min-w-0 flex-1">
-                      <p className={cn("truncate text-sm font-semibold", a.status === "CANCELLED" && "text-muted line-through")}>{a.customer.name}</p>
-                      <p className="truncate text-xs text-muted">{a.service.name}{a.notes ? ` · ${a.notes}` : ""}</p>
+                      <p className={cn("truncate text-sm font-semibold", a.status === "CANCELLED" && "text-muted-foreground line-through")}>{a.customer.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">{a.service.name}{a.notes ? ` · ${a.notes}` : ""}</p>
                     </div>
                     <AppointmentStatusBadge status={a.status} />
                   </Link>
@@ -95,28 +100,28 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                     <Link href={`/admin/agendamentos/${i.appointment.id}`} className="flex items-center justify-between gap-3 px-5 py-2.5 text-sm hover:bg-ivory/60">
                       <span className="min-w-0">
                         <span className="block truncate font-medium">{i.product.name}{i.size ? ` · tam. ${i.size}` : ""}</span>
-                        <span className="block truncate text-xs text-muted">{i.appointment.customer.name}</span>
+                        <span className="block truncate text-xs text-muted-foreground">{i.appointment.customer.name}</span>
                       </span>
-                      <span className="shrink-0 font-mono text-xs text-muted">{formatDate(i.appointment.startsAt, tz).slice(0, 5)} {toTimeKey(i.appointment.startsAt, tz)}</span>
+                      <span className="shrink-0 font-mono text-xs text-muted-foreground">{formatDate(i.appointment.startsAt, tz).slice(0, 5)} {toTimeKey(i.appointment.startsAt, tz)}</span>
                     </Link>
                   </li>
                 ))}
               </ul>
-              {data.toSeparate.length > 6 && <p className="border-t border-line px-5 py-2 text-xs text-muted">+{data.toSeparate.length - 6} outras</p>}
+              {data.toSeparate.length > 6 && <p className="border-t border-line px-5 py-2 text-xs text-muted-foreground">+{data.toSeparate.length - 6} outras</p>}
             </Card>
           )}
 
           <Card>
             <CardHeader title="Próximos horários" />
             {data.upcoming.length === 0 ? (
-              <p className="px-5 py-6 text-sm text-muted">Sem próximos agendamentos.</p>
+              <p className="px-5 py-6 text-sm text-muted-foreground">Sem próximos agendamentos.</p>
             ) : (
               <ul className="divide-y divide-line">
                 {data.upcoming.map((a) => (
                   <li key={a.id}>
                     <Link href={`/admin/agendamentos/${a.id}`} className="flex items-center justify-between gap-3 px-5 py-2.5 text-sm hover:bg-ivory/60">
                       <span className="truncate">{a.customer.name}</span>
-                      <span className="shrink-0 font-mono text-xs text-muted">{formatDate(a.startsAt, tz).slice(0, 5)} {toTimeKey(a.startsAt, tz)}</span>
+                      <span className="shrink-0 font-mono text-xs text-muted-foreground">{formatDate(a.startsAt, tz).slice(0, 5)} {toTimeKey(a.startsAt, tz)}</span>
                     </Link>
                   </li>
                 ))}
@@ -159,10 +164,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
           <Card className="flex items-center justify-between gap-3 p-5">
             <div className="flex items-center gap-3">
-              <Printer className="h-5 w-5 text-muted" />
+              <Printer className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm font-semibold">Impressora</p>
-                <p className="text-xs text-muted">{data.print.pending} pendente(s) · {data.print.failed} com falha</p>
+                <p className="text-xs text-muted-foreground">{data.print.pending} pendente(s) · {data.print.failed} com falha</p>
               </div>
             </div>
             <Link href="/admin/impressoes"><Badge tone={printerTone[data.print.printer.state]} dot>{data.print.printer.state}</Badge></Link>

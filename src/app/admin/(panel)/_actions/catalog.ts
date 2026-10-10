@@ -21,6 +21,7 @@ const productFields = (fd: FormData) => ({
   model: formStr(fd, "model"),
   colors: formStr(fd, "colors"),
   sizes: formStr(fd, "sizes"),
+  occasions: fd.getAll("occasions").map(String),
   details: formStr(fd, "details"),
   featured: formBool(fd, "featured"),
   active: formBool(fd, "active"),

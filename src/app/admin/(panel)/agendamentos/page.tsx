@@ -65,12 +65,12 @@ export default async function AppointmentsPage({ searchParams }: { searchParams:
             <tbody>
               {data.items.map((a) => (
                 <tr key={a.id} className="hover:bg-ivory/50">
-                  <Td><Link href={`/admin/agendamentos/${a.id}`} className="font-semibold hover:text-gold-dark">{formatDate(a.startsAt, tz)}</Link><span className="block font-mono text-xs text-muted">{toTimeKey(a.startsAt, tz)}</span></Td>
-                  <Td><Link href={`/admin/clientes/${a.customer.id}`} className="font-medium hover:text-gold-dark">{a.customer.name}</Link><span className="block text-xs text-muted">{formatPhone(a.customer.whatsapp)}</span></Td>
+                  <Td><Link href={`/admin/agendamentos/${a.id}`} className="font-semibold hover:text-gold-dark">{formatDate(a.startsAt, tz)}</Link><span className="block font-mono text-xs text-muted-foreground">{toTimeKey(a.startsAt, tz)}</span></Td>
+                  <Td><Link href={`/admin/clientes/${a.customer.id}`} className="font-medium hover:text-gold-dark">{a.customer.name}</Link><span className="block text-xs text-muted-foreground">{formatPhone(a.customer.whatsapp)}</span></Td>
                   <Td className="text-xs">{a.service.name}</Td>
                   <Td><AppointmentStatusBadge status={a.status} /></Td>
-                  <Td className="text-xs text-muted">{appointmentSourceLabel[a.source]}</Td>
-                  <Td>{a.printJobs[0] ? <PrintStatusBadge status={a.printJobs[0].status} /> : <span className="text-xs text-muted">—</span>}</Td>
+                  <Td className="text-xs text-muted-foreground">{appointmentSourceLabel[a.source]}</Td>
+                  <Td>{a.printJobs[0] ? <PrintStatusBadge status={a.printJobs[0].status} /> : <span className="text-xs text-muted-foreground">—</span>}</Td>
                   <Td><Link href={`/admin/agendamentos/${a.id}`} className="font-mono text-xs">{a.code}</Link></Td>
                 </tr>
               ))}

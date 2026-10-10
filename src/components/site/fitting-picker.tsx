@@ -36,8 +36,8 @@ export function FittingPicker({ product, availability, hasInventory }: Props) {
       {product.sizes.length > 0 && (
         <>
           <div className="flex items-baseline justify-between">
-            <h2 className="text-sm font-semibold">Tamanho</h2>
-            {hasInventory && <span className="text-xs text-muted">Disponibilidade atual na loja</span>}
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.22em]">Tamanho</h2>
+            {hasInventory && <span className="text-xs text-muted-foreground">Disponibilidade atual na loja</span>}
           </div>
           <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Tamanho">
             {product.sizes.map((s) => {
@@ -53,8 +53,8 @@ export function FittingPicker({ product, availability, hasInventory }: Props) {
                   onClick={() => setSize(selected ? null : s)}
                   title={out ? "Indisponível no momento — pode provar outro tamanho ou consultar a loja" : undefined}
                   className={cn(
-                    "relative min-w-14 rounded-md border px-3 py-2.5 text-sm font-semibold transition duration-200",
-                    selected ? "border-ink bg-ink text-ivory shadow-md" : out ? "border-line text-muted/60" : "border-ink/20 hover:border-ink/60",
+                    "relative h-11 min-w-12 rounded-full border px-4 text-sm font-semibold transition duration-200",
+                    selected ? "border-ink bg-ink text-ivory shadow-md" : out ? "border-line text-muted-foreground/60" : "border-ink/20 hover:border-ink/60",
                   )}
                 >
                   <span className={cn(out && !selected && "line-through")}>{s}</span>
@@ -63,14 +63,14 @@ export function FittingPicker({ product, availability, hasInventory }: Props) {
               );
             })}
           </div>
-          {hasInventory && <p className="mt-2 text-xs text-muted">Riscado = reservado ou alugado agora. <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-gold" /> última peça.</span></p>}
+          {hasInventory && <p className="mt-2 text-xs text-muted-foreground">Riscado = reservado ou alugado agora. <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-gold" /> última peça.</span></p>}
         </>
       )}
-      <button type="button" onClick={add} className={cn("mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-md border text-sm font-semibold transition", inList ? "border-gold bg-[#fbf6ec] text-gold-dark" : "border-ink/20 bg-white hover:border-ink")}>
+      <button type="button" onClick={add} className={cn("mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-full border text-[12px] font-bold uppercase tracking-[0.16em] transition", inList ? "border-gold bg-[#fbf6ec] text-gold-dark" : "border-gold bg-gold text-ink hover:bg-gold-light")}>
         {inList ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
         {inList ? "Na sua lista de provas" : "Quero provar esta peça"}
       </button>
-      <p className="mt-2 flex items-center gap-1.5 text-xs text-muted"><Shirt className="h-3.5 w-3.5 text-gold" /> Monte sua lista e agende: separamos as peças antes de você chegar.</p>
+      <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><Shirt className="h-3.5 w-3.5 text-gold" /> Monte sua lista e agende: separamos as peças antes de você chegar.</p>
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { useMemo, useSyncExternalStore } from "react";
 export type FittingEntry = { slug: string; name: string; size: string | null; image: string | null };
 
 const KEY = "sady:lista-de-provas";
+/** Evento para abrir o painel da lista de provas (ex.: pela barra inferior). */
+export const OPEN_FITTING_EVENT = "sady:abrir-provador";
 const EVENT = "sady:lista-de-provas";
 export const FITTING_MAX = 12;
 

@@ -38,8 +38,8 @@ export default async function NotificationsPage({ searchParams }: { searchParams
       <PageHeader title="Notificações" description="Mensagens automáticas de WhatsApp e alertas internos do painel." />
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <div className="flex rounded-md border border-line bg-white p-0.5 text-xs font-semibold">
-          <Link href="/admin/notificacoes" className={cn("rounded px-3 py-1.5", tab === "whatsapp" ? "bg-ink text-ivory" : "text-muted")}>WhatsApp</Link>
-          <Link href="/admin/notificacoes?aba=alertas" className={cn("rounded px-3 py-1.5", tab === "alertas" ? "bg-ink text-ivory" : "text-muted")}>Alertas internos</Link>
+          <Link href="/admin/notificacoes" className={cn("rounded px-3 py-1.5", tab === "whatsapp" ? "bg-ink text-ivory" : "text-muted-foreground")}>WhatsApp</Link>
+          <Link href="/admin/notificacoes?aba=alertas" className={cn("rounded px-3 py-1.5", tab === "alertas" ? "bg-ink text-ivory" : "text-muted-foreground")}>Alertas internos</Link>
         </div>
         {tab === "whatsapp" && (
           <>
@@ -54,7 +54,7 @@ export default async function NotificationsPage({ searchParams }: { searchParams
         {tab === "whatsapp" && (
           <CardHeader title="Mensagens" action={
             <div className="flex flex-wrap gap-1 text-xs font-semibold">
-              {[undefined, ...STATUSES].map((s) => <Link key={s ?? "all"} href={s ? `/admin/notificacoes?status=${s}` : "/admin/notificacoes"} className={cn("rounded-md px-2.5 py-1", status === s ? "bg-ink text-ivory" : "text-muted hover:bg-ivory")}>{s ? notificationStatusLabel[s] : "Todas"}</Link>)}
+              {[undefined, ...STATUSES].map((s) => <Link key={s ?? "all"} href={s ? `/admin/notificacoes?status=${s}` : "/admin/notificacoes"} className={cn("rounded-md px-2.5 py-1", status === s ? "bg-ink text-ivory" : "text-muted-foreground hover:bg-ivory")}>{s ? notificationStatusLabel[s] : "Todas"}</Link>)}
             </div>
           } />
         )}
@@ -63,8 +63,8 @@ export default async function NotificationsPage({ searchParams }: { searchParams
             {items.map((n) => (
               <li key={n.id} className={cn("px-5 py-3", !n.readAt && "bg-[#fbf6ec]")}>
                 <p className="text-sm font-semibold">🔔 {n.title}</p>
-                <p className="text-xs text-muted">{n.body}</p>
-                <p className="mt-1 text-[11px] text-muted/70">{formatDateTime(n.createdAt, tz)}{n.appointment && <> · <Link href={`/admin/agendamentos/${n.appointment.id}`} className="font-mono hover:text-ink">{n.appointment.code}</Link></>}</p>
+                <p className="text-xs text-muted-foreground">{n.body}</p>
+                <p className="mt-1 text-[11px] text-muted-foreground/70">{formatDateTime(n.createdAt, tz)}{n.appointment && <> · <Link href={`/admin/agendamentos/${n.appointment.id}`} className="font-mono hover:text-ink">{n.appointment.code}</Link></>}</p>
               </li>
             ))}
           </ul>
@@ -75,8 +75,8 @@ export default async function NotificationsPage({ searchParams }: { searchParams
               {items.map((n) => (
                 <tr key={n.id} className="align-top">
                   <Td className="whitespace-nowrap text-xs">{formatDateTime(n.createdAt, tz)}</Td>
-                  <Td className="text-xs">{notificationEventLabel[n.event]}{n.appointment && <Link href={`/admin/agendamentos/${n.appointment.id}`} className="block font-mono text-muted hover:text-ink">{n.appointment.code}</Link>}</Td>
-                  <Td className="text-xs">{n.customer?.name}<span className="block text-muted">{formatPhone(n.recipient)}</span></Td>
+                  <Td className="text-xs">{notificationEventLabel[n.event]}{n.appointment && <Link href={`/admin/agendamentos/${n.appointment.id}`} className="block font-mono text-muted-foreground hover:text-ink">{n.appointment.code}</Link>}</Td>
+                  <Td className="text-xs">{n.customer?.name}<span className="block text-muted-foreground">{formatPhone(n.recipient)}</span></Td>
                   <Td className="max-w-sm"><details><summary className="cursor-pointer truncate text-xs">{n.body.split("\n")[0]}</summary><pre className="mt-1 whitespace-pre-wrap font-sans text-xs text-ink/80">{n.body}</pre></details>{n.error && <p className="mt-1 text-xs text-red-700">{n.error}</p>}</Td>
                   <Td><NotificationStatusBadge status={n.status} /></Td>
                   <Td>{(n.status === "FAILED" || n.status === "SKIPPED") && <ActionButton action={retryNotificationAction} fields={{ id: n.id }}>Reenviar</ActionButton>}</Td>

@@ -21,6 +21,9 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "25mb" },
   },
   images: {
+    // Fotos de produto em alta qualidade (Next 16 exige a lista de qualidades permitidas)
+    qualities: [75, 90],
+    formats: ["image/avif", "image/webp"],
     remotePatterns: supabaseHost ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }] : [],
   },
   async headers() {

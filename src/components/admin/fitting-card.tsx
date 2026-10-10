@@ -38,7 +38,7 @@ export function FittingCard({ appointmentId, items, candidates, products, editab
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <Link href={`/catalogo/${i.product.slug}`} target="_blank" className="text-sm font-semibold hover:text-gold-dark">{i.product.name}</Link>
-                    <p className="text-xs text-muted">{i.size ? `Tamanho pedido: ${i.size}` : "Tamanho a definir na prova"}</p>
+                    <p className="text-xs text-muted-foreground">{i.size ? `Tamanho pedido: ${i.size}` : "Tamanho a definir na prova"}</p>
                   </div>
                   {editable && !i.inventoryItem && (
                     <ActionButton action={removeFittingItemAction} fields={{ itemId: i.id, appointmentId }} variant="ghost" size="icon" confirm="Remover esta peça da lista?"><X className="h-4 w-4" /></ActionButton>
@@ -75,7 +75,7 @@ export function FittingCard({ appointmentId, items, candidates, products, editab
       )}
       {editable && (
         <div className="border-t border-line bg-ivory/40 px-5 py-4">
-          <p className="mb-2 text-xs font-semibold text-muted">Adicionar peça à lista</p>
+          <p className="mb-2 text-xs font-semibold text-muted-foreground">Adicionar peça à lista</p>
           <InlineForm action={addFittingItemAction.bind(null, appointmentId)} submitLabel="Adicionar" variant="outline">
             <Select name="productId" required className="h-9 flex-1 text-xs" aria-label="Produto" defaultValue="">
               <option value="" disabled>Produto…</option>

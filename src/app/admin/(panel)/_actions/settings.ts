@@ -142,7 +142,7 @@ export async function saveWhatsAppAction(_prev: ActionState, fd: FormData): Prom
     const { actor } = await admin();
     const mode = formStr(fd, "whatsappMode") === "PRODUCTION" ? "PRODUCTION" : "SIMULATED";
     const reminderHoursBefore = z.coerce.number().int().min(1).max(168).parse(formStr(fd, "reminderHoursBefore"));
-    await db.storeSettings.update({ where: { id: "store" }, data: { whatsappEnabled: formBool(fd, "whatsappEnabled"), whatsappMode: mode, reminderHoursBefore } });
+    await db.storeSettings.update({ where: { id: "store" }, data: { whatsappEnabled: formBool(fd, "whatsappEnabled"), ownerAlertWhatsapp: formBool(fd, "ownerAlertWhatsapp"), whatsappMode: mode, reminderHoursBefore } });
     await AuditService.log(actor, { action: "settings.whatsapp_updated", entity: "StoreSettings", entityId: "store", summary: `WhatsApp: modo ${mode}` });
   } catch (err) {
     return toActionError(err);

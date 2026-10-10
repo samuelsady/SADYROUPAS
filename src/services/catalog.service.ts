@@ -8,7 +8,14 @@ import { slugify } from "@/utils/text";
 import { AuditService, type Actor } from "./audit.service";
 import { StorageService } from "./storage/storage.service";
 
-export type CatalogFilters = { categoria?: string; tamanho?: string; cor?: string; modelo?: string; q?: string };
+export type CatalogFilters = { categoria?: string; ocasiao?: string; tamanho?: string; cor?: string; modelo?: string; q?: string; ordem?: string };
+
+const SORTS: Record<string, Prisma.ProductOrderByWithRelationInput[]> = {
+  destaques: [{ featured: "desc" }, { sortOrder: "asc" }, { name: "asc" }],
+  "a-z": [{ name: "asc" }],
+  "z-a": [{ name: "desc" }],
+  novidades: [{ createdAt: "desc" }],
+};
 
 export const CatalogService = {
   categories() {
@@ -20,16 +27,30 @@ export const CatalogService = {
     const where: Prisma.ProductWhereInput = {
       active: true,
       ...(f.categoria ? { category: { slug: f.categoria } } : {}),
+      ...(f.ocasiao ? { occasions: { has: f.ocasiao } } : {}),
       ...(f.tamanho ? { sizes: { has: f.tamanho } } : {}),
       ...(f.cor ? { colors: { has: f.cor } } : {}),
       ...(f.modelo ? { model: f.modelo } : {}),
       ...(f.q ? { OR: [{ name: { contains: f.q, mode: "insensitive" } }, { description: { contains: f.q, mode: "insensitive" } }] } : {}),
     };
-    return db.product.findMany({
+    const products = await db.product.findMany({
       where,
-      orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { name: "asc" }],
-      include: { category: true, images: { orderBy: { sortOrder: "asc" }, take: 2 } },
+      orderBy: SORTS[f.ordem ?? ""] ?? SORTS.destaques,
+      include: {
+        category: true,
+        images: { orderBy: { sortOrder: "asc" }, take: 2 },
+        _count: { select: { items: { where: { active: true, status: "AVAILABLE" } } } },
+      },
     });
+    return products.map(({ _count, ...p }) => ({ ...p, availableCount: _count.items }));
+  },
+
+  /** Quantidade de produtos ativos por ocasião (menus e filtros). */
+  async occasionCounts() {
+    const rows = await db.$queryRaw<{ occasion: string; count: bigint }[]>`
+      SELECT unnest("occasions") AS occasion, count(*) AS count FROM "Product" WHERE "active" = true GROUP BY 1
+    `;
+    return Object.fromEntries(rows.map((r) => [r.occasion, Number(r.count)])) as Record<string, number>;
   },
 
   /** Valores para os filtros do catálogo (somente o que existe em produtos ativos). */
@@ -44,13 +65,14 @@ export const CatalogService = {
     };
   },
 
-  featured(take = 8) {
-    return db.product.findMany({
+  async featured(take = 10) {
+    const products = await db.product.findMany({
       where: { active: true, featured: true },
       orderBy: { sortOrder: "asc" },
       take,
-      include: { category: true, images: { orderBy: { sortOrder: "asc" }, take: 1 } },
+      include: { category: true, images: { orderBy: { sortOrder: "asc" }, take: 2 }, _count: { select: { items: { where: { active: true, status: "AVAILABLE" } } } } },
     });
+    return products.map(({ _count, ...p }) => ({ ...p, availableCount: _count.items }));
   },
 
   async publicBySlug(slug: string) {
@@ -66,13 +88,14 @@ export const CatalogService = {
     return { ...product, availability, hasInventory };
   },
 
-  related(product: { id: string; categoryId: string }, take = 4) {
-    return db.product.findMany({
+  async related(product: { id: string; categoryId: string }, take = 4) {
+    const products = await db.product.findMany({
       where: { active: true, categoryId: product.categoryId, id: { not: product.id } },
       orderBy: [{ featured: "desc" }, { sortOrder: "asc" }],
       take,
-      include: { category: true, images: { orderBy: { sortOrder: "asc" }, take: 1 } },
+      include: { category: true, images: { orderBy: { sortOrder: "asc" }, take: 2 }, _count: { select: { items: { where: { active: true, status: "AVAILABLE" } } } } },
     });
+    return products.map(({ _count, ...p }) => ({ ...p, availableCount: _count.items }));
   },
 
   // ---------------------------------------------------------------------------

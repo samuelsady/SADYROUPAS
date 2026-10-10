@@ -36,10 +36,10 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
               {logs.map((l) => (
                 <tr key={l.id}>
                   <Td className="whitespace-nowrap text-xs">{formatDateTime(l.createdAt, settings.timezone)}</Td>
-                  <Td className="text-xs">{l.actorLabel ?? "—"}{l.ip && <span className="block text-muted">{l.ip}</span>}</Td>
+                  <Td className="text-xs">{l.actorLabel ?? "—"}{l.ip && <span className="block text-muted-foreground">{l.ip}</span>}</Td>
                   <Td><code className="rounded bg-ivory px-1.5 py-0.5 text-[11px]">{l.action}</code></Td>
                   <Td className="text-sm">{l.summary}</Td>
-                  <Td className="text-xs text-muted">{l.entity}{l.entityId ? ` · ${l.entityId.slice(-8)}` : ""}</Td>
+                  <Td className="text-xs text-muted-foreground">{l.entity}{l.entityId ? ` · ${l.entityId.slice(-8)}` : ""}</Td>
                 </tr>
               ))}
             </tbody>

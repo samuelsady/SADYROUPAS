@@ -112,7 +112,7 @@ export function QrScanner() {
         }}
       >
         <div className="relative flex-1">
-          <Keyboard className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted" />
+          <Keyboard className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
           <Input value={manual} onChange={(e) => setManual(e.target.value)} placeholder="TER-PRE-042-001" aria-label="Código da peça" className="pl-9 font-mono uppercase" autoCapitalize="characters" />
         </div>
         <Button type="submit" disabled={!parseScannedCode(manual)}>Abrir</Button>

@@ -14,6 +14,15 @@ export const ADMIN_NAV: { section: string; items: NavItem[] }[] = [
     ],
   },
   {
+    section: "Locações",
+    items: [
+      { href: "/admin/locacoes", label: "Locações", icon: "FileSignature" },
+      { href: "/admin/locacoes?aba=retiradas", label: "Retiradas", icon: "PackageCheck" },
+      { href: "/admin/locacoes?aba=devolucoes", label: "Devoluções", icon: "Undo2" },
+      { href: "/admin/planilha", label: "Planilha", icon: "Sheet" },
+    ],
+  },
+  {
     section: "Acervo",
     items: [
       { href: "/admin/catalogo", label: "Catálogo", icon: "Shirt" },
@@ -32,9 +41,6 @@ export const ADMIN_NAV: { section: string; items: NavItem[] }[] = [
   {
     section: "Em breve (V2)",
     items: [
-      { href: "/admin/v2/locacoes", label: "Locações", icon: "FileSignature", future: true },
-      { href: "/admin/v2/retiradas", label: "Retiradas", icon: "PackageCheck", future: true },
-      { href: "/admin/v2/devolucoes", label: "Devoluções", icon: "Undo2", future: true },
       { href: "/admin/v2/lavanderia", label: "Lavanderia", icon: "WashingMachine", future: true },
       { href: "/admin/v2/manutencao", label: "Manutenção", icon: "Scissors", future: true },
       { href: "/admin/v2/financeiro", label: "Financeiro", icon: "Wallet", future: true },

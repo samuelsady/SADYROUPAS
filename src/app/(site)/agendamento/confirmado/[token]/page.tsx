@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
+import Image from "@/components/ui/sady-image";
 import Link from "next/link";
 import { CalendarPlus, MessageCircle, Shirt } from "lucide-react";
 import { ManageAppointment } from "@/components/site/manage-appointment";
@@ -51,13 +51,13 @@ export default async function ConfirmedPage({ params, searchParams }: { params: 
               <h1 className={`display mt-4 text-4xl ${novo ? "pop-in" : ""}`} style={novo ? { animationDelay: "0.5s" } : undefined}>
                 {novo ? "Agendamento confirmado!" : past ? "Atendimento realizado" : appointment.status === "CONFIRMED" ? "Atendimento confirmado" : "Atendimento agendado"}
               </h1>
-              <p className="mt-2 text-sm text-muted">{novo ? "Guarde seu código. Você também receberá a confirmação pelo WhatsApp." : "Guarde este link para consultar, remarcar ou cancelar."}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{novo ? "Guarde seu código. Você também receberá a confirmação pelo WhatsApp." : "Guarde este link para consultar, remarcar ou cancelar."}</p>
             </>
           )}
           <dl className="mt-8 divide-y divide-line rounded-lg border border-line text-left text-sm">
             {rows.map(([k, v]) => (
               <div key={k} className="flex justify-between gap-4 px-4 py-3">
-                <dt className="text-muted">{k}</dt>
+                <dt className="text-muted-foreground">{k}</dt>
                 <dd className={k === "Código" ? "font-mono font-semibold tracking-wide" : "text-right font-medium"}>{v}</dd>
               </div>
             ))}
@@ -73,7 +73,7 @@ export default async function ConfirmedPage({ params, searchParams }: { params: 
                         {i.product.images[0] && <Image src={i.product.images[0].url} alt="" fill sizes="120px" className="object-cover" />}
                       </div>
                       <p className="mt-1 truncate text-[11px] font-semibold">{i.product.name}</p>
-                      <p className="text-[10px] text-muted">{i.size ? `Tam. ${i.size}` : "Tam. a definir"}</p>
+                      <p className="text-[10px] text-muted-foreground">{i.size ? `Tam. ${i.size}` : "Tam. a definir"}</p>
                     </Link>
                   </li>
                 ))}
@@ -97,10 +97,10 @@ export default async function ConfirmedPage({ params, searchParams }: { params: 
           )}
           {canChange && <ManageAppointment token={token} serviceId={appointment.serviceId} cutoffHours={settings.selfServiceCutoffHours} />}
           {active && !past && !canChange && (
-            <p className="mt-6 text-xs text-muted">Faltam menos de {settings.selfServiceCutoffHours}h para o atendimento. Para remarcar ou cancelar, fale com a loja pelo WhatsApp.</p>
+            <p className="mt-6 text-xs text-muted-foreground">Faltam menos de {settings.selfServiceCutoffHours}h para o atendimento. Para remarcar ou cancelar, fale com a loja pelo WhatsApp.</p>
           )}
         </div>
-        {settings.address && <p className="mt-6 text-center text-sm text-muted">{settings.address}</p>}
+        {settings.address && <p className="mt-6 text-center text-sm text-muted-foreground">{settings.address}</p>}
       </div>
     </div>
   );

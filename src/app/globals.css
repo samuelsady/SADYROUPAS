@@ -1,20 +1,44 @@
 @import "tailwindcss";
 
 /* =============================================================================
-   Identidade Sady Roupas — preto, marfim e dourado (a partir do logotipo)
+   Identidade Sady Roupas — preto profundo, marfim e dourado champanhe.
+   Tokens no padrão shadcn/ui (background, card, primary, muted…) apontam
+   para a paleta da marca, para que componentes shadcn funcionem sem ajustes.
    ========================================================================== */
 @theme {
-  --color-ink: #13110f;
-  --color-ink-2: #1d1a17;
-  --color-ink-3: #2a2622;
-  --color-ivory: #f7f3ec;
-  --color-paper: #fbfaf7;
-  --color-sand: #ebe4d8;
-  --color-line: #e6e0d6;
-  --color-muted: #6f675d;
-  --color-gold: #b8955a;
-  --color-gold-light: #d8bd88;
-  --color-gold-dark: #8f6f3b;
+  /* Marca */
+  --color-ink: #0e0c0a;
+  --color-ink-2: #171411;
+  --color-ink-3: #24201b;
+  --color-ivory: #f6f1e8;
+  --color-paper: #faf7f2;
+  --color-sand: #ece4d6;
+  --color-line: #e3dacb;
+  --color-gold: #c2a06a;
+  --color-gold-light: #e2c793;
+  --color-gold-dark: #94743f;
+  --color-gold-deep: #6e5530;
+
+  /* shadcn/ui */
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+  --color-card: #ffffff;
+  --color-card-foreground: var(--color-ink);
+  --color-popover: #ffffff;
+  --color-popover-foreground: var(--color-ink);
+  --color-primary: var(--color-ink);
+  --color-primary-foreground: var(--color-ivory);
+  --color-secondary: var(--color-sand);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: #f1ebe1;
+  --color-muted-foreground: #6b6257;
+  --color-accent: var(--color-gold);
+  --color-accent-foreground: var(--color-ink);
+  --color-destructive: #b42318;
+  --color-border: var(--color-line);
+  --color-input: var(--color-line);
+  --color-ring: var(--color-gold);
+  --color-sidebar-border: #2c2620;
 
   --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
   --font-sans: var(--font-manrope), "Manrope", system-ui, sans-serif;
@@ -40,7 +64,8 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-paper font-sans text-ink antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: "ss01", "cv11";
   }
   ::selection {
     background: var(--color-gold-light);
@@ -54,17 +79,170 @@
 
 @layer components {
   .eyebrow {
-    @apply text-[11px] font-semibold uppercase tracking-[0.28em] text-gold;
+    @apply text-[11px] font-semibold tracking-[0.32em] text-gold uppercase;
   }
   .display {
-    @apply font-display font-medium tracking-tight;
+    @apply font-display font-medium tracking-[-0.01em];
   }
   .container-site {
-    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+    @apply mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12;
   }
   .gold-rule {
-    @apply h-px w-12 bg-gold;
+    @apply h-px w-14 bg-gradient-to-r from-transparent via-gold to-transparent;
   }
+}
+
+/* =============================================================================
+   Fundos e detalhes da marca
+   ========================================================================== */
+
+/* Textura de grão (papel/tecido) sobre fundos escuros e marfim */
+.grain {
+  position: relative;
+  isolation: isolate;
+}
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Aura dourada que se move lentamente (fundos escuros) */
+.aura {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-ink);
+}
+.aura::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 34% at 22% 28%, rgb(194 160 106 / 0.22), transparent 70%),
+    radial-gradient(30% 30% at 78% 72%, rgb(226 199 147 / 0.14), transparent 70%),
+    radial-gradient(45% 40% at 60% 10%, rgb(110 85 48 / 0.28), transparent 70%);
+  filter: blur(20px);
+  animation: aura-drift 22s ease-in-out infinite alternate;
+}
+/* Conteúdo acima da aura (sem mexer em elementos posicionados de propósito) */
+.aura > :not(.absolute):not(.fixed) {
+  position: relative;
+}
+@keyframes aura-drift {
+  0% {
+    transform: translate3d(-4%, -2%, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, 4%, 0) rotate(8deg) scale(1.08);
+  }
+  100% {
+    transform: translate3d(5%, -3%, 0) rotate(-6deg) scale(1.02);
+  }
+}
+
+/* Aura clara para seções marfim */
+.aura-light {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-ivory);
+}
+.aura-light::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background:
+    radial-gradient(35% 35% at 85% 15%, rgb(226 199 147 / 0.35), transparent 70%),
+    radial-gradient(30% 30% at 10% 90%, rgb(194 160 106 / 0.18), transparent 70%);
+  animation: aura-drift 26s ease-in-out infinite alternate;
+}
+.aura-light > :not(.absolute):not(.fixed) {
+  position: relative;
+}
+
+/* Texto com brilho dourado que percorre as letras */
+.text-gold-shine {
+  background: linear-gradient(110deg, var(--color-gold-dark) 0%, var(--color-gold-light) 35%, #fff4dc 50%, var(--color-gold-light) 65%, var(--color-gold-dark) 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 7s linear infinite;
+}
+@keyframes shine {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+
+/* Texto vazado (contorno) para letreiros grandes */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--outline-color, var(--color-gold-light));
+}
+
+/* Faixa infinita (letreiro) */
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-duration, 40s) linear infinite;
+}
+.marquee-reverse {
+  animation-direction: reverse;
+}
+.group:hover .marquee,
+.marquee:hover {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Linha dourada fina */
+.hairline-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+/* Brilho que atravessa o botão no hover */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%) skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent);
+  transition: transform 0.8s var(--ease-elegant);
+}
+.btn-shine:hover::after {
+  transform: translateX(120%) skewX(-20deg);
+}
+
+/* Sublinhado que desenha da esquerda para a direita */
+.link-draw {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.45s var(--ease-elegant);
+}
+.link-draw:hover,
+.link-draw[aria-current="page"] {
+  background-size: 100% 1px;
 }
 
 /* =============================================================================
@@ -74,15 +252,30 @@
 /* Revelar ao rolar — só esconde quando o JS está ativo (classe .js no <html>) */
 .js .reveal {
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateY(22px);
   transition:
-    opacity 0.9s var(--ease-elegant),
-    transform 0.9s var(--ease-elegant);
+    opacity 1s var(--ease-elegant),
+    transform 1s var(--ease-elegant);
   transition-delay: var(--reveal-delay, 0ms);
 }
 .js .reveal.is-visible {
   opacity: 1;
   transform: none;
+}
+
+/* Revelação de imagem com "cortina" que sobe (o elemento observado continua visível) */
+.js .reveal-clip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--cover, var(--color-ink));
+  transform-origin: top;
+  transition: transform 1.3s var(--ease-elegant);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js .reveal-clip.is-visible::after {
+  transform: scaleY(0);
 }
 
 @keyframes hero-zoom {
@@ -95,6 +288,19 @@
 }
 .hero-zoom {
   animation: hero-zoom 2.2s var(--ease-elegant) both;
+}
+
+/* Ken Burns lento para o slideshow do topo */
+@keyframes ken-burns {
+  from {
+    transform: scale(1.12) translate3d(0, 1.5%, 0);
+  }
+  to {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+.ken-burns {
+  animation: ken-burns 9s ease-out both;
 }
 
 @keyframes page-in {
@@ -195,10 +401,31 @@
   animation: shimmer 1.4s linear infinite;
 }
 
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(200%);
+  }
+}
+.scroll-cue {
+  animation: scroll-cue 1.8s var(--ease-elegant) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .js .reveal {
     opacity: 1;
     transform: none;
+  }
+  .js .reveal-clip::after {
+    display: none;
+  }
+  .marquee,
+  .aura::before,
+  .aura-light::before,
+  .text-gold-shine {
+    animation: none !important;
   }
   *,
   *::before,

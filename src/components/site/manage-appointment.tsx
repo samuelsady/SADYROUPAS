@@ -65,7 +65,7 @@ export function ManageAppointment({ token, serviceId, cutoffHours }: { token: st
   return (
     <div className="mt-8 rounded-xl border border-line bg-ivory/60 p-5 text-left">
       <p className="text-sm font-semibold">Precisa mudar algo?</p>
-      <p className="mt-0.5 text-xs text-muted">Você pode remarcar ou cancelar por aqui até {cutoffHours}h antes do horário.</p>
+      <p className="mt-0.5 text-xs text-muted-foreground">Você pode remarcar ou cancelar por aqui até {cutoffHours}h antes do horário.</p>
       {mode === "idle" && (
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           <button type="button" onClick={() => setMode("reschedule")} className={buttonClass("outline", "md")}><CalendarClock className="h-4 w-4" /> Remarcar</button>
@@ -84,7 +84,7 @@ export function ManageAppointment({ token, serviceId, cutoffHours }: { token: st
                 const [, m, day] = d.date.split("-").map(Number);
                 return (
                   <button key={d.date} type="button" disabled={disabled} onClick={() => { setDate(d.date); setTime(null); }} aria-pressed={date === d.date} aria-label={`${weekdayName(weekdayOfKey(d.date))}, ${formatDateKey(d.date)}`}
-                    className={cn("flex min-w-[4rem] flex-col items-center rounded-lg border py-2.5 transition", date === d.date ? "border-ink bg-ink text-ivory" : disabled ? "border-line bg-sand/40 text-muted/50" : "border-line bg-white hover:border-ink/40")}>
+                    className={cn("flex min-w-[4rem] flex-col items-center rounded-lg border py-2.5 transition", date === d.date ? "border-ink bg-ink text-ivory" : disabled ? "border-line bg-sand/40 text-muted-foreground/50" : "border-line bg-white hover:border-ink/40")}>
                     <span className="text-[10px] font-semibold uppercase opacity-70">{weekdayName(weekdayOfKey(d.date), true)}</span>
                     <span className="font-display text-xl leading-tight">{day}</span>
                     <span className="text-[10px] uppercase opacity-70">{monthName(m!).slice(0, 3)}</span>
@@ -100,7 +100,7 @@ export function ManageAppointment({ token, serviceId, cutoffHours }: { token: st
               {slots.slots.filter((s) => s.available).map((s) => (
                 <button key={s.time} type="button" onClick={() => setTime(s.time)} aria-pressed={time === s.time} className={cn("h-10 rounded-md border text-sm font-semibold transition active:scale-95", time === s.time ? "border-ink bg-ink text-ivory" : "border-line bg-white hover:border-ink/40")}>{s.time}</button>
               ))}
-              {slots.slots.every((s) => !s.available) && <p className="col-span-4 text-sm text-muted">Sem horários livres nesta data.</p>}
+              {slots.slots.every((s) => !s.available) && <p className="col-span-4 text-sm text-muted-foreground">Sem horários livres nesta data.</p>}
             </div>
           ))}
           <div className="flex gap-2">

@@ -1,7 +1,7 @@
 import { cn } from "@/utils/cn";
 
 export const inputClass =
-  "w-full rounded-md border border-line bg-white px-3 py-2.5 text-[15px] text-ink placeholder:text-muted/60 transition focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20 disabled:bg-sand/40 aria-[invalid=true]:border-red-400 sm:text-sm";
+  "w-full rounded-md border border-line bg-white px-3 py-2.5 text-[15px] text-ink placeholder:text-muted-foreground/60 transition focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20 disabled:bg-sand/40 aria-[invalid=true]:border-red-400 sm:text-sm";
 
 export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(inputClass, "h-11 py-0", className)} {...props} />;
@@ -27,7 +27,7 @@ export function Field({ label, hint, error, children, className, htmlFor, requir
         {required && <span className="ml-0.5 text-gold-dark">*</span>}
       </label>
       {children}
-      {error ? <p className="text-xs font-medium text-red-700">{error}</p> : hint ? <p className="text-xs text-muted">{hint}</p> : null}
+      {error ? <p className="text-xs font-medium text-red-700">{error}</p> : hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }

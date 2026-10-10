@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Image from "next/image";
+import Image from "@/components/ui/sady-image";
 import Link from "next/link";
 import { Check, Loader2, Shirt, X } from "lucide-react";
 import { Field, Input, Textarea } from "@/components/ui/form";
@@ -100,7 +100,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
       {fitting.length > 0 ? (
         <div className="rounded-lg border border-gold/30 bg-[#fbf6ec] p-4">
           <p className="flex items-center gap-2 text-sm font-semibold"><Shirt className="h-4 w-4 text-gold-dark" /> Sua lista de provas ({fitting.length})</p>
-          <p className="mt-0.5 text-xs text-muted">Vamos separar estas peças antes do seu atendimento.</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">Vamos separar estas peças antes do seu atendimento.</p>
           <ul className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
             {fitting.map((f) => (
               <li key={`${f.slug}-${f.size}`} className="relative w-20 shrink-0 animate-fade-up">
@@ -108,8 +108,8 @@ export function BookingForm({ services, product, initialServiceId }: { services:
                   {f.image && <Image src={f.image} alt="" fill sizes="80px" className="object-cover" />}
                 </div>
                 <p className="mt-1 truncate text-[11px] font-semibold" title={f.name}>{f.name.replace(/^Terno /, "")}</p>
-                <p className="text-[10px] text-muted">{f.size ? `Tam. ${f.size}` : "Tam. a definir"}</p>
-                <button type="button" onClick={() => fittingList.remove(f.slug, f.size)} aria-label={`Remover ${f.name}`} className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-white text-muted shadow ring-1 ring-line hover:text-red-700"><X className="h-3 w-3" /></button>
+                <p className="text-[10px] text-muted-foreground">{f.size ? `Tam. ${f.size}` : "Tam. a definir"}</p>
+                <button type="button" onClick={() => fittingList.remove(f.slug, f.size)} aria-label={`Remover ${f.name}`} className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-white text-muted-foreground shadow ring-1 ring-line hover:text-red-700"><X className="h-3 w-3" /></button>
               </li>
             ))}
           </ul>
@@ -120,7 +120,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
           Peça de interesse: <strong>{product.name}</strong>
         </div>
       ) : (
-        <p className="flex items-center gap-2 rounded-lg bg-ivory px-4 py-3 text-xs text-muted"><Shirt className="h-4 w-4 shrink-0 text-gold" /> Dica: no <Link href="/catalogo" className="font-semibold text-gold-dark hover:underline">catálogo</Link>, toque em “Quero provar” para separarmos as peças antes de você chegar.</p>
+        <p className="flex items-center gap-2 rounded-lg bg-ivory px-4 py-3 text-xs text-muted-foreground"><Shirt className="h-4 w-4 shrink-0 text-gold" /> Dica: no <Link href="/catalogo" className="font-semibold text-gold-dark hover:underline">catálogo</Link>, toque em “Quero provar” para separarmos as peças antes de você chegar.</p>
       )}
 
       <section>
@@ -129,7 +129,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
           {services.map((s) => (
             <button key={s.id} type="button" onClick={() => selectService(s.id)} aria-pressed={serviceId === s.id} className={cn("rounded-lg border p-4 text-left transition", serviceId === s.id ? "border-gold bg-[#fbf6ec] ring-1 ring-gold" : "border-line bg-white hover:border-ink/30")}>
               <span className="block font-semibold">{s.name}</span>
-              {s.description && <span className="mt-1 block text-xs text-muted">{s.description}</span>}
+              {s.description && <span className="mt-1 block text-xs text-muted-foreground">{s.description}</span>}
             </button>
           ))}
         </div>
@@ -139,7 +139,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
         <section className="animate-fade-up">
           <StepTitle n={2} title="Escolha a data" done={Boolean(date)} />
           {days.loading ? (
-            <p className="flex items-center gap-2 text-sm text-muted"><Loader2 className="h-4 w-4 animate-spin" /> Carregando datas…</p>
+            <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando datas…</p>
           ) : days.error ? (
             <p className="text-sm text-red-700">{days.error}</p>
           ) : (
@@ -149,7 +149,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
                 const [, m, day] = d.date.split("-").map(Number);
                 return (
                   <button key={d.date} type="button" disabled={disabled} onClick={() => { setDate(d.date); setTime(null); }} aria-pressed={date === d.date} aria-label={`${weekdayName(weekdayOfKey(d.date))}, ${formatDateKey(d.date)}${disabled ? " — sem horários" : ""}`}
-                    className={cn("flex min-w-[4.25rem] flex-col items-center rounded-lg border py-3 transition", date === d.date ? "border-ink bg-ink text-ivory" : disabled ? "border-line bg-sand/40 text-muted/50" : "border-line bg-white hover:border-ink/40")}>
+                    className={cn("flex min-w-[4.25rem] flex-col items-center rounded-lg border py-3 transition", date === d.date ? "border-ink bg-ink text-ivory" : disabled ? "border-line bg-sand/40 text-muted-foreground/50" : "border-line bg-white hover:border-ink/40")}>
                     <span className="text-[10px] font-semibold uppercase tracking-wider opacity-70">{weekdayName(weekdayOfKey(d.date), true)}</span>
                     <span className="font-display text-2xl leading-tight">{day}</span>
                     <span className="text-[10px] uppercase opacity-70">{monthName(m!).slice(0, 3)}</span>
@@ -169,13 +169,13 @@ export function BookingForm({ services, product, initialServiceId }: { services:
               {Array.from({ length: 12 }, (_, i) => <div key={i} className="skeleton h-12 rounded-md" />)}
             </div>
           ) : slots.slots.filter((s) => s.available).length === 0 ? (
-            <p className="text-sm text-muted">Não há horários livres nesta data. Escolha outro dia.</p>
+            <p className="text-sm text-muted-foreground">Não há horários livres nesta data. Escolha outro dia.</p>
           ) : (
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {slots.slots.map((s, i) => (
                 <button key={s.time} type="button" disabled={!s.available} onClick={() => setTime(s.time)} aria-pressed={time === s.time}
                   style={{ animationDelay: `${i * 18}ms` }}
-                  className={cn("h-12 rounded-md border text-sm font-semibold transition animate-fade-up active:scale-95", time === s.time ? "border-ink bg-ink text-ivory" : s.available ? "border-line bg-white hover:border-ink/40" : "border-transparent bg-sand/40 text-muted/40 line-through")}>
+                  className={cn("h-12 rounded-md border text-sm font-semibold transition animate-fade-up active:scale-95", time === s.time ? "border-ink bg-ink text-ivory" : s.available ? "border-line bg-white hover:border-ink/40" : "border-transparent bg-sand/40 text-muted-foreground/40 line-through")}>
                   {s.time}
                 </button>
               ))}
@@ -208,7 +208,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
 
           <div className="mt-8 rounded-lg bg-ivory p-5 text-sm">
             <p className="font-semibold">Resumo</p>
-            <p className="mt-1 text-muted">
+            <p className="mt-1 text-muted-foreground">
               {selectedService?.name} — {weekdayName(weekdayOfKey(date))}, {formatDateKey(date)} às {time}
             </p>
           </div>
@@ -218,7 +218,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
           <button type="submit" disabled={submitting} className={buttonClass("primary", "xl", "mt-6 w-full")}>
             {submitting ? <><Loader2 className="h-5 w-5 animate-spin" /> Confirmando…</> : "Confirmar agendamento"}
           </button>
-          <p className="mt-3 text-center text-xs text-muted">Seus dados são usados apenas para este atendimento.</p>
+          <p className="mt-3 text-center text-xs text-muted-foreground">Seus dados são usados apenas para este atendimento.</p>
         </section>
       )}
     </form>

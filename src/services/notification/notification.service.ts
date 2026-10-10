@@ -79,6 +79,22 @@ export const NotificationService = {
     });
   },
 
+  /**
+   * Aviso no WhatsApp DA LOJA quando um cliente agenda pelo site
+   * (nome, telefone, serviço, data/hora e peças da lista de provas).
+   */
+  async enqueueOwnerAlert(tx: Tx, appointment: AppointmentWithRelations & { items?: { size: string | null; product: { name: string } }[] }, settings: StoreSettings) {
+    if (!settings.ownerAlertWhatsapp || !settings.whatsapp || !settings.whatsappEnabled) return null;
+    const v = appointmentVars(appointment, settings);
+    const pieces = appointment.items?.length
+      ? `\n👔 Quer provar: ${appointment.items.map((i) => `${i.product.name}${i.size ? ` (${i.size})` : ""}`).join(", ")}`
+      : "";
+    const body = `🔔 Novo agendamento pelo site\n\n👤 ${appointment.customer.name}\n📞 ${formatPhone(appointment.customer.whatsapp)}\n📌 ${v.servico}\n📅 ${v.data} às ${v.horario}\n🔖 ${v.codigo}${pieces}${appointment.notes ? `\n📝 ${appointment.notes}` : ""}`;
+    return tx.notification.create({
+      data: { channel: "WHATSAPP", event: "APPOINTMENT_CREATED", status: "PENDING", recipient: settings.whatsapp, title: "Aviso para a loja", body, appointmentId: appointment.id },
+    });
+  },
+
   /** Alerta interno do painel (sino). */
   async alert(tx: Tx, input: { event: NotificationEvent; title: string; body: string; appointmentId?: string; customerId?: string }) {
     return tx.notification.create({

@@ -38,14 +38,14 @@ export default async function PrintsPage({ searchParams }: { searchParams: Promi
               <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-ink text-gold-light"><Printer className="h-5 w-5" /></div>
               <div>
                 <p className="text-sm font-semibold">Impressora{printer.agent?.printerName ? ` · ${printer.agent.printerName}` : settings.printerName ? ` · ${settings.printerName}` : ""}</p>
-                <p className="text-xs text-muted">{printer.agent ? `Último sinal: ${formatDateTime(printer.agent.lastSeenAt, tz)}${printer.agent.hostname ? ` (${printer.agent.hostname})` : ""}` : "Nenhum serviço de impressão conectou ainda."}</p>
+                <p className="text-xs text-muted-foreground">{printer.agent ? `Último sinal: ${formatDateTime(printer.agent.lastSeenAt, tz)}${printer.agent.hostname ? ` (${printer.agent.hostname})` : ""}` : "Nenhum serviço de impressão conectou ainda."}</p>
               </div>
             </div>
             <Badge tone={STATE_TONE[printer.state]} dot className="text-xs">{printer.state}</Badge>
           </div>
           {printer.agent?.message && <p className="mt-3 rounded-md bg-ivory p-2 text-xs">{printer.agent.message}</p>}
         </Card>
-        <Card className="p-5 text-xs leading-relaxed text-muted">
+        <Card className="p-5 text-xs leading-relaxed text-muted-foreground">
           <p className="text-sm font-semibold text-ink">Como funciona</p>
           <p className="mt-1">Sistema → fila (banco) → <strong>serviço local de impressão</strong> no computador da loja → impressora. O serviço local busca os comprovantes pendentes a cada poucos segundos, imprime e informa o resultado.</p>
           <p className="mt-2">Formato atual: <strong>{settings.printFormat}</strong> · Impressão automática: <strong>{settings.autoPrintOnCreate ? "ligada" : "desligada"}</strong> · Token do agente: <strong>{env.printAgentToken ? "configurado" : "NÃO configurado (PRINT_AGENT_TOKEN)"}</strong></p>
@@ -56,7 +56,7 @@ export default async function PrintsPage({ searchParams }: { searchParams: Promi
         <CardHeader title="Fila" action={
           <div className="flex flex-wrap gap-1 text-xs font-semibold">
             {[undefined, ...STATUSES].map((s) => (
-              <Link key={s ?? "all"} href={s ? `/admin/impressoes?status=${s}` : "/admin/impressoes"} className={cn("rounded-md px-2.5 py-1", status === s ? "bg-ink text-ivory" : "text-muted hover:bg-ivory")}>{s ? printStatusLabel[s] : "Todos"}</Link>
+              <Link key={s ?? "all"} href={s ? `/admin/impressoes?status=${s}` : "/admin/impressoes"} className={cn("rounded-md px-2.5 py-1", status === s ? "bg-ink text-ivory" : "text-muted-foreground hover:bg-ivory")}>{s ? printStatusLabel[s] : "Todos"}</Link>
             ))}
           </div>
         } />
@@ -66,8 +66,8 @@ export default async function PrintsPage({ searchParams }: { searchParams: Promi
             <tbody>
               {jobs.map((j) => (
                 <tr key={j.id}>
-                  <Td className="text-xs">{formatDateTime(j.createdAt, tz)}{j.printedAt && <span className="block text-muted">impresso {formatDateTime(j.printedAt, tz)}</span>}</Td>
-                  <Td>{j.appointment ? <Link href={`/admin/agendamentos/${j.appointment.id}`} className="font-mono text-xs font-semibold hover:text-gold-dark">{j.appointment.code}</Link> : "—"}</Td>
+                  <Td className="text-xs">{formatDateTime(j.createdAt, tz)}{j.printedAt && <span className="block text-muted-foreground">impresso {formatDateTime(j.printedAt, tz)}</span>}</Td>
+                  <Td>{j.appointment ? <Link href={`/admin/agendamentos/${j.appointment.id}`} className="font-mono text-xs font-semibold hover:text-gold-dark">{j.appointment.code}</Link> : j.rentalId ? <Link href={`/admin/locacoes/${j.rentalId}`} className="text-xs font-semibold hover:text-gold-dark">Locação</Link> : "—"}</Td>
                   <Td className="text-sm">{j.appointment?.customer.name ?? "—"}</Td>
                   <Td><PrintStatusBadge status={j.status} /></Td>
                   <Td className="tabular-nums">{j.attempts}</Td>

@@ -19,6 +19,17 @@ import { maskPhone } from "../src/utils/phone";
 import { slugify } from "../src/utils/text";
 
 const db = new PrismaClient();
+
+/** Ocasiões sugeridas a partir do nome/categoria (a equipe ajusta no painel). */
+function suggestOccasions(name: string, categorySlug: string): string[] {
+  const n = name.toLowerCase();
+  if (categorySlug === "becas") return ["formatura"];
+  if (n.startsWith("smoking")) return ["gala", "casamento", "formatura"];
+  if (["camisas", "gravatas", "acessorios"].includes(categorySlug)) return ["casamento", "formatura", "padrinhos", "gala", "social"];
+  if (/areia|bege|kraft|linho|summer|terracota|céu/.test(n)) return ["casamento", "padrinhos", "social"];
+  if (n.startsWith("blazer")) return ["social", "formatura"];
+  return ["casamento", "formatura", "padrinhos", "social"];
+}
 const TZ = "America/Fortaleza";
 
 // Gerador pseudoaleatório determinístico: o seed produz sempre os mesmos dados
@@ -140,6 +151,7 @@ async function main() {
             ? `${t.name}: elegância de gala para casamentos, formaturas e eventos noturnos.`
             : `${t.name} para casamentos, formaturas, batizados e eventos sociais. Acompanha paletó e calça; camisa, gravata e acessórios podem ser combinados no atendimento.`,
         model: t.model,
+        occasions: suggestOccasions(t.name, "ternos"),
         colors: [t.color],
         sizes,
         details: "Ajustes de barra e manga realizados na prova, conforme disponibilidade.",
@@ -167,7 +179,7 @@ async function main() {
   ];
   for (const [i, e] of extras.entries()) {
     const p = await db.product.create({
-      data: { slug: slugify(e.name), name: e.name, categoryId: cat[e.cat].id, description: e.desc, model: e.model, colors: [e.color], sizes: e.sizes, sortOrder: 100 + i, featured: e.name === "Beca Preta" },
+      data: { slug: slugify(e.name), name: e.name, categoryId: cat[e.cat].id, occasions: suggestOccasions(e.name, e.cat), description: e.desc, model: e.model, colors: [e.color], sizes: e.sizes, sortOrder: 100 + i, featured: e.name === "Beca Preta" },
     });
     seeded.push({ id: p.id, name: p.name, categoryName: cat[e.cat].name, color: e.color, sizes: e.sizes });
   }

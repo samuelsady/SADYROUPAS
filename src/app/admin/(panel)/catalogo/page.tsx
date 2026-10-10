@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Image from "@/components/ui/sady-image";
 import Link from "next/link";
 import { Plus, Star } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
@@ -43,7 +43,7 @@ export default async function AdminCatalogPage({ searchParams }: { searchParams:
                         {p.images[0] && <Image src={p.images[0].url} alt="" fill sizes="36px" className="object-cover" />}
                       </div>
                     </Td>
-                    <Td><Link href={`/admin/catalogo/${p.id}`} className="flex items-center gap-1.5 font-semibold hover:text-gold-dark">{p.featured && <Star className="h-3.5 w-3.5 fill-gold text-gold" />}{p.name}</Link><span className="text-xs text-muted">{p.model ?? ""}</span></Td>
+                    <Td><Link href={`/admin/catalogo/${p.id}`} className="flex items-center gap-1.5 font-semibold hover:text-gold-dark">{p.featured && <Star className="h-3.5 w-3.5 fill-gold text-gold" />}{p.name}</Link><span className="text-xs text-muted-foreground">{p.model ?? ""}</span></Td>
                     <Td className="text-xs">{p.category.name}</Td>
                     <Td className="text-xs">{p.colors.join(", ")}</Td>
                     <Td className="max-w-40 text-xs">{p.sizes.join(", ")}</Td>
@@ -59,7 +59,7 @@ export default async function AdminCatalogPage({ searchParams }: { searchParams:
           <CardHeader title="Categorias" />
           <ul className="divide-y divide-line text-sm">
             {categories.map((c) => (
-              <li key={c.id} className="flex justify-between px-5 py-2.5"><span>{c.name}</span><span className="text-muted">{c._count.products}</span></li>
+              <li key={c.id} className="flex justify-between px-5 py-2.5"><span>{c.name}</span><span className="text-muted-foreground">{c._count.products}</span></li>
             ))}
           </ul>
           <div className="border-t border-line p-5">

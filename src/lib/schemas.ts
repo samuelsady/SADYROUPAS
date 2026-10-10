@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isDateKey, isTimeKey } from "@/utils/datetime";
 import { normalizePhone } from "@/utils/phone";
+import { OCCASIONS } from "./occasions";
 
 /** Validações compartilhadas entre frontend e backend (o backend SEMPRE revalida). */
 
@@ -130,6 +131,7 @@ export const productSchema = z.object({
   model: optionalText(80),
   colors: csv,
   sizes: csv,
+  occasions: z.array(z.enum(OCCASIONS.map((o) => o.slug) as [string, ...string[]])).max(10).default([]),
   details: optionalText(4000),
   featured: z.boolean().default(false),
   active: z.boolean().default(true),

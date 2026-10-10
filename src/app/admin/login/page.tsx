@@ -23,11 +23,11 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             <Wordmark className="text-2xl" />
           </div>
           <h1 className="display text-3xl">Entrar</h1>
-          <p className="mt-1 text-sm text-muted">Use seu e-mail e senha da equipe.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Use seu e-mail e senha da equipe.</p>
           <div className="mt-8">
             <LoginForm next={next} />
           </div>
-          <Link href="/" className="mt-10 block text-center text-xs text-muted hover:text-ink">← Voltar ao site</Link>
+          <Link href="/" className="mt-10 block text-center text-xs text-muted-foreground hover:text-ink">← Voltar ao site</Link>
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ import { formatPhone } from "@/utils/phone";
 type Option = { id: string; name: string };
 type CustomerLite = { id: string; name: string; whatsapp: string; email: string | null };
 
-function CustomerPicker({ initial }: { initial?: CustomerLite | null }) {
+export function CustomerPicker({ initial }: { initial?: CustomerLite | null }) {
   const [mode, setMode] = useState<"search" | "new">("search");
   const [selected, setSelected] = useState<CustomerLite | null>(initial ?? null);
   const [q, setQ] = useState("");
@@ -48,9 +48,9 @@ function CustomerPicker({ initial }: { initial?: CustomerLite | null }) {
         <input type="hidden" name="customerId" value={selected.id} />
         <div>
           <p className="font-semibold">{selected.name}</p>
-          <p className="text-xs text-muted">{formatPhone(selected.whatsapp)}{selected.email ? ` · ${selected.email}` : ""}</p>
+          <p className="text-xs text-muted-foreground">{formatPhone(selected.whatsapp)}{selected.email ? ` · ${selected.email}` : ""}</p>
         </div>
-        <button type="button" onClick={() => setSelected(null)} className="rounded p-1 text-muted hover:text-ink" aria-label="Trocar cliente"><X className="h-4 w-4" /></button>
+        <button type="button" onClick={() => setSelected(null)} className="rounded p-1 text-muted-foreground hover:text-ink" aria-label="Trocar cliente"><X className="h-4 w-4" /></button>
       </div>
     );
   }
@@ -58,28 +58,28 @@ function CustomerPicker({ initial }: { initial?: CustomerLite | null }) {
   return (
     <div className="space-y-3">
       <div className="flex rounded-md border border-line p-0.5 text-xs font-semibold">
-        <button type="button" onClick={() => setMode("search")} className={cn("flex-1 rounded px-3 py-2", mode === "search" ? "bg-ink text-ivory" : "text-muted")}>Cliente existente</button>
-        <button type="button" onClick={() => setMode("new")} className={cn("flex-1 rounded px-3 py-2", mode === "new" ? "bg-ink text-ivory" : "text-muted")}>Novo cliente</button>
+        <button type="button" onClick={() => setMode("search")} className={cn("flex-1 rounded px-3 py-2", mode === "search" ? "bg-ink text-ivory" : "text-muted-foreground")}>Cliente existente</button>
+        <button type="button" onClick={() => setMode("new")} className={cn("flex-1 rounded px-3 py-2", mode === "new" ? "bg-ink text-ivory" : "text-muted-foreground")}>Novo cliente</button>
       </div>
       {mode === "search" ? (
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted" />
+          <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nome ou WhatsApp…" className="pl-9" aria-label="Buscar cliente" />
-          {loading && <Loader2 className="absolute right-3 top-3.5 h-4 w-4 animate-spin text-muted" />}
+          {loading && <Loader2 className="absolute right-3 top-3.5 h-4 w-4 animate-spin text-muted-foreground" />}
           {searching && results.length > 0 && (
             <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border border-line bg-white shadow-lg">
               {(searching ? results : []).map((c) => (
                 <li key={c.id}>
                   <button type="button" onClick={() => setSelected(c)} className="flex w-full justify-between px-3 py-2.5 text-left text-sm hover:bg-ivory">
                     <span className="font-medium">{c.name}</span>
-                    <span className="text-xs text-muted">{formatPhone(c.whatsapp)}</span>
+                    <span className="text-xs text-muted-foreground">{formatPhone(c.whatsapp)}</span>
                   </button>
                 </li>
               ))}
             </ul>
           )}
           {q.trim().length >= 2 && !loading && results.length === 0 && (
-            <p className="mt-2 text-xs text-muted">Nenhum cliente encontrado. <button type="button" className="font-semibold text-gold-dark" onClick={() => setMode("new")}>Cadastrar novo</button></p>
+            <p className="mt-2 text-xs text-muted-foreground">Nenhum cliente encontrado. <button type="button" className="font-semibold text-gold-dark" onClick={() => setMode("new")}>Cadastrar novo</button></p>
           )}
         </div>
       ) : (
@@ -87,7 +87,7 @@ function CustomerPicker({ initial }: { initial?: CustomerLite | null }) {
           <Field label="Nome completo" required className="sm:col-span-2"><Input name="name" required minLength={3} maxLength={120} /></Field>
           <Field label="WhatsApp" required><Input name="whatsapp" type="tel" required placeholder="(86) 99999-0000" /></Field>
           <Field label="E-mail"><Input name="email" type="email" /></Field>
-          <p className="flex items-center gap-1.5 text-xs text-muted sm:col-span-2"><UserPlus className="h-3.5 w-3.5" /> Se o WhatsApp já existir, o cadastro é atualizado.</p>
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground sm:col-span-2"><UserPlus className="h-3.5 w-3.5" /> Se o WhatsApp já existir, o cadastro é atualizado.</p>
         </div>
       )}
     </div>
@@ -142,16 +142,16 @@ export function AppointmentForm({
           <input type="hidden" name="time" value={time} />
           <p className="mb-2 text-[13px] font-semibold text-ink/80">Horário <span className="text-gold-dark">*</span></p>
           {!date ? (
-            <p className="text-sm text-muted">Escolha uma data para ver os horários.</p>
+            <p className="text-sm text-muted-foreground">Escolha uma data para ver os horários.</p>
           ) : slots.loading ? (
-            <p className="flex items-center gap-2 text-sm text-muted"><Loader2 className="h-4 w-4 animate-spin" /> Carregando horários…</p>
+            <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando horários…</p>
           ) : slotList.length === 0 ? (
-            <p className="text-sm text-muted">Loja fechada ou sem horários nesta data.</p>
+            <p className="text-sm text-muted-foreground">Loja fechada ou sem horários nesta data.</p>
           ) : (
             <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-8">
               {slotList.map((s) => (
                 <button key={s.time} type="button" disabled={!s.available} onClick={() => setTime(s.time)} aria-pressed={time === s.time}
-                  className={cn("h-10 rounded-md border font-mono text-xs font-semibold", time === s.time ? "border-ink bg-ink text-ivory" : s.available ? "border-line bg-white hover:border-ink/40" : "border-transparent bg-sand/50 text-muted/40 line-through")}>
+                  className={cn("h-10 rounded-md border font-mono text-xs font-semibold", time === s.time ? "border-ink bg-ink text-ivory" : s.available ? "border-line bg-white hover:border-ink/40" : "border-transparent bg-sand/50 text-muted-foreground/40 line-through")}>
                   {s.time}
                 </button>
               ))}

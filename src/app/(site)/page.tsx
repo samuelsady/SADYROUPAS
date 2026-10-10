@@ -1,178 +1,200 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CalendarCheck, Shirt, Sparkles, Ruler, ShoppingBag, RotateCcw } from "lucide-react";
-import { LinkButton } from "@/components/ui/button";
-import { ProductCard } from "@/components/site/product-card";
+import { ArrowRight, ArrowUpRight, CalendarCheck, Ruler, Shirt, ShoppingBag, Sparkles, RotateCcw } from "lucide-react";
+import { HeroSlideshow, type HeroSlide } from "@/components/site/home/hero-slideshow";
+import { MarqueeBand } from "@/components/site/home/marquee-band";
+import { ProductRail } from "@/components/site/home/product-rail";
+import Image from "@/components/ui/sady-image";
 import { Reveal } from "@/components/ui/reveal";
+import { OCCASIONS } from "@/lib/occasions";
+import { cn } from "@/lib/utils";
 import { CatalogService } from "@/services/catalog.service";
 
-const STEPS = [
-  { icon: Shirt, title: "Escolha", text: "Navegue pelo catálogo e separe os modelos que combinam com o seu evento." },
-  { icon: CalendarCheck, title: "Agende", text: "Marque um horário online, sem precisar criar conta." },
-  { icon: Ruler, title: "Experimente", text: "Prove os trajes com a orientação da nossa equipe." },
-  { icon: Sparkles, title: "Reserve", text: "Garanta as peças escolhidas para a data do seu evento." },
-  { icon: ShoppingBag, title: "Retire", text: "Retire o traje pronto e conferido, perto da data." },
-  { icon: RotateCcw, title: "Devolva", text: "Depois do evento, devolva na data combinada." },
+const SLIDES: HeroSlide[] = [
+  { image: "/catalogo/smoking-tradicional-1-bota-o-foto-1.jpg", eyebrow: "Gala & noite", caption: "Smoking Tradicional 1 Botão", href: "/catalogo/smoking-tradicional-1-botao", position: "50% 15%" },
+  { image: "/catalogo/azul-dior-foto-1.jpg", eyebrow: "Mais procurado", caption: "Terno Azul Dior", href: "/catalogo/terno-azul-dior", position: "50% 15%" },
+  { image: "/catalogo/dior-bege-foto-1.jpg", eyebrow: "Casamento de dia", caption: "Terno Dior Bege", href: "/catalogo/terno-dior-bege", position: "50% 15%" },
+  { image: "/catalogo/terracota-foto-1.jpg", eyebrow: "Para ousar", caption: "Terno Terracota", href: "/catalogo/terno-terracota", position: "50% 15%" },
 ];
 
-// Só usa foto quando ela representa a categoria; as demais recebem um bloco tipográfico
-const CATEGORY_IMAGES: Record<string, string> = {
-  ternos: "/catalogo/azul-dior-foto-1.jpg",
-  camisas: "/catalogo/blazer-com-calc-a-sarja-1-foto-1.jpg",
-  gravatas: "/catalogo/bonner-3-foto-1.jpg",
+const OCCASION_IMAGES: Record<string, string> = {
+  casamento: "/catalogo/dior-bege-foto-1.jpg",
+  formatura: "/catalogo/preto-resumo-slim-foto-1.jpg",
+  padrinhos: "/catalogo/azul-dama-foto-1.jpg",
+  gala: "/catalogo/smoking-summer-preto-foto-1.jpg",
+  social: "/catalogo/blazer-com-calc-a-sarja-1-foto-1.jpg",
 };
 
+const STEPS = [
+  { icon: Shirt, title: "Escolha", text: "Navegue pelo catálogo e monte sua lista de provas." },
+  { icon: CalendarCheck, title: "Agende", text: "Marque um horário online, sem criar conta." },
+  { icon: Ruler, title: "Experimente", text: "Prove com orientação da nossa equipe." },
+  { icon: Sparkles, title: "Reserve", text: "Garanta as peças para a data do evento." },
+  { icon: ShoppingBag, title: "Retire", text: "Traje pronto e conferido, perto da data." },
+  { icon: RotateCcw, title: "Devolva", text: "Depois da festa, devolva na data combinada." },
+];
+
 export default async function HomePage() {
-  const [categories, featured] = await Promise.all([CatalogService.categories(), CatalogService.featured(8)]);
+  const [featured, occasionCounts, categories] = await Promise.all([CatalogService.featured(10), CatalogService.occasionCounts(), CatalogService.categories()]);
+  const occasions = OCCASIONS.filter((o) => occasionCounts[o.slug]);
+  const totalProducts = categories.reduce((s, c) => s + c._count.products, 0);
 
   return (
     <>
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-ink text-ivory">
-        <div className="container-site grid min-h-[calc(100svh-4rem)] items-center gap-10 py-14 sm:min-h-[calc(100svh-5rem)] lg:grid-cols-[1.05fr_1fr] lg:py-20">
-          <div className="relative z-10 max-w-xl animate-fade-up">
-            <p className="eyebrow">Aluguel de trajes · Desde 2008</p>
-            <h1 className="display mt-5 text-[2.9rem] leading-[1.02] sm:text-6xl lg:text-7xl">
-              Elegância para momentos que <em className="font-normal text-gold-light">merecem</em> ser lembrados.
-            </h1>
-            <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ivory/70 sm:text-base">
-              Ternos, smokings, becas, camisas e acessórios com atendimento personalizado em Teresina. Escolha o seu traje e agende um horário com a nossa equipe.
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <LinkButton href="/agendamento" variant="gold" size="xl">
-                Agendar atendimento
-              </LinkButton>
-              <LinkButton href="/catalogo" variant="outline-light" size="xl">
-                Ver catálogo <ArrowRight className="h-4 w-4" />
-              </LinkButton>
-            </div>
-          </div>
-          <div className="relative hidden h-full min-h-[520px] lg:block" aria-hidden>
-            <div className="absolute right-0 top-0 h-[78%] w-[62%] overflow-hidden rounded-t-[999px]">
-              <Image src="/catalogo/smoking-tradicional-1-bota-o-foto-1.jpg" alt="" fill priority sizes="30vw" className="hero-zoom object-cover" />
-            </div>
-            <div className="absolute bottom-0 left-0 h-[62%] w-[48%] overflow-hidden rounded-lg border-[10px] border-ink animate-fade-up [animation-delay:350ms]">
-              <Image src="/catalogo/azul-dior-foto-1.jpg" alt="" fill priority sizes="25vw" className="object-cover" />
-            </div>
-            <div className="absolute bottom-10 right-6 rounded-md border border-gold/30 bg-ink/80 px-5 py-4 backdrop-blur animate-fade-up [animation-delay:700ms]">
-              <p className="font-display text-3xl text-gold-light">Desde 2008</p>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-ivory/60">vestindo momentos especiais</p>
-            </div>
-          </div>
-          <div className="relative -mx-5 aspect-[4/3] overflow-hidden sm:mx-0 sm:rounded-lg lg:hidden">
-            <Image src="/catalogo/azul-dior-foto-1.jpg" alt="Terno Azul Dior da Sady Roupas" fill priority sizes="100vw" className="object-cover object-top" />
-          </div>
-        </div>
-      </section>
+      <HeroSlideshow slides={SLIDES} />
 
-      {/* CATEGORIAS */}
-      <section className="container-site py-20 sm:py-28">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <p className="eyebrow">Categorias</p>
-            <h2 className="display mt-3 text-4xl sm:text-5xl">Tudo para o seu traje</h2>
-          </div>
-          <Link href="/catalogo" className="text-sm font-semibold text-gold-dark hover:underline">
-            Ver catálogo completo →
-          </Link>
-        </div>
-        <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
-          {categories.map((c, i) => {
-            const img = CATEGORY_IMAGES[c.slug];
-            return (
-              <Reveal key={c.id} delay={(i % 3) * 90}>
-              <Link href={`/catalogo?categoria=${c.slug}`} className="group relative block aspect-[4/5] overflow-hidden rounded-lg bg-ink sm:aspect-[4/3]">
-                {img ? (
-                  <Image src={img} alt="" fill sizes="(min-width: 1024px) 33vw, 50vw" className="object-cover object-top opacity-60 transition duration-700 group-hover:scale-105 group-hover:opacity-45" />
-                ) : (
-                  <span className="absolute inset-0 flex items-center justify-center font-display text-[7rem] leading-none text-gold/15 transition duration-700 group-hover:text-gold/25" aria-hidden>
-                    {c.name.charAt(0)}
-                  </span>
+      <MarqueeBand words={["Ternos", "Smokings", "Becas", "Camisas", "Gravatas", "Acessórios"]} />
+
+      {/* OCASIÕES — coleções */}
+      <section className="aura-light py-24 sm:py-32">
+        <div className="container-site">
+          <Reveal className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div>
+              <p className="eyebrow">Coleções</p>
+              <h2 className="display mt-4 text-5xl leading-[1] sm:text-7xl">
+                Para cada <em className="font-normal text-gold-dark">ocasião</em>
+              </h2>
+            </div>
+            <p className="max-w-sm text-muted-foreground">Do casamento ao baile de formatura: escolha pelo momento e encontre o traje certo em poucos cliques.</p>
+          </Reveal>
+          <div className="mt-14 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-6 lg:grid-rows-2">
+            {occasions.map((o, i) => (
+              <Reveal
+                key={o.slug}
+                delay={i * 90}
+                className={cn(
+                  i === 0 ? "col-span-2 row-span-2 lg:col-span-3" : i === 1 ? "col-span-1 lg:col-span-3" : "col-span-1 lg:col-span-1",
+                  i >= 2 && occasions.length === 5 && "lg:col-span-1",
+                  i === 4 && "col-span-2 lg:col-span-1",
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
-                  <h3 className="display text-2xl text-ivory sm:text-3xl">{c.name}</h3>
-                  <p className="mt-1 text-xs text-ivory/60">{c._count.products} {c._count.products === 1 ? "item" : "itens"}</p>
-                </div>
-              </Link>
+              >
+                <Link href={`/catalogo?ocasiao=${o.slug}`} className={cn("group relative block h-full overflow-hidden rounded-[2px] bg-ink", i === 0 ? "aspect-[4/5] lg:aspect-auto" : "aspect-[3/4] lg:aspect-auto lg:min-h-[19rem]")}>
+                  <Image src={OCCASION_IMAGES[o.slug] ?? "/catalogo/areia-foto-1.jpg"} alt="" fill sizes={i === 0 ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, 50vw"} className={cn("object-cover opacity-85 transition duration-[1400ms] ease-[var(--ease-elegant)] group-hover:scale-105 group-hover:opacity-70", i === 1 ? "object-[50%_38%]" : "object-top")} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/10 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5 sm:p-7">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-light">{occasionCounts[o.slug]} trajes</p>
+                      <h3 className={cn("display mt-1 text-ivory", i === 0 ? "text-4xl sm:text-6xl" : "text-2xl sm:text-3xl")}>{o.name}</h3>
+                      {i === 0 && <p className="mt-2 hidden max-w-xs text-sm text-ivory/70 sm:block">{o.description}</p>}
+                    </div>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-ivory/30 text-ivory transition duration-500 group-hover:rotate-45 group-hover:border-gold-light group-hover:bg-gold-light group-hover:text-ink">
+                      <ArrowUpRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </Link>
               </Reveal>
-            );
-          })}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* DESTAQUES */}
       {featured.length > 0 && (
-        <section className="bg-ivory py-20 sm:py-28">
+        <section className="overflow-hidden bg-paper py-24 sm:py-32">
           <div className="container-site">
-            <div className="text-center">
+            <Reveal className="mb-12 max-w-2xl">
               <p className="eyebrow">Destaques</p>
-              <h2 className="display mt-3 text-4xl sm:text-5xl">Os mais procurados</h2>
-              <div className="gold-rule mx-auto mt-6" />
-            </div>
-            <div className="mt-12 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-4">
-              {featured.map((p, i) => (
-                <Reveal key={p.id} delay={(i % 4) * 80}>
-                  <ProductCard product={p} />
-                </Reveal>
-              ))}
-            </div>
-            <div className="mt-14 text-center">
-              <LinkButton href="/catalogo" variant="outline" size="lg">
-                Explorar o catálogo
-              </LinkButton>
-            </div>
+              <h2 className="display mt-4 text-5xl leading-[1] sm:text-7xl">Os mais procurados</h2>
+            </Reveal>
+            <ProductRail products={featured} />
+            <Reveal className="mt-12">
+              <Link href="/catalogo" className="group inline-flex items-center gap-3 text-sm font-bold uppercase tracking-[0.2em] text-ink">
+                <span className="link-draw">Ver os {totalProducts} trajes do catálogo</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </Reveal>
           </div>
         </section>
       )}
 
-      {/* COMO FUNCIONA */}
-      <section className="container-site py-20 sm:py-28">
-        <div className="max-w-2xl">
-          <p className="eyebrow">Como funciona</p>
-          <h2 className="display mt-3 text-4xl sm:text-5xl">Do primeiro contato à devolução, sem complicação.</h2>
-        </div>
-        <ol className="mt-14 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
-          {STEPS.map((s, i) => (
-            <Reveal as="li" key={s.title} delay={(i % 3) * 100} className="bg-paper p-7 sm:p-9">
-              <div className="flex items-center justify-between">
-                <s.icon className="h-6 w-6 text-gold" strokeWidth={1.5} />
-                <span className="font-display text-4xl text-ink/10">{String(i + 1).padStart(2, "0")}</span>
-              </div>
-              <h3 className="display mt-6 text-2xl">{s.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{s.text}</p>
+      {/* EDITORIAL */}
+      <section className="aura grain text-ivory">
+        <div className="container-site grid items-center gap-14 py-24 sm:py-32 lg:grid-cols-2 lg:gap-20">
+          <div className="relative">
+            <Reveal className="reveal-clip relative aspect-[4/5] overflow-hidden rounded-[2px]">
+              <Image src="/catalogo/panama-azul-marinho-foto-1.jpg" alt="Terno Panamá Azul Marinho" fill sizes="(min-width: 1024px) 45vw, 100vw" className="object-cover object-top" />
             </Reveal>
-          ))}
-        </ol>
+            <Reveal delay={250} className="absolute -bottom-8 -right-2 w-2/5 overflow-hidden rounded-[2px] border-[6px] border-ink shadow-2xl sm:-right-8">
+              <div className="relative aspect-[3/4]">
+                <Image src="/catalogo/panama-azul-marinho-foto-2.jpg" alt="" fill sizes="20vw" className="object-cover object-top" />
+              </div>
+            </Reveal>
+          </div>
+          <Reveal delay={150}>
+            <p className="eyebrow">A arte de vestir bem</p>
+            <h2 className="display mt-5 text-5xl leading-[1.02] sm:text-6xl">
+              Corte certo, caimento perfeito, <em className="text-gold-shine font-normal">atenção a cada detalhe.</em>
+            </h2>
+            <p className="mt-7 max-w-lg leading-relaxed text-ivory/70">
+              Na Sady Roupas o traje é escolhido com calma, provado com orientação e ajustado para você. Ternos, smokings, becas e acessórios para casamentos, formaturas e todos os momentos que merecem ser lembrados.
+            </p>
+            <dl className="mt-10 grid grid-cols-3 gap-6 border-t border-white/10 pt-8">
+              <div><dt className="text-[10px] uppercase tracking-[0.25em] text-ivory/45">Desde</dt><dd className="display mt-1 text-4xl text-gold-light">2008</dd></div>
+              <div><dt className="text-[10px] uppercase tracking-[0.25em] text-ivory/45">Trajes</dt><dd className="display mt-1 text-4xl text-gold-light">{totalProducts}</dd></div>
+              <div><dt className="text-[10px] uppercase tracking-[0.25em] text-ivory/45">Atendimento</dt><dd className="display mt-1 text-4xl text-gold-light">1:1</dd></div>
+            </dl>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* COMO FUNCIONA */}
+      <section className="bg-paper py-24 sm:py-32">
+        <div className="container-site">
+          <Reveal className="grid gap-6 lg:grid-cols-2 lg:items-end">
+            <div>
+              <p className="eyebrow">Como funciona</p>
+              <h2 className="display mt-4 text-5xl leading-[1] sm:text-6xl">Do primeiro clique à devolução.</h2>
+            </div>
+            <p className="max-w-md text-muted-foreground lg:justify-self-end">Um processo simples, pensado para você chegar ao evento tranquilo e bem vestido.</p>
+          </Reveal>
+          <ol className="relative mt-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-6 lg:gap-6">
+            <div className="hairline-gold absolute left-0 right-0 top-7 hidden lg:block" aria-hidden />
+            {STEPS.map((s, i) => (
+              <Reveal as="li" key={s.title} delay={i * 110} className="relative">
+                <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-full border border-gold/40 bg-paper text-gold-dark shadow-[0_0_0_6px_var(--color-paper)]">
+                  <s.icon className="h-5 w-5" strokeWidth={1.5} />
+                </div>
+                <p className="mt-6 font-display text-sm text-gold-dark">{String(i + 1).padStart(2, "0")}</p>
+                <h3 className="display mt-1 text-3xl">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.text}</p>
+              </Reveal>
+            ))}
+          </ol>
+        </div>
       </section>
 
       {/* SOBRE */}
-      <section className="bg-ink text-ivory">
-        <div className="container-site grid items-center gap-12 py-20 sm:py-28 lg:grid-cols-2">
-          <Reveal className="relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-lg">
+      <section className="aura-light py-24 sm:py-32">
+        <div className="container-site grid items-center gap-14 lg:grid-cols-[1fr_1.1fr] lg:gap-24">
+          <Reveal className="reveal-clip relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2px] [--cover:var(--color-ivory)]">
             <Image src="/brand/ana-claudia-sady.jpg" alt="Ana Claudia Sady, proprietária da Sady Roupas, ao lado de manequins com ternos da loja" fill loading="eager" sizes="(min-width: 1024px) 40vw, 90vw" className="object-cover" />
           </Reveal>
-          <Reveal delay={150} className="max-w-lg">
+          <Reveal delay={150} className="max-w-xl">
             <p className="eyebrow">Quem está por trás da Sady Roupas</p>
-            <h2 className="display mt-4 text-4xl sm:text-5xl">Ana Claudia Sady</h2>
-            <p className="mt-1 text-sm uppercase tracking-[0.2em] text-gold-light">Proprietária</p>
-            <p className="mt-7 leading-relaxed text-ivory/70">
-              Ana Claudia Sady está à frente da Sady Roupas com dedicação e atenção a cada detalhe. O objetivo é oferecer aos clientes não apenas um traje, mas uma experiência de atendimento acolhedora, personalizada e marcada pela elegância.
+            <h2 className="display mt-5 text-5xl sm:text-7xl">Ana Claudia Sady</h2>
+            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.3em] text-gold-dark">Proprietária</p>
+            <div className="gold-rule my-8" />
+            <p className="font-display text-2xl leading-snug text-ink/85 sm:text-3xl">
+              “Mais do que um traje, uma experiência de atendimento acolhedora, personalizada e marcada pela elegância.”
             </p>
+            <p className="mt-6 leading-relaxed text-muted-foreground">Ana Claudia Sady está à frente da Sady Roupas com dedicação e atenção a cada detalhe.</p>
           </Reveal>
         </div>
       </section>
 
       {/* CTA FINAL */}
-      <section className="container-site py-24 text-center sm:py-32">
-        <Reveal>
-        <p className="eyebrow">Seu evento merece</p>
-        <h2 className="display mx-auto mt-4 max-w-3xl text-4xl sm:text-6xl">Vamos encontrar o traje ideal para você?</h2>
-        <p className="mx-auto mt-5 max-w-md text-muted">Agende um horário e venha experimentar com calma, com quem entende de trajes sociais.</p>
-        <LinkButton href="/agendamento" variant="primary" size="xl" className="mt-10">
-          Agende seu atendimento
-        </LinkButton>
-        </Reveal>
+      <section className="grain relative isolate overflow-hidden bg-ink text-ivory">
+        <Image src="/catalogo/smoking-azul-summer-foto-1.jpg" alt="" fill sizes="100vw" className="-z-10 object-cover object-[50%_20%] opacity-45" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink via-ink/70 to-ink/20" />
+        <div className="container-site py-28 sm:py-40">
+          <Reveal className="max-w-2xl">
+            <p className="eyebrow">Seu evento merece</p>
+            <h2 className="display mt-5 text-5xl leading-[1] sm:text-7xl">Vamos encontrar o traje ideal para você?</h2>
+            <p className="mt-6 max-w-md text-ivory/70">Agende um horário e venha experimentar com calma, com quem entende de trajes sociais.</p>
+            <Link href="/agendamento" className="btn-shine mt-10 inline-flex h-14 items-center justify-center rounded-full bg-gold px-9 text-[13px] font-bold uppercase tracking-[0.18em] text-ink transition hover:bg-gold-light">
+              Agende seu atendimento
+            </Link>
+          </Reveal>
+        </div>
       </section>
     </>
   );
