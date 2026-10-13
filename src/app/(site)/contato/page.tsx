@@ -37,22 +37,22 @@ export default async function ContactPage() {
       <section className="container-site grid gap-10 py-14 lg:grid-cols-[1fr_1.2fr]">
         <div className="space-y-6">
           {settings.address && (
-            <div className="flex gap-4"><MapPin className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h2 className="font-semibold">Endereço</h2><p className="text-muted">{settings.address}</p>{directions && <a href={directions} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-sm font-semibold text-gold-dark hover:underline">Como chegar →</a>}</div></div>
+            <div className="flex gap-4"><MapPin className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h2 className="font-semibold">Endereço</h2><p className="text-muted-foreground">{settings.address}</p>{directions && <a href={directions} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-sm font-semibold text-gold-dark hover:underline">Como chegar →</a>}</div></div>
           )}
           {settings.phone && (
-            <div className="flex gap-4"><Phone className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h2 className="font-semibold">Telefone</h2><a href={`tel:+${settings.phone}`} className="text-muted hover:text-ink">{formatPhone(settings.phone)}</a></div></div>
+            <div className="flex gap-4"><Phone className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h2 className="font-semibold">Telefone</h2><a href={`tel:+${settings.phone}`} className="text-muted-foreground hover:text-ink">{formatPhone(settings.phone)}</a></div></div>
           )}
           {settings.whatsapp && wa && (
-            <div className="flex gap-4"><MessageCircle className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h2 className="font-semibold">WhatsApp</h2><a href={wa} target="_blank" rel="noopener noreferrer" className="text-muted hover:text-ink">{formatPhone(settings.whatsapp)}</a></div></div>
+            <div className="flex gap-4"><MessageCircle className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h2 className="font-semibold">WhatsApp</h2><a href={wa} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-ink">{formatPhone(settings.whatsapp)}</a></div></div>
           )}
           {settings.instagram && (
-            <div className="flex gap-4"><InstagramIcon className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h2 className="font-semibold">Instagram</h2><a href={`https://instagram.com/${settings.instagram}`} target="_blank" rel="noopener noreferrer" className="text-muted hover:text-ink">@{settings.instagram}</a></div></div>
+            <div className="flex gap-4"><InstagramIcon className="mt-1 h-5 w-5 shrink-0 text-gold" /><div><h2 className="font-semibold">Instagram</h2><a href={`https://instagram.com/${settings.instagram}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-ink">@{settings.instagram}</a></div></div>
           )}
           <div className="flex gap-4">
             <Clock className="mt-1 h-5 w-5 shrink-0 text-gold" />
             <div className="flex-1">
               <h2 className="font-semibold">Horários</h2>
-              <ul className="mt-1 space-y-1 text-sm text-muted">
+              <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
                 {hoursSummary(hours).map((g) => <li key={g.days} className="flex justify-between gap-4"><span>{g.days}</span><span>{g.label}</span></li>)}
               </ul>
             </div>
@@ -61,7 +61,7 @@ export default async function ContactPage() {
         {settings.mapsEmbedUrl?.startsWith("https://www.google.com/maps/embed") ? (
           <iframe src={settings.mapsEmbedUrl} title="Mapa — Sady Roupas" className="h-80 w-full rounded-xl border border-line lg:h-full lg:min-h-96" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
         ) : (
-          <div className="flex h-80 items-center justify-center rounded-xl bg-sand text-sm text-muted">Mapa não configurado</div>
+          <div className="flex h-80 items-center justify-center rounded-xl bg-sand text-sm text-muted-foreground">Mapa não configurado</div>
         )}
       </section>
 
@@ -72,7 +72,7 @@ export default async function ContactPage() {
             {FAQ.map(([q, a]) => (
               <details key={q} className="group py-4">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">{q}<span className="text-gold transition group-open:rotate-45">+</span></summary>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{a}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a}</p>
               </details>
             ))}
           </div>

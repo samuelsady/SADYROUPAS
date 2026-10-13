@@ -157,13 +157,34 @@ O link da confirmação, que também vai na mensagem de WhatsApp pela variável 
 - **Leitor de QR Code** (`/admin/estoque/leitor`): pela câmera do celular (Chrome/Android), por um leitor USB ou digitando o código. Abre a peça em **modo balcão**, com botões grandes para mudar o status em um toque.
 - **Grade tamanho × status** em cada produto e alerta de **tamanhos esgotados** no dashboard.
 
+## Locações (baixa automática no estoque)
+
+Menu **Locações** no painel (`/admin/locacoes`), com abas Ativas, Retiradas próximas, Devoluções próximas, Atrasadas e Todas.
+
+1. **Nova locação**: direto pelo botão ou, na ficha de um agendamento, em **Criar locação** (cliente e peças separadas já vêm preenchidos). Informe datas, **retirada na loja ou entrega** (endereço e horário), peças, valores e sinal pago.
+2. Ao salvar, as peças ficam **RESERVADAS** (o banco impede a mesma peça em duas locações com datas sobrepostas, incluindo os dias de lavanderia), o comprovante vai para a fila de impressão e o cliente recebe a confirmação no WhatsApp.
+3. **Retirada/entrega confirmada** → baixa automática: as peças passam para **ALUGADO**, com o nome do cliente na localização e no histórico.
+4. **Devolução**: conferência peça a peça (recebida, para lavar, com avaria, não devolvida). Cada peça volta para DISPONÍVEL, LAVANDERIA, MANUTENÇÃO ou PERDIDO; atraso gera multa conforme a política configurada.
+5. Atrasos são marcados pelo cron (`/api/cron/notifications`), que avisa o cliente uma única vez e cria um alerta no painel.
+
+## Planilha e Excel
+
+`/admin/planilha` mostra, em formato de planilha, **Agendamentos** (quem agendou, quando e quais roupas quer provar), **Locações** (quem alugou, quais roupas, retirada, devolução, entrega e saldo), **Estoque** (status de cada peça e com quem está ou para quem está reservada) e **Clientes**, com filtros de período, status e busca.
+
+- **Baixar esta aba**: `.xlsx` com os mesmos filtros da tela.
+- **Planilha completa**: um arquivo com as quatro abas (`/api/admin/export/completa`), com cabeçalho fixo, filtros, datas em dd/mm/aaaa e valores em R$.
+
+## Aviso para a loja a cada agendamento do site
+
+Quando alguém agenda pelo site, além da confirmação para o cliente, o **WhatsApp da loja** (Configurações → Dados da loja) recebe um resumo: nome, telefone, atendimento, data e hora, código e peças da lista de provas. Liga e desliga em **Configurações → WhatsApp → Avisar a loja**.
+
 ## WhatsApp
 
 ```
 Sistema → Evento → NotificationService → WhatsApp API → Cliente
 ```
 
-- Eventos da V1: `APPOINTMENT_CREATED`, `APPOINTMENT_UPDATED`, `APPOINTMENT_CANCELLED` e `APPOINTMENT_REMINDER`. Os eventos da V2 já estão cadastrados (`RETURN_OVERDUE`, `PICKUP_REMINDER`…).
+- Eventos ativos: `APPOINTMENT_CREATED`, `APPOINTMENT_UPDATED`, `APPOINTMENT_CANCELLED`, `APPOINTMENT_REMINDER`, `RENTAL_CONFIRMED` e `RETURN_OVERDUE`, além do aviso para a loja a cada agendamento do site.
 - **Outbox**: a mensagem é gravada como pendente na mesma transação do agendamento e enviada depois da resposta, com até 3 tentativas. Falhas aparecem no painel com botão **Reenviar**.
 - **Modo SIMULADO** (padrão): nada é enviado; a mensagem fica registrada com status *Simulado*.
 - **Modo PRODUÇÃO**: preencha `WHATSAPP_ACCESS_TOKEN` e `WHATSAPP_PHONE_NUMBER_ID` e mude o modo em **Configurações → WhatsApp**. Mensagens iniciadas pela empresa exigem **templates aprovados pela Meta**: informe, em cada mensagem, o nome do template e a ordem das variáveis.

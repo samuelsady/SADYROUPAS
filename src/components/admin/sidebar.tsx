@@ -1,18 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
-  BarChart3, Bell, Boxes, CalendarDays, ClipboardList, FileSignature, LayoutDashboard, Menu, PackageCheck, Printer, Scissors, Settings, Shirt, ShieldCheck, Undo2, Users, Wallet, WashingMachine, X,
+  BarChart3, Bell, Boxes, Sheet, CalendarDays, ClipboardList, FileSignature, LayoutDashboard, Menu, PackageCheck, Printer, Scissors, Settings, Shirt, ShieldCheck, Undo2, Users, Wallet, WashingMachine, X,
 } from "lucide-react";
 import { Wordmark } from "@/components/ui/wordmark";
 import { cn } from "@/utils/cn";
 import type { NavItem } from "./nav";
 
-const ICONS = { BarChart3, Bell, Boxes, CalendarDays, ClipboardList, FileSignature, LayoutDashboard, PackageCheck, Printer, Scissors, Settings, Shirt, ShieldCheck, Undo2, Users, Wallet, WashingMachine };
+const ICONS = { BarChart3, Bell, Boxes, Sheet, CalendarDays, ClipboardList, FileSignature, LayoutDashboard, PackageCheck, Printer, Scissors, Settings, Shirt, ShieldCheck, Undo2, Users, Wallet, WashingMachine };
 
 function NavList({ nav, pathname }: { nav: { section: string; items: NavItem[] }[]; pathname: string }) {
+  const currentQuery = useSearchParams().toString();
   return (
     <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5" aria-label="Painel">
       {nav.map((group) => (
@@ -21,7 +22,8 @@ function NavList({ nav, pathname }: { nav: { section: string; items: NavItem[] }
           <ul className="space-y-0.5">
             {group.items.map((item) => {
               const Icon = ICONS[item.icon as keyof typeof ICONS] ?? LayoutDashboard;
-              const active = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
+              const [path, query] = item.href.split("?");
+              const active = item.href === "/admin" ? pathname === "/admin" : query ? pathname === path && currentQuery === query : pathname.startsWith(path!) && !(path === "/admin/locacoes" && currentQuery.startsWith("aba=") && /aba=(retiradas|devolucoes)/.test(currentQuery));
               return (
                 <li key={item.href}>
                   <Link href={item.href} aria-current={active ? "page" : undefined}

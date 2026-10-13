@@ -66,7 +66,7 @@ export function InventoryTable({ rows }: { rows: Row[] }) {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead>
-            <tr className="border-b border-line bg-ivory/60 text-[11px] font-semibold uppercase tracking-wider text-muted">
+            <tr className="border-b border-line bg-ivory/60 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               <th className="w-10 px-4 py-2.5"><input type="checkbox" checked={all} onChange={() => setSelected(all ? new Set() : new Set(rows.map((r) => r.code)))} aria-label="Selecionar todas" className="h-4 w-4 accent-[var(--color-gold-dark)]" /></th>
               <th className="px-4 py-2.5">Código</th>
               <th className="px-4 py-2.5">Produto</th>
@@ -82,11 +82,11 @@ export function InventoryTable({ rows }: { rows: Row[] }) {
               <tr key={i.id} className={cn("border-b border-line/70 transition-colors", selected.has(i.code) ? "bg-[#fbf6ec]" : "hover:bg-ivory/50")}>
                 <td className="px-4 py-2.5"><input type="checkbox" checked={selected.has(i.code)} onChange={() => toggle(i.code)} aria-label={`Selecionar ${i.code}`} className="h-4 w-4 accent-[var(--color-gold-dark)]" /></td>
                 <td className="px-4 py-2.5"><Link href={`/admin/estoque/${i.code}`} className="whitespace-nowrap font-mono text-xs font-semibold hover:text-gold-dark">{i.code}</Link></td>
-                <td className="px-4 py-2.5"><Link href={`/admin/catalogo/${i.product.id}`} className="hover:text-gold-dark">{i.product.name}</Link><span className="block text-[11px] text-muted">{i.product.category}</span></td>
+                <td className="px-4 py-2.5"><Link href={`/admin/catalogo/${i.product.id}`} className="hover:text-gold-dark">{i.product.name}</Link><span className="block text-[11px] text-muted-foreground">{i.product.category}</span></td>
                 <td className="px-4 py-2.5 font-semibold">{i.size}</td>
                 <td className="px-4 py-2.5 text-xs">{i.color}</td>
                 <td className="px-4 py-2.5"><QuickStatus code={i.code} status={i.status} /></td>
-                <td className="px-4 py-2.5 text-xs text-muted">{i.location ?? "—"}</td>
+                <td className="px-4 py-2.5 text-xs text-muted-foreground">{i.location ?? "—"}</td>
                 <td className="px-4 py-2.5 text-right tabular-nums">{i.rentalCount}</td>
               </tr>
             ))}

@@ -4,6 +4,7 @@ import { addDaysKey, dayRangeUtc, startOfMonthKey, todayKey } from "@/utils/date
 import { FittingService } from "./fitting.service";
 import { InventoryService } from "./inventory.service";
 import { PrintService } from "./print/print.service";
+import { RentalService } from "./rental-workflow.service";
 import { SettingsService } from "./settings.service";
 
 export const DashboardService = {
@@ -15,7 +16,7 @@ export const DashboardService = {
     const monthStart = dayRangeUtc(startOfMonthKey(today), tz).start;
     const weekAgo = dayRangeUtc(addDaysKey(today, -6), tz).start;
 
-    const [todayAppointments, upcoming, customersTotal, customersNew, inventory, printPending, printFailed, whatsappFailed, printer, toSeparate, soldOut] = await Promise.all([
+    const [todayAppointments, upcoming, customersTotal, customersNew, inventory, printPending, printFailed, whatsappFailed, printer, toSeparate, soldOut, rentals] = await Promise.all([
       db.appointment.findMany({
         where: { startsAt: { gte: start, lt: end } },
         orderBy: { startsAt: "asc" },
@@ -37,6 +38,7 @@ export const DashboardService = {
       // Peças da lista de provas ainda não separadas (hoje e amanhã)
       FittingService.pendingBetween(now, dayRangeUtc(addDaysKey(today, 1), tz).end),
       InventoryService.soldOutSizes(6),
+      RentalService.todayCounts(),
     ]);
 
     const by = (s: string) => todayAppointments.filter((a) => a.status === s).length;
@@ -48,6 +50,9 @@ export const DashboardService = {
     if (inventory.counts.UNAVAILABLE) alerts.push({ tone: "red", text: `${inventory.counts.UNAVAILABLE} peça(s) indisponível(is)`, href: "/admin/estoque?status=UNAVAILABLE" });
     if (printPending + printFailed) alerts.push({ tone: "amber", text: `${printPending + printFailed} impressão(ões) pendente(s)`, href: "/admin/impressoes" });
     if (whatsappFailed) alerts.push({ tone: "red", text: `${whatsappFailed} mensagem(ns) de WhatsApp com falha`, href: "/admin/notificacoes?status=FAILED" });
+    if (rentals.overdue) alerts.push({ tone: "red", text: `${rentals.overdue} devolução(ões) atrasada(s)`, href: "/admin/locacoes?aba=atrasadas" });
+    if (rentals.pickups) alerts.push({ tone: "gold", text: `${rentals.pickups} retirada(s) para hoje`, href: "/admin/locacoes?aba=retiradas" });
+    if (rentals.returns) alerts.push({ tone: "blue", text: `${rentals.returns} devolução(ões) previstas para hoje`, href: "/admin/locacoes?aba=devolucoes" });
     if (toSeparate.length) alerts.push({ tone: "gold", text: `${toSeparate.length} peça(s) para separar`, href: "/admin/agenda" });
     if (printer.state === "DESCONECTADA" && printPending) alerts.push({ tone: "amber", text: "Serviço de impressão desconectado", href: "/admin/impressoes" });
 
@@ -67,6 +72,7 @@ export const DashboardService = {
       print: { pending: printPending, failed: printFailed, printer },
       toSeparate,
       soldOut,
+      rentals,
       alerts,
     };
   },

@@ -159,7 +159,9 @@ async function createInternal(p: CreateParams) {
       });
 
       const notification = await NotificationService.enqueueAppointmentMessage(tx, "APPOINTMENT_CREATED", appointment, settings);
+      let ownerAlertId: string | null = null;
       if (p.source === "WEBSITE") {
+        ownerAlertId = (await NotificationService.enqueueOwnerAlert(tx, appointment, settings))?.id ?? null;
         await NotificationService.alert(tx, {
           event: "APPOINTMENT_CREATED",
           title: "Novo agendamento pelo site",
@@ -181,14 +183,12 @@ async function createInternal(p: CreateParams) {
         },
         tx,
       );
-      return { appointment, notificationId: notification?.status === "PENDING" ? notification.id : null, printJobId: printJob?.id ?? null };
+      return { appointment, notificationId: notification?.status === "PENDING" ? notification.id : null, ownerAlertId, printJobId: printJob?.id ?? null };
     }),
   );
 
-  if (result.notificationId) {
-    const id = result.notificationId;
-    runAfterResponse("whatsapp", () => NotificationService.processPending({ ids: [id] }));
-  }
+  const ids = [result.notificationId, result.ownerAlertId].filter((x): x is string => Boolean(x));
+  if (ids.length) runAfterResponse("whatsapp", () => NotificationService.processPending({ ids }));
   return result;
 }
 
@@ -369,6 +369,7 @@ export const AppointmentService = {
       include: {
         ...include,
         createdBy: { select: { name: true } },
+        rental: { select: { id: true, number: true } },
         printJobs: { orderBy: { createdAt: "desc" } },
         notifications: { where: { channel: "WHATSAPP" }, orderBy: { createdAt: "desc" } },
       },

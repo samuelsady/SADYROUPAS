@@ -122,3 +122,22 @@ export const notificationStatusTone: Record<NotificationStatus, Tone> = {
   FAILED: "red",
   SKIPPED: "gray",
 };
+
+export const rentalStatusTone: Record<RentalStatus, Tone> = {
+  QUOTE: "gray",
+  RESERVED: "blue",
+  CONFIRMED: "blue",
+  PICKED_UP: "gold",
+  RETURNED: "green",
+  OVERDUE: "red",
+  CANCELLED: "gray",
+  CLOSED: "green",
+};
+
+export const returnConditionLabel: Record<string, string> = {
+  RECEIVED: "Recebida — bom estado",
+  DIRTY: "Recebida — suja (lavanderia)",
+  DAMAGED: "Recebida — danificada (manutenção)",
+  NOT_RECEIVED: "Não devolvida",
+  LOST: "Perdida",
+};

@@ -36,10 +36,10 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                 <tr key={c.id} className="hover:bg-ivory/50">
                   <Td><Link href={`/admin/clientes/${c.id}`} className="font-semibold hover:text-gold-dark">{c.name}</Link></Td>
                   <Td className="text-xs">{formatPhone(c.whatsapp)}</Td>
-                  <Td className="text-xs text-muted">{c.email ?? "—"}</Td>
+                  <Td className="text-xs text-muted-foreground">{c.email ?? "—"}</Td>
                   <Td className="tabular-nums">{c._count.appointments}</Td>
-                  <Td>{c.appointments[0] ? <span className="flex items-center gap-2 text-xs">{formatDate(c.appointments[0].startsAt, settings.timezone)} <AppointmentStatusBadge status={c.appointments[0].status} /></span> : <span className="text-xs text-muted">—</span>}</Td>
-                  <Td className="text-xs text-muted">{formatDate(c.createdAt, settings.timezone)}</Td>
+                  <Td>{c.appointments[0] ? <span className="flex items-center gap-2 text-xs">{formatDate(c.appointments[0].startsAt, settings.timezone)} <AppointmentStatusBadge status={c.appointments[0].status} /></span> : <span className="text-xs text-muted-foreground">—</span>}</Td>
+                  <Td className="text-xs text-muted-foreground">{formatDate(c.createdAt, settings.timezone)}</Td>
                 </tr>
               ))}
             </tbody>

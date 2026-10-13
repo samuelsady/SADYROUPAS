@@ -32,7 +32,7 @@ export const DEFAULT_TEMPLATES: { event: NotificationEvent; name: string; body: 
   },
   {
     event: "RETURN_OVERDUE",
-    name: "Devolução atrasada (V2)",
+    name: "Devolução atrasada",
     body: "Olá, {nome}! Identificamos que a devolução da sua locação está pendente.\n\nData prevista: {data}\n\nEntre em contato com a Sady Roupas para regularizar a devolução.",
     waParams: ["nome", "data"],
   },
@@ -50,11 +50,11 @@ export const DEFAULT_TEMPLATES: { event: NotificationEvent; name: string; body: 
   },
   {
     event: "RENTAL_CONFIRMED",
-    name: "Locação confirmada (V2)",
-    body: "Olá, {nome}! Sua locação na Sady Roupas está confirmada. Retirada: {data}.",
-    waParams: ["nome", "data"],
+    name: "Locação confirmada",
+    body: "Olá, {nome}! Sua locação {numero} na Sady Roupas está confirmada. ✅\n\n📦 {entrega} em {retirada}\n🔁 Devolução: {devolucao}\n👔 Peças: {pecas}\n\nQualquer dúvida, é só responder esta mensagem.",
+    waParams: ["nome", "numero", "retirada", "devolucao"],
   },
 ];
 
 /** Eventos que geram mensagem ao cliente na V1. */
-export const V1_WHATSAPP_EVENTS: NotificationEvent[] = ["APPOINTMENT_CREATED", "APPOINTMENT_UPDATED", "APPOINTMENT_CANCELLED", "APPOINTMENT_REMINDER"];
+export const V1_WHATSAPP_EVENTS: NotificationEvent[] = ["APPOINTMENT_CREATED", "APPOINTMENT_UPDATED", "APPOINTMENT_CANCELLED", "APPOINTMENT_REMINDER", "RENTAL_CONFIRMED", "RETURN_OVERDUE"];

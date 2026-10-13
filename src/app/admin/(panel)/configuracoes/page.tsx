@@ -45,7 +45,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       <PageHeader title="Configurações" description="Ajustes da loja, agenda, mensagens e impressão." />
       <div className="mb-6 flex gap-1 overflow-x-auto border-b border-line">
         {TABS.map(([k, label]) => (
-          <Link key={k} href={`/admin/configuracoes?aba=${k}`} className={cn("whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold", tab === k ? "border-gold text-ink" : "border-transparent text-muted hover:text-ink")}>{label}</Link>
+          <Link key={k} href={`/admin/configuracoes?aba=${k}`} className={cn("whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold", tab === k ? "border-gold text-ink" : "border-transparent text-muted-foreground hover:text-ink")}>{label}</Link>
         ))}
       </div>
 
@@ -78,6 +78,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
             </div>
             <SimpleForm action={saveWhatsAppAction}>
               <Checkbox name="whatsappEnabled" label="Enviar mensagens automáticas" defaultChecked={settings.whatsappEnabled} />
+              <Checkbox name="ownerAlertWhatsapp" label={`Avisar a loja no WhatsApp (${formatPhone(settings.whatsapp) || "configure o WhatsApp em Empresa"}) a cada agendamento pelo site`} defaultChecked={settings.ownerAlertWhatsapp} />
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Modo" hint="SIMULADO registra a mensagem sem enviar. PRODUÇÃO usa a WhatsApp Business Platform.">
                   <Select name="whatsappMode" defaultValue={settings.whatsappMode}>
@@ -107,7 +108,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               </Field>
               <Field label="Impressora padrão" hint="Nome da impressora no computador da loja (informativo; o agente usa PRINTER_NAME)"><Input name="printerName" defaultValue={settings.printerName ?? ""} /></Field>
             </div>
-            <p className="text-xs text-muted">Status e fila: <Link href="/admin/impressoes" className="font-semibold text-gold-dark">Impressões</Link>. Instalação do serviço local: veja <code>print-agent/README.md</code>.</p>
+            <p className="text-xs text-muted-foreground">Status e fila: <Link href="/admin/impressoes" className="font-semibold text-gold-dark">Impressões</Link>. Instalação do serviço local: veja <code>print-agent/README.md</code>.</p>
           </SimpleForm>
         </Card>
       )}
@@ -133,7 +134,7 @@ async function ScheduleTab() {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-sm">
-            <thead><tr className="text-left text-xs text-muted"><th className="py-2">Dia</th><th>Aberto</th><th>Abre</th><th>Fecha</th><th>Pausa início</th><th>Pausa fim</th></tr></thead>
+            <thead><tr className="text-left text-xs text-muted-foreground"><th className="py-2">Dia</th><th>Aberto</th><th>Abre</th><th>Fecha</th><th>Pausa início</th><th>Pausa fim</th></tr></thead>
             <tbody>
               {hours.map((h) => (
                 <tr key={h.weekday} className="border-t border-line">
@@ -148,7 +149,7 @@ async function ScheduleTab() {
             </tbody>
           </table>
         </div>
-        <p className="text-xs text-muted">Exemplo: 08:00–18:00, duração 30 min e intervalo 10 min geram 08:00, 08:40, 09:20… Mudanças não alteram agendamentos já feitos.</p>
+        <p className="text-xs text-muted-foreground">Exemplo: 08:00–18:00, duração 30 min e intervalo 10 min geram 08:00, 08:40, 09:20… Mudanças não alteram agendamentos já feitos.</p>
       </SimpleForm>
     </Card>
   );
@@ -205,11 +206,11 @@ async function BlockedTab({ tz }: { tz: string }) {
       </Card>
       <Card>
         <CardHeader title="Bloqueios ativos e futuros" />
-        {blocked.length === 0 ? <p className="px-5 py-5 text-sm text-muted">Nenhum bloqueio.</p> : (
+        {blocked.length === 0 ? <p className="px-5 py-5 text-sm text-muted-foreground">Nenhum bloqueio.</p> : (
           <ul className="divide-y divide-line">
             {blocked.map((b) => (
               <li key={b.id} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
-                <span>{formatDateTime(b.startsAt, tz)} → {formatDateTime(b.endsAt, tz)}<span className="block text-xs text-muted">{b.reason ?? "Sem motivo"}</span></span>
+                <span>{formatDateTime(b.startsAt, tz)} → {formatDateTime(b.endsAt, tz)}<span className="block text-xs text-muted-foreground">{b.reason ?? "Sem motivo"}</span></span>
                 <ActionButton action={removeBlockedPeriodAction} fields={{ id: b.id }} variant="danger-outline" confirm="Remover este bloqueio?">Remover</ActionButton>
               </li>
             ))}
@@ -249,7 +250,7 @@ function RentalTab({ policyJson }: { policyJson: unknown }) {
   const p = parseRentalPolicy(policyJson);
   return (
     <Card className="max-w-3xl p-5 sm:p-7">
-      <p className="mb-5 rounded-md bg-ivory p-3 text-xs text-muted">Estas regras serão usadas pelos módulos de locação e devolução da V2. O termo usado é <strong>multa por atraso</strong>, conforme a política contratual da loja.</p>
+      <p className="mb-5 rounded-md bg-ivory p-3 text-xs text-muted-foreground">Estas regras serão usadas pelos módulos de locação e devolução da V2. O termo usado é <strong>multa por atraso</strong>, conforme a política contratual da loja.</p>
       <SimpleForm action={saveRentalPolicyAction}>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Prazo padrão de locação (dias)"><Input name="defaultRentalDays" type="number" min={1} defaultValue={p.defaultRentalDays} /></Field>
@@ -278,15 +279,15 @@ async function UsersTab({ meId, tz }: { meId: string; tz: string }) {
             <li key={u.id} className="space-y-3 px-5 py-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm font-semibold">{u.name} {u.id === meId && <span className="text-xs text-muted">(você)</span>}</p>
-                  <p className="text-xs text-muted">{u.email} · último acesso {u.lastLoginAt ? formatDateTime(u.lastLoginAt, tz) : "nunca"}</p>
+                  <p className="text-sm font-semibold">{u.name} {u.id === meId && <span className="text-xs text-muted-foreground">(você)</span>}</p>
+                  <p className="text-xs text-muted-foreground">{u.email} · último acesso {u.lastLoginAt ? formatDateTime(u.lastLoginAt, tz) : "nunca"}</p>
                 </div>
                 <span className="flex gap-1.5"><Badge tone={u.role === "ADMIN" ? "gold" : "neutral"}>{roleLabel[u.role]}</Badge>{!u.active && <Badge tone="red">Inativo</Badge>}</span>
               </div>
               <div className="flex flex-wrap items-end gap-2">
                 {u.id !== meId && <ActionButton action={toggleUserAction} fields={{ id: u.id }} variant={u.active ? "danger-outline" : "outline"} confirm={u.active ? "Desativar este acesso?" : undefined}>{u.active ? "Desativar" : "Reativar"}</ActionButton>}
                 <details>
-                  <summary className="cursor-pointer text-xs font-semibold text-muted">Redefinir senha</summary>
+                  <summary className="cursor-pointer text-xs font-semibold text-muted-foreground">Redefinir senha</summary>
                   <div className="mt-2 w-64"><SimpleForm action={changePasswordAction} submitLabel="Redefinir"><input type="hidden" name="id" value={u.id} /><Input name="password" type="password" minLength={8} required placeholder="Nova senha" autoComplete="new-password" /></SimpleForm></div>
                 </details>
               </div>

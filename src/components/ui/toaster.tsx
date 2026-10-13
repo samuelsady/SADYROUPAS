@@ -23,7 +23,7 @@ export function Toaster() {
   }, []);
 
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-24 z-[60] flex flex-col items-center gap-2 px-4 sm:bottom-6">
+    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-24 z-[60] md:bottom-8 flex flex-col items-center gap-2 px-4 sm:bottom-6">
       {items.map((t) => {
         const Icon = t.tone === "error" ? XCircle : t.tone === "info" ? Info : CheckCircle2;
         return (

@@ -28,7 +28,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-white/90 px-4 backdrop-blur sm:px-6">
           <MobileSidebar nav={nav} />
           <form action="/admin/busca" className="relative max-w-md flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input name="q" placeholder="Buscar cliente, código, peça…" aria-label="Busca global" className="h-10 w-full rounded-md border border-line bg-[#f6f4f0] pl-9 pr-3 text-sm focus:border-gold focus:bg-white focus:outline-none" />
           </form>
           <div className="ml-auto flex items-center gap-2">
@@ -45,13 +45,13 @@ export default async function PanelLayout({ children }: { children: React.ReactN
                   )}
                 </div>
                 <ul className="max-h-80 overflow-y-auto">
-                  {alerts.items.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted">Nenhuma notificação.</li>}
+                  {alerts.items.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted-foreground">Nenhuma notificação.</li>}
                   {alerts.items.map((n) => (
                     <li key={n.id} className={`border-b border-line/60 px-4 py-3 text-sm ${n.readAt ? "" : "bg-[#fbf6ec]"}`}>
                       <Link href={n.appointmentId ? `/admin/agendamentos/${n.appointmentId}` : "/admin/notificacoes"} className="block">
                         <p className="font-semibold">🔔 {n.title}</p>
-                        <p className="mt-0.5 text-xs text-muted">{n.body}</p>
-                        <p className="mt-1 text-[10px] text-muted/70">{formatDateTime(n.createdAt, settings.timezone)}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{n.body}</p>
+                        <p className="mt-1 text-[10px] text-muted-foreground/70">{formatDateTime(n.createdAt, settings.timezone)}</p>
                       </Link>
                     </li>
                   ))}
@@ -63,7 +63,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-[11px] font-semibold text-gold-light">{initials(user.name)}</span>
               <div className="leading-tight">
                 <p className="text-sm font-semibold">{user.name}</p>
-                <p className="text-[11px] text-muted">{roleLabel[user.role]}</p>
+                <p className="text-[11px] text-muted-foreground">{roleLabel[user.role]}</p>
               </div>
             </div>
             <form action={logoutAction}>

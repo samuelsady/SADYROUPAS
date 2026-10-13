@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { InventoryStatus } from "@prisma/client";
-import Image from "next/image";
+import Image from "@/components/ui/sady-image";
 import Link from "next/link";
 import QRCode from "qrcode";
 import { ActionButton } from "@/components/admin/action-button";
@@ -27,6 +27,9 @@ const ACTION_LABEL: Record<string, string> = {
   DEACTIVATED: "Baixada do estoque",
   RESERVED_FOR_APPOINTMENT: "Separada para atendimento",
   RELEASED: "Liberada",
+  RENTAL_RESERVED: "Reservada para locação",
+  RENTED: "Alugada (baixa automática)",
+  RETURNED: "Devolvida",
 };
 
 const QUICK: { status: InventoryStatus; label: string }[] = [
@@ -51,7 +54,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex-1">
             <p className="text-sm font-semibold">Ações rápidas</p>
-            <p className="text-xs text-muted">{balcao ? "Peça lida pelo QR Code. " : ""}Um toque muda o status e registra no histórico.</p>
+            <p className="text-xs text-muted-foreground">{balcao ? "Peça lida pelo QR Code. " : ""}Um toque muda o status e registra no histórico.</p>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:flex">
             {QUICK.filter((q) => q.status !== item.status).map((q) => (
@@ -69,11 +72,11 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
               {item.product.images[0] && <Image src={item.product.images[0].url} alt="" fill sizes="112px" className="object-cover" />}
             </div>
             <dl className="grid flex-1 grid-cols-2 gap-3 text-sm">
-              <div><dt className="text-xs text-muted">Tamanho</dt><dd className="text-lg font-semibold">{item.size}</dd></div>
-              <div><dt className="text-xs text-muted">Cor</dt><dd className="font-semibold">{item.color}</dd></div>
-              <div><dt className="text-xs text-muted">Locações</dt><dd className="text-lg font-semibold tabular-nums">{item.rentalCount}</dd></div>
-              <div><dt className="text-xs text-muted">Localização</dt><dd className="font-semibold">{item.location ?? "—"}</dd></div>
-              {item.notes && <div className="col-span-2"><dt className="text-xs text-muted">Observações</dt><dd>{item.notes}</dd></div>}
+              <div><dt className="text-xs text-muted-foreground">Tamanho</dt><dd className="text-lg font-semibold">{item.size}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">Cor</dt><dd className="font-semibold">{item.color}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">Locações</dt><dd className="text-lg font-semibold tabular-nums">{item.rentalCount}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">Localização</dt><dd className="font-semibold">{item.location ?? "—"}</dd></div>
+              {item.notes && <div className="col-span-2"><dt className="text-xs text-muted-foreground">Observações</dt><dd>{item.notes}</dd></div>}
             </dl>
           </Card>
 
@@ -118,7 +121,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
             <div className="shrink-0 rounded-md border border-line p-1" dangerouslySetInnerHTML={{ __html: qr }} aria-label={`QR Code da peça ${item.code}`} />
             <div className="space-y-2 text-sm">
               <p className="font-semibold">Etiqueta com QR Code</p>
-              <p className="text-xs text-muted">Ao escanear, abre esta ficha (status, produto, tamanho, cor, locações e histórico).</p>
+              <p className="text-xs text-muted-foreground">Ao escanear, abre esta ficha (status, produto, tamanho, cor, locações e histórico).</p>
               <PrintLabelButton code={item.code} product={item.product.name} size={item.size} qrSvg={qr} />
             </div>
           </Card>
@@ -129,7 +132,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
               {item.history.map((h) => (
                 <li key={h.id} className="relative border-l border-line pb-5 pl-5 last:pb-0">
                   <span className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-gold" />
-                  <p className="text-xs text-muted">{formatDateTime(h.createdAt, tz)}{h.user ? ` · ${h.user.name}` : ""}</p>
+                  <p className="text-xs text-muted-foreground">{formatDateTime(h.createdAt, tz)}{h.user ? ` · ${h.user.name}` : ""}</p>
                   <p className="mt-0.5 flex flex-wrap items-center gap-2 text-sm font-semibold">
                     {ACTION_LABEL[h.action] ?? h.action}
                     {h.fromStatus && h.toStatus && h.fromStatus !== h.toStatus && (<><InventoryStatusBadge status={h.fromStatus} /> → <InventoryStatusBadge status={h.toStatus} /></>)}

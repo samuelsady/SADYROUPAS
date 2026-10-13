@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Image from "@/components/ui/sady-image";
 import Link from "next/link";
 import { ExternalLink, Plus, Trash2 } from "lucide-react";
 import { ActionButton } from "@/components/admin/action-button";
@@ -55,7 +55,7 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
               )}
               <SimpleForm action={uploadImagesAction.bind(null, p.id)} submitLabel="Enviar fotos">
                 <input type="file" name="images" accept="image/jpeg,image/png,image/webp,image/avif" multiple className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-ink file:px-3 file:py-2 file:text-xs file:font-semibold file:text-ivory" />
-                <p className="text-xs text-muted">JPG, PNG, WEBP ou AVIF, até 5 MB cada.</p>
+                <p className="text-xs text-muted-foreground">JPG, PNG, WEBP ou AVIF, até 5 MB cada.</p>
               </SimpleForm>
             </div>
           </Card>
@@ -65,7 +65,7 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
               <div className="overflow-x-auto p-4">
                 <table className="w-full text-center text-xs">
                   <thead>
-                    <tr className="text-muted"><th className="py-1.5 text-left">Tam.</th>{V1_INVENTORY_STATUSES.map((s) => <th key={s} className="px-1 font-semibold">{inventoryStatusLabel[s]}</th>)}</tr>
+                    <tr className="text-muted-foreground"><th className="py-1.5 text-left">Tam.</th>{V1_INVENTORY_STATUSES.map((s) => <th key={s} className="px-1 font-semibold">{inventoryStatusLabel[s]}</th>)}</tr>
                   </thead>
                   <tbody>
                     {matrix.map((row) => (
@@ -75,7 +75,7 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
                           const n = row.counts[s] ?? 0;
                           return (
                             <td key={s} className="px-1 py-2">
-                              <Link href={`/admin/estoque?produto=${p.id}&tamanho=${encodeURIComponent(row.size)}&status=${s}`} className={`inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 font-semibold tabular-nums ${n === 0 ? "text-muted/40" : s === "AVAILABLE" ? "bg-emerald-50 text-emerald-800" : s === "UNAVAILABLE" ? "bg-red-50 text-red-800" : "bg-ivory text-ink"}`}>{n}</Link>
+                              <Link href={`/admin/estoque?produto=${p.id}&tamanho=${encodeURIComponent(row.size)}&status=${s}`} className={`inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 font-semibold tabular-nums ${n === 0 ? "text-muted-foreground/40" : s === "AVAILABLE" ? "bg-emerald-50 text-emerald-800" : s === "UNAVAILABLE" ? "bg-red-50 text-red-800" : "bg-ivory text-ink"}`}>{n}</Link>
                             </td>
                           );
                         })}
@@ -89,13 +89,13 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
           )}
           <Card>
             <CardHeader title="Peças físicas" description={`${p.items.length} peça(s) ativa(s)`} action={<LinkButton href={`/admin/estoque/novo?produto=${p.id}`} size="sm" variant="outline"><Plus className="h-3.5 w-3.5" /> Peça</LinkButton>} />
-            {p.items.length === 0 ? <p className="px-5 py-5 text-sm text-muted">Nenhuma peça cadastrada.</p> : (
+            {p.items.length === 0 ? <p className="px-5 py-5 text-sm text-muted-foreground">Nenhuma peça cadastrada.</p> : (
               <ul className="max-h-96 divide-y divide-line overflow-y-auto">
                 {p.items.map((i) => (
                   <li key={i.id}>
                     <Link href={`/admin/estoque/${i.code}`} className="flex items-center justify-between px-5 py-2.5 text-sm hover:bg-ivory/50">
                       <span className="font-mono text-xs font-semibold">{i.code}</span>
-                      <span className="text-xs text-muted">Tam. {i.size}</span>
+                      <span className="text-xs text-muted-foreground">Tam. {i.size}</span>
                       <InventoryStatusBadge status={i.status} />
                     </Link>
                   </li>

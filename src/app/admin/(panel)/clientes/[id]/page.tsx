@@ -9,7 +9,9 @@ import { LinkButton, buttonClass } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/form";
 import { requirePageUser } from "@/lib/auth/session";
-import { notificationEventLabel } from "@/lib/labels";
+import { notificationEventLabel, rentalStatusLabel, rentalStatusTone } from "@/lib/labels";
+import { Badge } from "@/components/ui/badge";
+import { formatRentalNumber } from "@/utils/codes";
 import { CustomerService } from "@/services/customer.service";
 import { SettingsService } from "@/services/settings.service";
 import { formatDate, formatDateTime, toTimeKey } from "@/utils/datetime";
@@ -43,14 +45,14 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
         <div className="space-y-6">
           <Card>
             <CardHeader title="Agendamentos" description={`${c.appointments.length} no total`} />
-            {c.appointments.length === 0 ? <p className="px-5 py-5 text-sm text-muted">Nenhum agendamento.</p> : (
+            {c.appointments.length === 0 ? <p className="px-5 py-5 text-sm text-muted-foreground">Nenhum agendamento.</p> : (
               <ul className="divide-y divide-line">
                 {c.appointments.map((a) => (
                   <li key={a.id}>
                     <Link href={`/admin/agendamentos/${a.id}`} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-ivory/50">
                       <div>
                         <p className="text-sm font-semibold">{formatDate(a.startsAt, tz)} · {toTimeKey(a.startsAt, tz)}</p>
-                        <p className="text-xs text-muted">{a.service.name}{a.product ? ` · ${a.product.name}` : ""} · <span className="font-mono">{a.code}</span></p>
+                        <p className="text-xs text-muted-foreground">{a.service.name}{a.product ? ` · ${a.product.name}` : ""} · <span className="font-mono">{a.code}</span></p>
                       </div>
                       <AppointmentStatusBadge status={a.status} />
                     </Link>
@@ -73,7 +75,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
               {m && (
                 <dl className="mb-5 grid grid-cols-4 gap-2 text-center">
                   {[["Paletó", m.jacket], ["Calça", m.pants], ["Camisa", m.shirt], ["Sapato", m.shoe]].map(([k, v]) => (
-                    <div key={k} className="rounded-md bg-ivory p-2"><dt className="text-[10px] uppercase text-muted">{k}</dt><dd className="text-lg font-semibold">{v || "—"}</dd></div>
+                    <div key={k} className="rounded-md bg-ivory p-2"><dt className="text-[10px] uppercase text-muted-foreground">{k}</dt><dd className="text-lg font-semibold">{v || "—"}</dd></div>
                   ))}
                 </dl>
               )}
@@ -88,20 +90,31 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
           </Card>
           <Card>
             <CardHeader title="Mensagens enviadas" />
-            {c.notifications.length === 0 ? <p className="px-5 py-5 text-sm text-muted">Nenhuma mensagem.</p> : (
+            {c.notifications.length === 0 ? <p className="px-5 py-5 text-sm text-muted-foreground">Nenhuma mensagem.</p> : (
               <ul className="divide-y divide-line">
                 {c.notifications.map((n) => (
                   <li key={n.id} className="flex items-center justify-between gap-3 px-5 py-2.5 text-xs">
-                    <span>{notificationEventLabel[n.event]}<span className="block text-muted">{formatDateTime(n.createdAt, tz)}</span></span>
+                    <span>{notificationEventLabel[n.event]}<span className="block text-muted-foreground">{formatDateTime(n.createdAt, tz)}</span></span>
                     <NotificationStatusBadge status={n.status} />
                   </li>
                 ))}
               </ul>
             )}
           </Card>
-          <Card className="p-5 text-xs text-muted">
-            <p className="font-semibold text-ink">Em breve (V2)</p>
-            <p className="mt-1">Histórico de locações, pagamentos, devoluções e ocorrências deste cliente.</p>
+          <Card>
+            <CardHeader title="Locações" action={<Link href={`/admin/locacoes/nova?cliente=${c.id}`} className="text-xs font-semibold text-gold-dark hover:underline">Nova locação</Link>} />
+            {c.rentals.length === 0 ? <p className="px-5 py-5 text-sm text-muted-foreground">Nenhuma locação.</p> : (
+              <ul className="divide-y divide-line">
+                {c.rentals.map((r) => (
+                  <li key={r.id}>
+                    <Link href={`/admin/locacoes/${r.id}`} className="flex items-center justify-between gap-3 px-5 py-2.5 text-sm hover:bg-ivory/50">
+                      <span><span className="font-mono text-xs font-semibold">{formatRentalNumber(r.number)}</span> · {r.eventName ?? "Locação"}<span className="block text-xs text-muted-foreground">Retirada {formatDate(r.pickupDate, "UTC")} · devolução {formatDate(r.returnDueDate, "UTC")}</span></span>
+                      <Badge tone={rentalStatusTone[r.status]}>{rentalStatusLabel[r.status]}</Badge>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Card>
         </div>
       </div>

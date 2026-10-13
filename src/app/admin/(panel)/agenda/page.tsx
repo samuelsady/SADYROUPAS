@@ -79,7 +79,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
         </div>
         <div className="flex rounded-md border border-line p-0.5 text-xs font-semibold" role="tablist">
           {(["day", "week", "month"] as View[]).map((v) => (
-            <Link key={v} href={link(v, date)} role="tab" aria-selected={view === v} className={cn("rounded px-3 py-1.5", view === v ? "bg-ink text-ivory" : "text-muted hover:text-ink")}>
+            <Link key={v} href={link(v, date)} role="tab" aria-selected={view === v} className={cn("rounded px-3 py-1.5", view === v ? "bg-ink text-ivory" : "text-muted-foreground hover:text-ink")}>
               {{ day: "Dia", week: "Semana", month: "Mês" }[v]}
             </Link>
           ))}
@@ -90,7 +90,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
         <div className="grid grid-cols-1 gap-5 [&>*]:min-w-0 lg:grid-cols-[1fr_260px]">
           <Card>
             {appointments.length === 0 ? (
-              <p className="px-5 py-10 text-center text-sm text-muted">Nenhum atendimento neste dia.</p>
+              <p className="px-5 py-10 text-center text-sm text-muted-foreground">Nenhum atendimento neste dia.</p>
             ) : (
               <ul className="divide-y divide-line">
                 {appointments.map((a) => (
@@ -99,7 +99,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
                       <span className="w-14 shrink-0 font-mono text-base font-semibold tabular-nums">{toTimeKey(a.startsAt, tz)}</span>
                       <div className="min-w-0">
                         <p className="font-semibold">{a.customer.name}</p>
-                        <p className="text-xs text-muted">{a.service.name} · até {toTimeKey(a.endsAt, tz)}</p>
+                        <p className="text-xs text-muted-foreground">{a.service.name} · até {toTimeKey(a.endsAt, tz)}</p>
                         {a.items.length > 0 && (
                           <p className={cn("mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold", a.items.every((i) => i.inventoryItemId) ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-900")}>
                             <Shirt className="h-3 w-3" /> {a.items.filter((i) => i.inventoryItemId).length}/{a.items.length} peças separadas
@@ -119,9 +119,9 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
           </Card>
           <Card className="h-fit p-4">
             <p className="text-sm font-semibold">Horários livres</p>
-            <p className="mb-3 text-xs text-muted">Clique para agendar ({defaultService?.name ?? "serviço padrão"}).</p>
+            <p className="mb-3 text-xs text-muted-foreground">Clique para agendar ({defaultService?.name ?? "serviço padrão"}).</p>
             {freeSlots.length === 0 ? (
-              <p className="text-xs text-muted">Sem horários livres (loja fechada ou agenda cheia).</p>
+              <p className="text-xs text-muted-foreground">Sem horários livres (loja fechada ou agenda cheia).</p>
             ) : (
               <div className="grid grid-cols-3 gap-1.5">
                 {freeSlots.map((s) => (
@@ -142,7 +142,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
             return (
               <Card key={d} className={cn("min-h-40 p-2", d === today && "ring-2 ring-gold/50")}>
                 <Link href={link("day", d)} className="mb-2 flex items-baseline justify-between px-1 hover:text-gold-dark">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{weekdayName(weekdayOfKey(d), true)}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{weekdayName(weekdayOfKey(d), true)}</span>
                   <span className="text-lg font-semibold">{Number(d.slice(8))}</span>
                 </Link>
                 <ul className="space-y-1.5">
@@ -150,11 +150,11 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
                     <li key={a.id}>
                       <Link href={`/admin/agendamentos/${a.id}`} className={cn("block rounded-md border-l-4 bg-ivory/70 px-2 py-1.5 text-xs hover:bg-ivory", toneBorder[appointmentStatusTone[a.status]], a.status === "CANCELLED" && "opacity-50 line-through")}>
                         <span className="font-mono font-semibold">{toTimeKey(a.startsAt, tz)}</span> {a.customer.name}
-                        <span className="block truncate text-[10px] text-muted">{a.service.name}{a.items.length > 0 ? ` · ${a.items.length} peça(s)` : ""}</span>
+                        <span className="block truncate text-[10px] text-muted-foreground">{a.service.name}{a.items.length > 0 ? ` · ${a.items.length} peça(s)` : ""}</span>
                       </Link>
                     </li>
                   ))}
-                  {list.length === 0 && <li className="px-1 text-[11px] text-muted/60">—</li>}
+                  {list.length === 0 && <li className="px-1 text-[11px] text-muted-foreground/60">—</li>}
                 </ul>
               </Card>
             );
@@ -164,7 +164,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
 
       {view === "month" && (
         <Card className="overflow-hidden">
-          <div className="grid grid-cols-7 border-b border-line bg-ivory/60 text-center text-[11px] font-semibold uppercase tracking-wider text-muted">
+          <div className="grid grid-cols-7 border-b border-line bg-ivory/60 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             {[1, 2, 3, 4, 5, 6, 0].map((w) => <div key={w} className="py-2">{weekdayName(w, true)}</div>)}
           </div>
           <div className="grid grid-cols-7">
@@ -172,7 +172,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
               const list = (byDay.get(d) ?? []).filter((a) => a.status !== "CANCELLED");
               const inMonth = d.slice(0, 7) === startOfMonthKey(date).slice(0, 7);
               return (
-                <Link key={d} href={link("day", d)} className={cn("min-h-20 border-b border-r border-line p-1.5 text-xs hover:bg-ivory/60 sm:min-h-28 sm:p-2", !inMonth && "bg-[#faf8f4] text-muted/50")}>
+                <Link key={d} href={link("day", d)} className={cn("min-h-20 border-b border-r border-line p-1.5 text-xs hover:bg-ivory/60 sm:min-h-28 sm:p-2", !inMonth && "bg-[#faf8f4] text-muted-foreground/50")}>
                   <span className={cn("inline-flex h-6 w-6 items-center justify-center rounded-full font-semibold", d === today && "bg-ink text-ivory")}>{Number(d.slice(8))}</span>
                   {list.length > 0 && (
                     <>
