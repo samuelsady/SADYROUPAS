@@ -111,18 +111,18 @@ export default async function HomePage() {
       <section className="aura grain text-ivory">
         <div className="container-site grid items-center gap-10 py-20 sm:py-28 lg:grid-cols-[1fr_0.8fr] lg:gap-20">
           <Reveal>
-            <p className="eyebrow">Novo · Ateliê virtual</p>
+            <p className="eyebrow">Novo · Monte seu terno</p>
             <h2 className="display mt-4 text-5xl leading-[1] sm:text-7xl">
               Monte seu terno <em className="text-gold-shine">antes de provar</em>
             </h2>
             <p className="mt-6 max-w-md text-ivory/70">Gire o manequim, veja lapela, botões e tecido de perto, troque cores e acompanhe camisa, gravata, colete e blazer sendo vestidos.</p>
             <Link href="/monte-seu-terno" className="btn-shine mt-9 inline-flex h-14 items-center gap-3 rounded-full bg-gold px-8 text-[13px] font-bold uppercase tracking-[0.18em] text-ink transition hover:bg-gold-light">
-              Abrir o ateliê <ArrowRight className="h-4 w-4" />
+              Montar meu terno <ArrowRight className="h-4 w-4" />
             </Link>
           </Reveal>
           <Reveal className="relative mx-auto w-full max-w-[340px]">
             <div className="absolute inset-x-8 bottom-2 h-6 rounded-[50%] bg-black/60 blur-lg" />
-            <Link href="/monte-seu-terno" aria-label="Abrir o Ateliê virtual" className="block transition-transform duration-700 hover:-translate-y-2">
+            <Link href="/monte-seu-terno" aria-label="Montar meu terno" className="block transition-transform duration-700 hover:-translate-y-2">
               <SuitStatic config={{ suit: "marinho", fabric: "risca", lapel: "bico", shirt: "branca", tieStyle: "gravata", tie: "dourada", vest: "terno" }} className="relative h-auto w-full drop-shadow-[0_30px_40px_rgb(0_0_0/0.45)]" />
             </Link>
           </Reveal>

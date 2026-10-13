@@ -97,6 +97,9 @@ model StoreSettings {
   instagram    String?
   facebook     String?
   mapsEmbedUrl String?
+  /// Ponto da loja no mapa da página de contato
+  latitude     Float?
+  longitude    Float?
   foundedAt    DateTime?
 
   // Agenda

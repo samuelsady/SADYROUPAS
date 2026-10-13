@@ -40,7 +40,12 @@ export async function saveCompanyAction(_prev: ActionState, fd: FormData): Promi
     if (input.phone && !phone) throw badRequest("Telefone inválido.");
     if (input.whatsapp && !whatsapp) throw badRequest("WhatsApp inválido.");
     if (input.mapsEmbedUrl && !input.mapsEmbedUrl.startsWith("https://www.google.com/maps/embed")) throw badRequest("O mapa deve ser um link de incorporação do Google Maps.");
-    await db.storeSettings.update({ where: { id: "store" }, data: { ...input, phone, whatsapp, instagram: input.instagram?.replace(/^@/, "") ?? null } });
+    // Coordenadas no formato copiado do Google Maps: "-5.0702, -42.7915"
+    const coords = (formStr(fd, "coordinates") ?? "").trim();
+    const m = coords.match(/^(-?\d{1,2}(?:\.\d+)?)\s*[,;]\s*(-?\d{1,3}(?:\.\d+)?)$/);
+    if (coords && (!m || Math.abs(Number(m[1])) > 90 || Math.abs(Number(m[2])) > 180)) throw badRequest("Coordenadas inválidas. Use o formato -5.0702, -42.7915.");
+    const [latitude, longitude] = m ? [Number(m[1]!), Number(m[2]!)] : [null, null];
+    await db.storeSettings.update({ where: { id: "store" }, data: { ...input, phone, whatsapp, latitude, longitude, instagram: input.instagram?.replace(/^@/, "") ?? null } });
     await AuditService.log(actor, { action: "settings.company_updated", entity: "StoreSettings", entityId: "store", summary: "Dados da empresa alterados" });
   } catch (err) {
     return toActionError(err);

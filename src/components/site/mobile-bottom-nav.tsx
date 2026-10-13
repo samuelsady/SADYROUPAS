@@ -15,7 +15,7 @@ export function MobileBottomNav() {
     { label: "Catálogo", icon: LayoutGrid, href: "/catalogo" },
     { label: "Provador", icon: Shirt, onClick: () => window.dispatchEvent(new Event(OPEN_FITTING_EVENT)), badge: fitting.length || undefined },
     { label: "Agendar", icon: CalendarCheck, href: "/agendamento" },
-    { label: "Ateliê", icon: Sparkles, href: "/monte-seu-terno" },
+    { label: "Montar", icon: Sparkles, href: "/monte-seu-terno" },
   ];
   const active =
     pathname === "/" ? 0 : pathname.startsWith("/catalogo") ? 1 : pathname.startsWith("/agendamento") ? 3 : pathname.startsWith("/monte-seu-terno") ? 4 : -1;

@@ -1,5 +1,7 @@
 import { connection } from "next/server";
 import { AnnouncementBar } from "@/components/site/announcement-bar";
+import { IntroSplash } from "@/components/site/intro-splash";
+import { INTRO_KEY } from "@/lib/intro";
 import { MobileBottomNav } from "@/components/site/mobile-bottom-nav";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
@@ -22,6 +24,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-gold focus:px-4 focus:py-2 focus:text-ink">
         Pular para o conteúdo
       </a>
+      {/* Quem já viu a abertura nesta sessão não a vê de novo (antes da pintura, sem piscar) */}
+      <script dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem("${INTRO_KEY}"))document.documentElement.dataset.intro="seen"}catch(e){}` }} />
+      <IntroSplash />
       <AnnouncementBar />
       <SiteHeader
         categories={categories.filter((c) => c._count.products > 0).map((c) => ({ slug: c.slug, name: c.name, count: c._count.products }))}
