@@ -80,6 +80,7 @@ export function SiteHeader({ categories, occasions, feature }: Props) {
           </button>
           {navLink("/catalogo?ocasiao=casamento", "Casamento")}
           {navLink("/catalogo?ocasiao=formatura", "Formatura")}
+          {navLink("/monte-seu-terno", "Ateliê")}
           {navLink("/contato", "A loja")}
         </nav>
         <div className="lg:hidden">
