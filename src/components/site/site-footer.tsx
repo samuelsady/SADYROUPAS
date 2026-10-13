@@ -74,6 +74,7 @@ export function SiteFooter({ settings, hours }: { settings: StoreSettings; hours
               <li><Link href="/catalogo?ocasiao=casamento" className="link-draw hover:text-ivory">Casamento</Link></li>
               <li><Link href="/catalogo?ocasiao=formatura" className="link-draw hover:text-ivory">Formatura</Link></li>
               <li><Link href="/catalogo?ocasiao=gala" className="link-draw hover:text-ivory">Gala & noite</Link></li>
+              <li><Link href="/monte-seu-terno" className="link-draw hover:text-ivory">Monte seu terno</Link></li>
               <li><Link href="/agendamento" className="link-draw hover:text-ivory">Agendar atendimento</Link></li>
               <li><Link href="/admin" className="link-draw hover:text-ivory">Área da equipe</Link></li>
             </ul>
