@@ -9,6 +9,7 @@ import { Field, Input, Textarea } from "@/components/ui/form";
 import { buttonClass } from "@/components/ui/button";
 import { useOpenDays, useSlots } from "@/hooks/use-availability";
 import { fittingList, useFittingList } from "@/hooks/use-fitting-list";
+import { maskPhoneInput } from "@/utils/phone";
 import { cn } from "@/utils/cn";
 import { formatDateKey, monthName, weekdayName, weekdayOfKey } from "@/utils/datetime";
 
@@ -21,14 +22,6 @@ function StepTitle({ n, title, done }: { n: number; title: string; done?: boolea
       <h2 className="display text-2xl sm:text-[1.7rem]">{title}</h2>
     </div>
   );
-}
-
-function maskPhoneInput(v: string) {
-  const d = v.replace(/\D/g, "").slice(0, 11);
-  if (d.length <= 2) return d;
-  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
-  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
-  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
 }
 
 export function BookingForm({ services, product, initialServiceId }: { services: ServiceOption[]; product: { slug: string; name: string } | null; initialServiceId?: string }) {

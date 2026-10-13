@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Toaster } from "@/components/ui/toaster";
 import { Bell, LogOut, Search } from "lucide-react";
 import { ADMIN_NAV } from "@/components/admin/nav";
+import { InterestService } from "@/services/interest.service";
 import { MobileSidebar, Sidebar } from "@/components/admin/sidebar";
 import { can } from "@/lib/auth/permissions";
 import { requirePageUser } from "@/lib/auth/session";
@@ -18,15 +19,16 @@ export const metadata: Metadata = { title: { default: "Painel", template: "%s ·
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const user = await requirePageUser();
-  const [alerts, settings] = await Promise.all([NotificationService.unreadAlerts(8), SettingsService.get()]);
-  const nav = ADMIN_NAV.map((g) => ({ ...g, items: g.items.filter((i) => !i.permission || can(user.role, i.permission)) }));
+  const [alerts, settings, interests] = await Promise.all([NotificationService.unreadAlerts(8), SettingsService.get(), InterestService.counts()]);
+  const nav = ADMIN_NAV.filter((i) => (!i.permission || can(user.role, i.permission)) && (!i.withoutPermission || !can(user.role, i.withoutPermission)));
+  const badges = { interessados: interests.novos + interests.semLocacao };
 
   return (
     <div className="min-h-svh bg-[#f6f4f0]">
-      <Sidebar nav={nav} />
+      <Sidebar nav={nav} badges={badges} />
       <div className="lg:pl-60">
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-white/90 px-4 backdrop-blur sm:px-6">
-          <MobileSidebar nav={nav} />
+          <MobileSidebar nav={nav} badges={badges} />
           <form action="/admin/busca" className="relative max-w-md flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input name="q" placeholder="Buscar cliente, código, peça…" aria-label="Busca global" className="h-10 w-full rounded-md border border-line bg-[#f6f4f0] pl-9 pr-3 text-sm focus:border-gold focus:bg-white focus:outline-none" />

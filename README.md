@@ -157,6 +157,17 @@ O link da confirmação, que também vai na mensagem de WhatsApp pela variável 
 - **Leitor de QR Code** (`/admin/estoque/leitor`): pela câmera do celular (Chrome/Android), por um leitor USB ou digitando o código. Abre a peça em **modo balcão**, com botões grandes para mudar o status em um toque.
 - **Grade tamanho × status** em cada produto e alerta de **tamanhos esgotados** no dashboard.
 
+## Interessados
+
+Menu **Interessados** (`/admin/interessados`): quem mostrou interesse e precisa de retorno, em quatro grupos:
+
+- **Pediram contato**: no site, a pessoa monta a lista de provas e toca em **"Quero que a loja me chame"** (nome + WhatsApp, sem marcar horário). A loja recebe um aviso no WhatsApp e no sino do painel.
+- **Vão provar**: atendimentos marcados, com as roupas que querem experimentar.
+- **Provaram e não alugaram**: atendimentos concluídos nos últimos 60 dias sem locação depois. Botões para chamar no WhatsApp, criar a locação ou registrar o retorno.
+- **Alugaram**: locações dos últimos 30 dias.
+
+Cada linha tem o botão de WhatsApp com mensagem pronta. Quem pediu contato e depois agenda sai sozinho de "Pediram contato". O número ao lado do menu soma os que aguardam ação.
+
 ## Locações (baixa automática no estoque)
 
 Menu **Locações** no painel (`/admin/locacoes`), com abas Ativas, Retiradas próximas, Devoluções próximas, Atrasadas e Todas.

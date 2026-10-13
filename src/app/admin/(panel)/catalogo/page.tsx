@@ -21,7 +21,7 @@ export default async function AdminCatalogPage({ searchParams }: { searchParams:
   const [products, categories] = await Promise.all([CatalogService.adminList({ q: sp.q, categoryId: sp.categoria }), CatalogService.categories()]);
   return (
     <>
-      <PageHeader title="Catálogo" description="Produtos exibidos no site. Cada produto pode ter várias peças físicas no estoque." actions={<LinkButton href="/admin/catalogo/novo"><Plus className="h-4 w-4" /> Novo produto</LinkButton>} />
+      <PageHeader back={{ href: "/admin/estoque", label: "Estoque" }} title="Catálogo" description="Produtos exibidos no site. Cada produto pode ter várias peças físicas no estoque." actions={<LinkButton href="/admin/catalogo/novo"><Plus className="h-4 w-4" /> Novo produto</LinkButton>} />
       <div className="grid grid-cols-1 gap-6 [&>*]:min-w-0 xl:grid-cols-[1fr_300px]">
         <Card>
           <form className="flex flex-col gap-2 border-b border-line p-3 sm:flex-row">

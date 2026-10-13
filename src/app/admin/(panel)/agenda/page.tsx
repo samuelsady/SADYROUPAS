@@ -68,7 +68,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <PageHeader title="Agenda" description="Atendimentos por dia, semana e mês." actions={<LinkButton href={`/admin/agendamentos/novo?date=${date}`}><Plus className="h-4 w-4" /> Novo agendamento</LinkButton>} />
+      <PageHeader title="Agenda" description="Atendimentos por dia, semana e mês." actions={<><LinkButton href="/admin/agendamentos" variant="outline">Ver em lista</LinkButton><LinkButton href={`/admin/agendamentos/novo?date=${date}`}><Plus className="h-4 w-4" /> Novo agendamento</LinkButton></>} />
 
       <Card className="mb-5 flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-1">

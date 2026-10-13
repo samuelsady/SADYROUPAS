@@ -158,6 +158,9 @@ async function createInternal(p: CreateParams) {
         include,
       });
 
+      // Quem tinha deixado interesse e agora agendou sai da lista de "novos interessados"
+      await tx.interest.updateMany({ where: { customerId, status: { in: ["NEW", "CONTACTED"] } }, data: { status: "CLOSED", closedAt: new Date() } });
+
       const notification = await NotificationService.enqueueAppointmentMessage(tx, "APPOINTMENT_CREATED", appointment, settings);
       let ownerAlertId: string | null = null;
       if (p.source === "WEBSITE") {

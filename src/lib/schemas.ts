@@ -62,6 +62,18 @@ export const publicBookingSchema = z.object({
 });
 export type PublicBookingInput = z.input<typeof publicBookingSchema>;
 
+/** "Quero que a loja me chame": contato + lista de provas, sem agendar. */
+export const publicInterestSchema = z.object({
+  name: nameSchema,
+  whatsapp: phoneSchema,
+  message: optionalText(500),
+  items: z
+    .array(z.object({ slug: z.string().trim().min(1).max(120), size: optionalText(10) }))
+    .min(1, "Adicione ao menos uma peça à lista.")
+    .max(12, "No máximo 12 peças na lista de provas."),
+  company: z.string().max(0, "Requisição inválida.").optional(),
+});
+
 export const appointmentSourceSchema = z.enum(["WEBSITE", "ADMIN", "WHATSAPP", "PHONE", "WALK_IN"]);
 
 export const staffBookingSchema = z

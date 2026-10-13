@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { StoreSettings } from "@prisma/client";
-import { MapPin, Phone, MessageCircle } from "lucide-react";
-import { FacebookIcon, InstagramIcon } from "@/components/ui/brand-icons";
+import { MapPin, Navigation, Phone } from "lucide-react";
+import { InstagramIcon, WhatsAppIcon } from "@/components/ui/brand-icons";
+import { LocationMap } from "@/components/ui/expanded-map";
 import { Wordmark } from "@/components/ui/wordmark";
 import { formatPhone, whatsappLink } from "@/utils/phone";
 import { weekdayName } from "@/utils/datetime";
@@ -28,87 +29,72 @@ export function hoursSummary(hours: Hours) {
 
 export function SiteFooter({ settings, hours }: { settings: StoreSettings; hours: Hours }) {
   const wa = whatsappLink(settings.whatsapp, "Olá! Vim pelo site da Sady Roupas.");
+  const directions = settings.address ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(settings.address)}` : null;
   return (
-    <footer className="aura grain text-ivory/75">
-      <div className="container-site pt-20 sm:pt-28">
-        <div className="flex flex-col gap-10 border-b border-white/10 pb-14 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-xl">
-            <p className="eyebrow">Sady Roupas · Desde 2008</p>
-            <h2 className="display mt-4 text-4xl leading-[1.05] text-ivory sm:text-6xl">
-              Seu próximo grande momento <em className="text-gold-shine font-normal">começa aqui.</em>
-            </h2>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Link href="/agendamento" className="btn-shine inline-flex h-14 items-center justify-center rounded-full bg-gold px-8 text-[13px] font-bold uppercase tracking-[0.18em] text-ink transition hover:bg-gold-light">
-              Agendar atendimento
-            </Link>
+    <footer id="contato" className="scroll-mt-16 bg-ink text-ivory/75">
+      <div className="container-site grid gap-10 py-14 sm:py-16 lg:grid-cols-[1.2fr_1fr_0.8fr] lg:gap-14">
+        <div className="space-y-5">
+          <Wordmark tone="light" className="text-2xl" />
+          {settings.address && settings.latitude != null && settings.longitude != null ? (
+            <LocationMap location="Visite a loja" subtitle={settings.address} latitude={settings.latitude} longitude={settings.longitude} zoom={16}>
+              {directions && (
+                <a href={directions} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center gap-2 rounded-full bg-ink px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-ivory transition hover:bg-gold hover:text-ink">
+                  <Navigation className="h-3.5 w-3.5" /> Como chegar
+                </a>
+              )}
+            </LocationMap>
+          ) : (
+            settings.address && <p className="flex gap-3 text-sm"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold" />{settings.address}</p>
+          )}
+        </div>
+
+        <div>
+          <h3 className="eyebrow mb-4">Fale com a gente</h3>
+          <div className="grid gap-2.5">
             {wa && (
-              <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-white/20 px-8 text-[13px] font-bold uppercase tracking-[0.18em] text-ivory transition hover:border-gold-light hover:text-gold-light">
-                <MessageCircle className="h-4 w-4" /> WhatsApp
+              <a href={wa} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl bg-[#25D366] px-4 py-3 text-white transition hover:-translate-y-0.5 hover:bg-[#1ebe5b]">
+                <WhatsAppIcon className="h-5 w-5" />
+                <span className="text-sm font-bold">WhatsApp · {formatPhone(settings.whatsapp)}</span>
+              </a>
+            )}
+            {settings.instagram && (
+              <a href={`https://instagram.com/${settings.instagram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl bg-[linear-gradient(45deg,#f58529,#dd2a7b_45%,#8134af_75%,#515bd4)] px-4 py-3 text-white transition hover:-translate-y-0.5 hover:brightness-110">
+                <InstagramIcon className="h-5 w-5" />
+                <span className="text-sm font-bold">@{settings.instagram}</span>
+              </a>
+            )}
+            {settings.phone && (
+              <a href={`tel:+${settings.phone}`} className="flex items-center gap-3 rounded-xl border border-white/15 px-4 py-3 text-ivory transition hover:border-gold-light">
+                <Phone className="h-5 w-5 text-gold-light" />
+                <span className="text-sm font-bold">{formatPhone(settings.phone)}</span>
               </a>
             )}
           </div>
         </div>
 
-        <div className="grid gap-12 py-14 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1.2fr]">
-          <div className="space-y-5">
-            <Wordmark tone="light" className="text-2xl" />
-            <p className="max-w-xs text-sm leading-relaxed text-ivory/55">Aluguel de ternos, smokings, becas, roupas sociais e acessórios em Teresina.</p>
-            <div className="flex gap-3">
-              {settings.instagram && (
-                <a href={`https://instagram.com/${settings.instagram}`} target="_blank" rel="noopener noreferrer" className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 transition hover:-translate-y-0.5 hover:border-gold-light hover:text-gold-light" aria-label="Instagram">
-                  <InstagramIcon className="h-4 w-4" />
-                </a>
-              )}
-              {settings.facebook && (
-                <a href={`https://facebook.com/${settings.facebook}`} target="_blank" rel="noopener noreferrer" className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 transition hover:-translate-y-0.5 hover:border-gold-light hover:text-gold-light" aria-label="Facebook">
-                  <FacebookIcon className="h-4 w-4" />
-                </a>
-              )}
-            </div>
-          </div>
-          <div>
-            <h3 className="eyebrow mb-5">Explore</h3>
-            <ul className="space-y-3 text-sm">
-              <li><Link href="/catalogo" className="link-draw hover:text-ivory">Catálogo completo</Link></li>
-              <li><Link href="/catalogo?ocasiao=casamento" className="link-draw hover:text-ivory">Casamento</Link></li>
-              <li><Link href="/catalogo?ocasiao=formatura" className="link-draw hover:text-ivory">Formatura</Link></li>
-              <li><Link href="/catalogo?ocasiao=gala" className="link-draw hover:text-ivory">Gala & noite</Link></li>
-              <li><Link href="/monte-seu-terno" className="link-draw hover:text-ivory">Monte seu terno</Link></li>
-              <li><Link href="/agendamento" className="link-draw hover:text-ivory">Agendar atendimento</Link></li>
-              <li><Link href="/admin" className="link-draw hover:text-ivory">Área da equipe</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="eyebrow mb-5">Horários</h3>
-            <ul className="space-y-2.5 text-sm">
-              {hoursSummary(hours).map((g) => (
-                <li key={g.days} className="flex flex-col">
-                  <span className="text-ivory/45">{g.days}</span>
-                  <span className="text-ivory/85">{g.label}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3 className="eyebrow mb-5">Visite a loja</h3>
-            <ul className="space-y-3.5 text-sm">
-              {settings.address && <li className="flex gap-3"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold" /><span>{settings.address}</span></li>}
-              {settings.phone && <li className="flex gap-3"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-gold" /><a href={`tel:+${settings.phone}`} className="link-draw hover:text-ivory">{formatPhone(settings.phone)}</a></li>}
-              {wa && <li className="flex gap-3"><MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-gold" /><a href={wa} target="_blank" rel="noopener noreferrer" className="link-draw hover:text-ivory">{formatPhone(settings.whatsapp)}</a></li>}
-            </ul>
-          </div>
+        <div>
+          <h3 className="eyebrow mb-4">Horários</h3>
+          <ul className="space-y-2 text-sm">
+            {hoursSummary(hours).map((g) => (
+              <li key={g.days} className="flex justify-between gap-4 border-b border-white/5 pb-2">
+                <span className="text-ivory/55">{g.days}</span>
+                <span className="text-ivory/90">{g.label}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-xs text-ivory/45">Atendimento com hora marcada.</p>
         </div>
       </div>
 
-      {/* Assinatura gigante */}
-      <div className="overflow-hidden" aria-hidden>
-        <p className="display select-none whitespace-nowrap text-center text-[22vw] leading-[0.8] tracking-[-0.03em] text-ivory/[0.05]">SADY ROUPAS</p>
-      </div>
-      <div className="border-t border-white/10 pb-28 md:pb-0">
-        <div className="container-site flex flex-col gap-2 py-6 text-xs text-ivory/40 sm:flex-row sm:justify-between">
-          <span>© {new Date().getFullYear()} {settings.companyName}. Desde 30/10/2008.</span>
-          <span>Teresina — Piauí</span>
+      <div className="border-t border-white/10 pb-24 md:pb-0">
+        <div className="container-site flex flex-col gap-3 py-5 text-xs text-ivory/45 sm:flex-row sm:items-center sm:justify-between">
+          <span>© {new Date().getFullYear()} {settings.companyName} · Desde 2008 · Teresina — PI</span>
+          <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label="Rodapé">
+            <Link href="/catalogo" className="hover:text-ivory">Catálogo</Link>
+            <Link href="/monte-seu-terno" className="hover:text-ivory">Monte seu terno</Link>
+            <Link href="/agendamento" className="hover:text-ivory">Agendar</Link>
+            <Link href="/admin" className="hover:text-ivory">Área da equipe</Link>
+          </nav>
         </div>
       </div>
     </footer>

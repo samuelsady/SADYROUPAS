@@ -152,6 +152,7 @@ model Customer {
   appointments  Appointment[]
   rentals       Rental[]
   notifications Notification[]
+  interests     Interest[]
 
   @@index([name])
 }
@@ -264,6 +265,8 @@ model Appointment {
   completedAt    DateTime?
   cancelledAt    DateTime?
   reminderSentAt DateTime?
+  /// Pós-atendimento resolvido (provou e não alugou: a loja já retornou o contato)
+  followUpAt     DateTime?
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
@@ -348,6 +351,7 @@ model Product {
   appointments     Appointment[]
   kitItems         KitItem[]
   appointmentItems AppointmentItem[]
+  interestItems    InterestItem[]
 
   @@index([categoryId, active])
 }
@@ -477,6 +481,7 @@ enum NotificationEvent {
   PRINT_FAILED
   // V2
   RENTAL_CONFIRMED
+  INTEREST_CREATED
   PICKUP_REMINDER
   RETURN_REMINDER
   RETURN_OVERDUE
@@ -786,4 +791,43 @@ model LateFee {
   createdAt DateTime @default(now())
 
   rental Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+}
+
+// =============================================================================
+// Interessados: cliente deixou nome e WhatsApp com a lista de provas, sem agendar
+// =============================================================================
+
+enum InterestStatus {
+  NEW // NOVO
+  CONTACTED // CONTATADO
+  CLOSED // ENCERRADO
+}
+
+model Interest {
+  id          String         @id @default(cuid())
+  customerId  String
+  status      InterestStatus @default(NEW)
+  message     String?
+  contactedAt DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  customer Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items    InterestItem[]
+
+  @@index([status, createdAt])
+  @@index([customerId])
+}
+
+model InterestItem {
+  id         String  @id @default(cuid())
+  interestId String
+  productId  String
+  size       String?
+
+  interest Interest @relation(fields: [interestId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([interestId])
 }

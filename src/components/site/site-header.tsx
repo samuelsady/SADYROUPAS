@@ -78,8 +78,7 @@ export function SiteHeader({ categories, occasions, feature }: Props) {
           >
             Catálogo
           </button>
-          {navLink("/monte-seu-terno", "Monte seu terno")}
-          {navLink("/contato", "A loja")}
+          {navLink("/#contato", "Contato")}
         </nav>
         <div className="lg:hidden">
           <Link href="/catalogo" className="flex h-11 w-11 items-center justify-center rounded-full text-current/80 hover:text-gold-light" aria-label="Buscar no catálogo">

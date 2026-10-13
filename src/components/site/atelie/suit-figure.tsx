@@ -342,18 +342,3 @@ export function suitLayers(c: SuitConfig): Layer[] {
   ];
 }
 
-/** Manequim vestido, estático (vitrine da home). */
-export function SuitStatic({ config, className }: { config: SuitConfig; className?: string }) {
-  return (
-    <>
-      <SuitDefs />
-      <svg viewBox={VIEWBOX} className={className} role="img" aria-label="Manequim com terno completo">
-        {suitLayers(config)
-          .sort((a, b) => a.z - b.z)
-          .map((l) => (
-            <g key={l.id}>{l.node}</g>
-          ))}
-      </svg>
-    </>
-  );
-}

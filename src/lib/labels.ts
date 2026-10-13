@@ -63,6 +63,7 @@ export const notificationEventLabel: Record<NotificationEvent, string> = {
   APPOINTMENT_REMINDER: "Lembrete de atendimento",
   PRINT_FAILED: "Falha de impressão",
   RENTAL_CONFIRMED: "Locação confirmada",
+  INTEREST_CREATED: "Novo interessado",
   PICKUP_REMINDER: "Lembrete de retirada",
   RETURN_REMINDER: "Lembrete de devolução",
   RETURN_OVERDUE: "Devolução atrasada",

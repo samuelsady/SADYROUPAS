@@ -35,7 +35,7 @@ export default async function NotificationsPage({ searchParams }: { searchParams
 
   return (
     <>
-      <PageHeader title="Notificações" description="Mensagens automáticas de WhatsApp e alertas internos do painel." />
+      <PageHeader back={{ href: "/admin/configuracoes", label: "Configurações" }} title="Mensagens enviadas" description="Mensagens automáticas de WhatsApp e alertas internos do painel." />
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <div className="flex rounded-md border border-line bg-white p-0.5 text-xs font-semibold">
           <Link href="/admin/notificacoes" className={cn("rounded px-3 py-1.5", tab === "whatsapp" ? "bg-ink text-ivory" : "text-muted-foreground")}>WhatsApp</Link>
