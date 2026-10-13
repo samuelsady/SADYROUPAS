@@ -60,6 +60,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               <Field label="Instagram" hint="Somente o usuário"><Input name="instagram" defaultValue={settings.instagram ?? ""} /></Field>
               <Field label="Facebook" hint="Somente o usuário"><Input name="facebook" defaultValue={settings.facebook ?? ""} /></Field>
               <Field label="Endereço" className="sm:col-span-2"><Input name="address" defaultValue={settings.address ?? ""} /></Field>
+              <Field label="Ponto da loja no mapa" hint="No Google Maps, clique com o botão direito em cima da loja e toque nos números para copiar" className="sm:col-span-2"><Input name="coordinates" placeholder="-5.0702, -42.7915" defaultValue={settings.latitude != null && settings.longitude != null ? `${settings.latitude}, ${settings.longitude}` : ""} /></Field>
               <Field label="Mapa (link de incorporação do Google Maps)" className="sm:col-span-2"><Input name="mapsEmbedUrl" defaultValue={settings.mapsEmbedUrl ?? ""} /></Field>
             </div>
           </SimpleForm>

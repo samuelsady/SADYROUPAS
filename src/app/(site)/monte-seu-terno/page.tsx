@@ -4,7 +4,7 @@ import { CatalogService } from "@/services/catalog.service";
 import { SettingsService } from "@/services/settings.service";
 
 export const metadata: Metadata = {
-  title: "Monte seu terno — Ateliê virtual",
+  title: "Monte seu terno",
   description: "Gire o manequim, veja os detalhes de perto, troque cores e tecidos e acompanhe o terno sendo vestido peça por peça.",
 };
 
@@ -14,7 +14,7 @@ export default async function SuitBuilderPage() {
     <>
       <section className="aura grain text-ivory">
         <div className="container-site py-14 sm:py-20">
-          <p className="eyebrow">Ateliê virtual</p>
+          <p className="eyebrow">Do seu jeito</p>
           <h1 className="display mt-3 max-w-3xl text-4xl leading-[1.05] sm:text-6xl">
             Monte seu terno <em className="text-gold-shine">peça por peça</em>
           </h1>

@@ -436,6 +436,16 @@
   }
 }
 
+/* Abertura do site: escondida para quem já viu nesta sessão ou prefere menos movimento */
+[data-intro="seen"] .intro-splash {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-splash {
+    display: none;
+  }
+}
+
 @media print {
   .no-print {
     display: none !important;

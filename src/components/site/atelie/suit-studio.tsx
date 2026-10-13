@@ -183,7 +183,7 @@ export function SuitStudio({ whatsapp, catalogColors }: { whatsapp: string | nul
   const tone = find(SUIT_TONES, config.suit);
   const lightTint = find(LIGHTS, light);
   const summary = describe(config);
-  const wa = whatsappLink(whatsapp, `Olá! Montei este look no Ateliê virtual do site: ${summary}. Vocês têm algo assim para eu provar?`);
+  const wa = whatsappLink(whatsapp, `Olá! Montei este look na página "Monte seu terno" do site: ${summary}. Vocês têm algo assim para eu provar?`);
   const catalogHref = tone.catalog && catalogColors.includes(tone.catalog) ? `/catalogo?cor=${encodeURIComponent(tone.catalog)}` : "/catalogo";
   const stepInfo = step ? PIECES.find((p) => p.id === step) : null;
 

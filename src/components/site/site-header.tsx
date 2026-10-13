@@ -78,9 +78,7 @@ export function SiteHeader({ categories, occasions, feature }: Props) {
           >
             Catálogo
           </button>
-          {navLink("/catalogo?ocasiao=casamento", "Casamento")}
-          {navLink("/catalogo?ocasiao=formatura", "Formatura")}
-          {navLink("/monte-seu-terno", "Ateliê")}
+          {navLink("/monte-seu-terno", "Monte seu terno")}
           {navLink("/contato", "A loja")}
         </nav>
         <div className="lg:hidden">

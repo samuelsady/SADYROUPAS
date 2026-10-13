@@ -1,4 +1,4 @@
-/** Opções do Ateliê virtual (monte seu terno). Textos em português do Brasil. */
+/** Opções da página "Monte seu terno". Textos em português do Brasil. */
 
 export type Swatch = { id: string; label: string; hex: string; catalog?: string };
 
