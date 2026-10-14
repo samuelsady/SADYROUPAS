@@ -97,6 +97,9 @@ type CreateParams = {
   internalNotes?: string | null;
   productId?: string | null;
   items?: FittingItemInput[];
+  eventDate?: string | null;
+  eventRole?: string | null;
+  piecesNeeded?: string[];
   source: AppointmentSource;
   staff: boolean;
   actor: Actor;
@@ -150,6 +153,12 @@ async function createInternal(p: CreateParams) {
           blockedUntil: slot.blockedUntil,
           lane,
           source: p.source,
+          // Pedido pelo site aguarda a loja confirmar; agendamento feito pela equipe já nasce confirmado
+          status: p.staff ? "CONFIRMED" : "SCHEDULED",
+          confirmedAt: p.staff ? new Date() : null,
+          eventDate: p.eventDate ? new Date(`${p.eventDate}T00:00:00Z`) : null,
+          eventRole: p.eventRole ?? null,
+          piecesNeeded: p.piecesNeeded ?? [],
           notes: p.notes ?? null,
           internalNotes: p.staff ? (p.internalNotes ?? null) : null,
           createdById: p.actor.userId,
@@ -161,13 +170,13 @@ async function createInternal(p: CreateParams) {
       // Quem tinha deixado interesse e agora agendou sai da lista de "novos interessados"
       await tx.interest.updateMany({ where: { customerId, status: { in: ["NEW", "CONTACTED"] } }, data: { status: "CLOSED", closedAt: new Date() } });
 
-      const notification = await NotificationService.enqueueAppointmentMessage(tx, "APPOINTMENT_CREATED", appointment, settings);
+      const notification = await NotificationService.enqueueAppointmentMessage(tx, p.staff ? "APPOINTMENT_CONFIRMED" : "APPOINTMENT_CREATED", appointment, settings);
       let ownerAlertId: string | null = null;
       if (p.source === "WEBSITE") {
         ownerAlertId = (await NotificationService.enqueueOwnerAlert(tx, appointment, settings))?.id ?? null;
         await NotificationService.alert(tx, {
           event: "APPOINTMENT_CREATED",
-          title: "Novo agendamento pelo site",
+          title: "Novo pedido de agendamento",
           body: `${appointment.customer.name} — ${appointment.service.name} em ${formatDate(appointment.startsAt, settings.timezone)} às ${toTimeKey(appointment.startsAt, settings.timezone)}`,
           appointmentId: appointment.id,
           customerId,
@@ -221,6 +230,9 @@ export const AppointmentService = {
       notes: input.notes,
       productId: items[0]?.productId ?? null,
       items,
+      eventDate: input.eventDate,
+      eventRole: input.eventRole ?? null,
+      piecesNeeded: input.piecesNeeded,
       source: "WEBSITE",
       staff: false,
       actor,
@@ -339,7 +351,9 @@ export const AppointmentService = {
         if (to === "CANCELLED" || to === "NO_SHOW") {
           await FittingService.releaseAllInTx(tx, id, actor, to === "CANCELLED" ? `Agendamento ${appointment.code} cancelado` : `Cliente não compareceu (${appointment.code})`);
         }
-        const notification = to === "CANCELLED" ? await NotificationService.enqueueAppointmentMessage(tx, "APPOINTMENT_CANCELLED", appointment, settings) : null;
+        // Pedido confirmado pela loja (ou pelo agente de WhatsApp): o cliente recebe a confirmação
+        const event = to === "CANCELLED" ? "APPOINTMENT_CANCELLED" : to === "CONFIRMED" && current.status === "SCHEDULED" ? "APPOINTMENT_CONFIRMED" : null;
+        const notification = event ? await NotificationService.enqueueAppointmentMessage(tx, event, appointment, settings) : null;
         await AuditService.log(
           actor,
           {
@@ -386,7 +400,7 @@ export const AppointmentService = {
     return db.appointment.findUnique({
       where: { publicToken: token },
       include: {
-        customer: { select: { name: true } },
+        customer: { select: { name: true, whatsapp: true } },
         service: true,
         items: { orderBy: { createdAt: "asc" }, include: { product: { select: { name: true, slug: true, images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } } } } } },
       },

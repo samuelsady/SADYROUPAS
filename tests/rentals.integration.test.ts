@@ -118,7 +118,7 @@ describe("Aviso no WhatsApp da loja", () => {
     while (weekdayOfKey(d) === 0) d = addDaysKey(d, 1);
     const { appointment } = await AppointmentService.createFromWebsite({ name: "Maria Santos", whatsapp: "86999990002", serviceId, date: d, time: "10:00", notes: "Formatura" }, actor);
     const alert = await db.notification.findFirstOrThrow({ where: { appointmentId: appointment.id, recipient: "5586988100001" } });
-    expect(alert.body).toContain("Novo agendamento pelo site");
+    expect(alert.body).toContain("Novo pedido de agendamento pelo site");
     expect(alert.body).toContain("Maria Santos");
     expect(alert.body).toContain("Formatura");
   });

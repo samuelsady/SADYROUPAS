@@ -162,7 +162,9 @@ export const InterestService = {
 
     return {
       novos: interests.map((i) => ({ id: i.id, status: i.status, createdAt: i.createdAt, contactedAt: i.contactedAt, message: i.message, customer: i.customer, pieces: i.items.map((x) => piece(x.product, x.size)) })),
-      agendados: scheduled.map((a) => ({ id: a.id, code: a.code, startsAt: a.startsAt, service: a.service.name, customer: a.customer, pieces: apptPieces(a) })),
+      // Pedidos do site esperando a loja confirmar o horário
+      pedidos: scheduled.filter((a) => a.status === "SCHEDULED").map((a) => ({ id: a.id, code: a.code, startsAt: a.startsAt, service: a.service.name, customer: a.customer, pieces: apptPieces(a), eventRole: a.eventRole, eventDate: a.eventDate, piecesNeeded: a.piecesNeeded, notes: a.notes })),
+      agendados: scheduled.filter((a) => a.status === "CONFIRMED").map((a) => ({ id: a.id, code: a.code, startsAt: a.startsAt, service: a.service.name, customer: a.customer, pieces: apptPieces(a), eventRole: a.eventRole, eventDate: a.eventDate, piecesNeeded: a.piecesNeeded, notes: a.notes })),
       // Sem locação ligada ao atendimento nem criada depois dele
       semLocacao: completed
         .filter((a) => !a.rental && !a.customer.rentals.some((r) => r.createdAt >= a.startsAt))
@@ -181,13 +183,14 @@ export const InterestService = {
 
   /** Contadores para o menu e o painel "Hoje" (mesmas regras do quadro). */
   async counts() {
-    const [novos, completed] = await Promise.all([
+    const [novos, pedidos, completed] = await Promise.all([
       db.interest.count({ where: { status: "NEW" } }),
+      db.appointment.count({ where: { status: "SCHEDULED", startsAt: { gte: new Date(Date.now() - 2 * 60 * 60 * 1000) } } }),
       db.appointment.findMany({
         where: { status: "COMPLETED", followUpAt: null, rental: null, startsAt: { gte: new Date(Date.now() - FOLLOW_UP_DAYS * DAY) } },
         select: { startsAt: true, customer: { select: { rentals: { where: { status: { not: "CANCELLED" } }, select: { createdAt: true } } } } },
       }),
     ]);
-    return { novos, semLocacao: completed.filter((a) => !a.customer.rentals.some((r) => r.createdAt >= a.startsAt)).length };
+    return { novos, pedidos, semLocacao: completed.filter((a) => !a.customer.rentals.some((r) => r.createdAt >= a.startsAt)).length };
   },
 };

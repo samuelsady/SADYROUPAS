@@ -46,7 +46,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
       <section aria-label="Resumo de hoje" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Atendimentos hoje" value={data.counts.active} icon={CalendarClock} href="/admin/agenda" />
-        <Stat label="Interessados aguardando" value={interests.novos + interests.semLocacao} icon={Sparkles} tone="gold" href="/admin/interessados" />
+        <Stat label="Pedidos e interessados" value={interests.pedidos + interests.novos + interests.semLocacao} icon={Sparkles} tone="gold" href="/admin/interessados" />
         <Stat label="Retiradas hoje" value={data.rentals.pickups} icon={PackageCheck} href="/admin/locacoes?aba=retiradas" />
         <Stat label={data.rentals.overdue ? `Devoluções (${data.rentals.overdue} atrasada${data.rentals.overdue > 1 ? "s" : ""})` : "Devoluções hoje"} value={data.rentals.returns + data.rentals.overdue} icon={Undo2} tone={data.rentals.overdue ? "red" : "ink"} href={data.rentals.overdue ? "/admin/locacoes?aba=atrasadas" : "/admin/locacoes?aba=devolucoes"} />
       </section>

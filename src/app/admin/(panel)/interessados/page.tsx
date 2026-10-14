@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarCheck, CalendarPlus, Check, FileSignature, PhoneCall, Sparkles, X } from "lucide-react";
+import { CalendarCheck, CalendarClock, CalendarPlus, Check, FileSignature, PhoneCall, Sparkles, X } from "lucide-react";
 import { ActionButton } from "@/components/admin/action-button";
 import { PageHeader } from "@/components/admin/page-header";
 import { WhatsAppIcon } from "@/components/ui/brand-icons";
@@ -14,7 +14,9 @@ import { SettingsService } from "@/services/settings.service";
 import { formatRentalNumber } from "@/utils/codes";
 import { formatDate, formatDateKey, toTimeKey } from "@/utils/datetime";
 import { formatPhone, whatsappLink } from "@/utils/phone";
+import { changeAppointmentStatusAction } from "../_actions/appointments";
 import { closeInterestAction, followUpDoneAction, markInterestContactedAction } from "../_actions/interests";
+import { eventRoleLabel, pieceLabel } from "@/lib/event-roles";
 
 export const metadata: Metadata = { title: "Interessados" };
 
@@ -39,6 +41,12 @@ function Pieces({ pieces }: { pieces: (InterestPiece & { code?: string })[] }) {
       ))}
     </ul>
   );
+}
+
+function EventInfo({ role, eventDate, pieces }: { role: string | null; eventDate: Date | null; pieces: string[] }) {
+  const parts = [eventRoleLabel(role), eventDate && `Evento ${formatDateKey(eventDate.toISOString().slice(0, 10))}`, pieces.length ? pieces.map(pieceLabel).join(", ") : null].filter(Boolean);
+  if (!parts.length) return null;
+  return <p className="mt-1.5 text-xs font-medium text-gold-dark">{parts.join(" · ")}</p>;
 }
 
 function WhatsButton({ customer, text }: { customer: Person; text: string }) {
@@ -89,17 +97,18 @@ export default async function InterestsPage() {
   const tz = settings.timezone;
   const when = (d: Date) => `${formatDate(d, tz)} às ${toTimeKey(d, tz)}`;
   const summary = [
+    { id: "pedidos", label: "Aguardando confirmação", n: board.pedidos.length, tone: "gold" as const },
     { id: "novos", label: "Pediram contato", n: board.novos.length, tone: "gold" as const },
-    { id: "agendados", label: "Vão provar", n: board.agendados.length, tone: "neutral" as const },
+    { id: "agendados", label: "Confirmados", n: board.agendados.length, tone: "neutral" as const },
     { id: "retornar", label: "Provaram e não alugaram", n: board.semLocacao.length, tone: "amber" as const },
     { id: "alugaram", label: "Alugaram (30 dias)", n: board.alugaram.length, tone: "green" as const },
   ];
 
   return (
     <>
-      <PageHeader title="Interessados" description="Quem mostrou interesse nas roupas e o que precisa de retorno. Comece pelos que pediram contato." />
+      <PageHeader title="Interessados" description="Pedidos do site, quem pediu contato e quem precisa de retorno. Comece pelos que aguardam confirmação." />
 
-      <nav className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Resumo">
+      <nav className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5" aria-label="Resumo">
         {summary.map((s) => (
           <a key={s.id} href={`#${s.id}`} className="rounded-xl border border-line bg-card p-4 transition hover:border-ink/25">
             <p className="text-xs font-semibold text-muted-foreground">{s.label}</p>
@@ -109,6 +118,28 @@ export default async function InterestsPage() {
       </nav>
 
       <div className="space-y-10">
+        <Section id="pedidos" title="Aguardando confirmação" hint="Pedidos feitos no site: confira o horário, responda no WhatsApp e confirme. Para mudar o horário, abra o pedido." count={board.pedidos.length} icon={CalendarClock} empty="Nenhum pedido esperando confirmação.">
+          {board.pedidos.map((a) => (
+            <Row
+              key={a.id}
+              tone="new"
+              customer={a.customer}
+              pieces={a.pieces}
+              note={a.notes}
+              when={<>Quer vir: <span className="font-semibold text-ink">{when(a.startsAt)}</span></>}
+              actions={
+                <>
+                  <WhatsButton customer={a.customer} text={`Olá, ${firstName(a.customer.name)}! Aqui é da Sady Roupas. Seu horário de ${when(a.startsAt)} está confirmado. Te esperamos!`} />
+                  <ActionButton action={changeAppointmentStatusAction} fields={{ id: a.id, status: "CONFIRMED" }} size="sm" variant="primary"><Check className="h-3.5 w-3.5" /> Confirmar</ActionButton>
+                  <Link href={`/admin/agendamentos/${a.id}`} className="inline-flex h-9 items-center rounded-md border border-line px-3 text-xs font-semibold hover:border-ink">Outro horário</Link>
+                </>
+              }
+            >
+              <EventInfo role={a.eventRole} eventDate={a.eventDate} pieces={a.piecesNeeded} />
+            </Row>
+          ))}
+        </Section>
+
         <Section id="novos" title="Pediram contato" hint="Deixaram nome e WhatsApp com a lista de provas no site, sem marcar horário." count={board.novos.length} icon={Sparkles} empty="Ninguém aguardando contato.">
           {board.novos.map((i) => (
             <Row
@@ -133,20 +164,23 @@ export default async function InterestsPage() {
           ))}
         </Section>
 
-        <Section id="agendados" title="Vão provar" hint="Atendimentos marcados, com as roupas que querem experimentar — separe as peças antes." count={board.agendados.length} icon={CalendarCheck} empty="Nenhum atendimento marcado.">
+        <Section id="agendados" title="Confirmados" hint="Atendimentos confirmados, com as roupas que querem experimentar — separe as peças antes." count={board.agendados.length} icon={CalendarCheck} empty="Nenhum atendimento marcado.">
           {board.agendados.map((a) => (
             <Row
               key={a.id}
               customer={a.customer}
               pieces={a.pieces}
               when={<>{a.service} · <span className="font-semibold text-ink">{when(a.startsAt)}</span></>}
+              note={a.notes}
               actions={
                 <>
                   <WhatsButton customer={a.customer} text={`Olá, ${firstName(a.customer.name)}! Aqui é da Sady Roupas. Passando para confirmar seu atendimento em ${when(a.startsAt)}.`} />
                   <Link href={`/admin/agendamentos/${a.id}`} className="inline-flex h-9 items-center rounded-md border border-line px-3 text-xs font-semibold hover:border-ink">Abrir</Link>
                 </>
               }
-            />
+            >
+              <EventInfo role={a.eventRole} eventDate={a.eventDate} pieces={a.piecesNeeded} />
+            </Row>
           ))}
         </Section>
 

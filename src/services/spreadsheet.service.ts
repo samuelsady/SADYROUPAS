@@ -3,6 +3,7 @@ import ExcelJS from "exceljs";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/database/client";
 import { appointmentSourceLabel, appointmentStatusLabel, inventoryStatusLabel, rentalStatusLabel } from "@/lib/labels";
+import { eventRoleLabel, pieceLabel } from "@/lib/event-roles";
 import { formatRentalNumber } from "@/utils/codes";
 import { addDaysKey, dayRangeUtc, isDateKey, toDateKey, toTimeKey, todayKey } from "@/utils/datetime";
 import { formatPhone } from "@/utils/phone";
@@ -97,8 +98,11 @@ async function appointments(f: SheetFilters, tz: string): Promise<Sheet> {
       { key: "cliente", header: "Cliente", width: 28 },
       { key: "whatsapp", header: "WhatsApp", width: 18 },
       { key: "servico", header: "Atendimento", width: 22 },
-      { key: "status", header: "Status", width: 15 },
+      { key: "status", header: "Status", width: 22 },
       { key: "origem", header: "Origem", width: 11 },
+      { key: "para", header: "Para", width: 16 },
+      { key: "evento", header: "Data do evento", width: 13, type: "date" },
+      { key: "pecasPrecisa", header: "Peças que precisa", width: 30, wide: true },
       { key: "roupas", header: "Roupas de interesse", width: 40, wide: true },
       { key: "pecas", header: "Peças separadas", width: 24 },
       { key: "locacao", header: "Locação", width: 10 },
@@ -118,6 +122,9 @@ async function appointments(f: SheetFilters, tz: string): Promise<Sheet> {
         servico: a.service.name,
         status: appointmentStatusLabel[a.status],
         origem: appointmentSourceLabel[a.source],
+        para: eventRoleLabel(a.eventRole),
+        evento: a.eventDate ? a.eventDate.toISOString().slice(0, 10) : null,
+        pecasPrecisa: a.piecesNeeded.map(pieceLabel).join(", ") || null,
         roupas: [...new Set(interest)].join(", ") || null,
         pecas: a.items.map((i) => i.inventoryItem?.code).filter(Boolean).join(", ") || null,
         locacao: a.rental ? formatRentalNumber(a.rental.number) : null,

@@ -21,7 +21,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const user = await requirePageUser();
   const [alerts, settings, interests] = await Promise.all([NotificationService.unreadAlerts(8), SettingsService.get(), InterestService.counts()]);
   const nav = ADMIN_NAV.filter((i) => (!i.permission || can(user.role, i.permission)) && (!i.withoutPermission || !can(user.role, i.withoutPermission)));
-  const badges = { interessados: interests.novos + interests.semLocacao };
+  const badges = { interessados: interests.pedidos + interests.novos + interests.semLocacao };
 
   return (
     <div className="min-h-svh bg-[#f6f4f0]">

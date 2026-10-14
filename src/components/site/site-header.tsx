@@ -24,7 +24,8 @@ type Props = { categories: HeaderCategory[]; occasions: HeaderOccasion[]; featur
  */
 export function SiteHeader({ categories, occasions, feature }: Props) {
   const pathname = usePathname();
-  const overlayPage = pathname === "/";
+  // Cabeçalho sempre sólido: a home agora abre com fundo claro
+  const overlayPage = false;
   const [scrolled, setScrolled] = useState(false);
   const [menuOn, setMenuOn] = useState<string | null>(null);
   const megaOpen = menuOn === pathname;
@@ -78,7 +79,8 @@ export function SiteHeader({ categories, occasions, feature }: Props) {
           >
             Catálogo
           </button>
-          {navLink("/#contato", "Contato")}
+          {navLink("/monte-seu-terno", "Monte seu terno")}
+          {navLink("/#contato", "Localização")}
         </nav>
         <div className="lg:hidden">
           <Link href="/catalogo" className="flex h-11 w-11 items-center justify-center rounded-full text-current/80 hover:text-gold-light" aria-label="Buscar no catálogo">

@@ -265,6 +265,10 @@ model Appointment {
   completedAt    DateTime?
   cancelledAt    DateTime?
   reminderSentAt DateTime?
+  /// Pedido do cliente: data do evento, para quem é a roupa e peças que precisa
+  eventDate      DateTime?         @db.Date
+  eventRole      String?
+  piecesNeeded   String[]          @default([])
   /// Pós-atendimento resolvido (provou e não alugou: a loja já retornou o contato)
   followUpAt     DateTime?
   createdAt      DateTime          @default(now())
@@ -475,6 +479,7 @@ enum NotificationStatus {
 /// Eventos do sistema que geram comunicação.
 enum NotificationEvent {
   APPOINTMENT_CREATED
+  APPOINTMENT_CONFIRMED
   APPOINTMENT_UPDATED
   APPOINTMENT_CANCELLED
   APPOINTMENT_REMINDER

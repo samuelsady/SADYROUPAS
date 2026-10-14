@@ -8,8 +8,14 @@ import type { NotificationEvent } from "@prisma/client";
 export const DEFAULT_TEMPLATES: { event: NotificationEvent; name: string; body: string; waParams: string[] }[] = [
   {
     event: "APPOINTMENT_CREATED",
-    name: "Confirmação de agendamento",
-    body: "Olá, {nome}! Seu atendimento na Sady Roupas foi confirmado.\n\n📅 Data: {data}\n🕐 Horário: {horario}\n📌 Serviço: {servico}\n🔖 Código: {codigo}\n\nPara ver, remarcar ou cancelar: {link}\n\nEsperamos você!",
+    name: "Pedido de agendamento recebido",
+    body: "Olá, {nome}! Recebemos seu pedido de atendimento na Sady Roupas.\n\n📅 Data desejada: {data}\n🕐 Horário: {horario}\n📌 Serviço: {servico}\n🔖 Código: {codigo}\n\nVamos confirmar a disponibilidade por aqui em instantes.",
+    waParams: ["nome", "data", "horario", "servico", "codigo"],
+  },
+  {
+    event: "APPOINTMENT_CONFIRMED",
+    name: "Agendamento confirmado",
+    body: "Olá, {nome}! Seu atendimento na Sady Roupas está confirmado. ✅\n\n📅 Data: {data}\n🕐 Horário: {horario}\n📌 Serviço: {servico}\n🔖 Código: {codigo}\n\nPara ver, remarcar ou cancelar: {link}\n\nEsperamos você!",
     waParams: ["nome", "data", "horario", "servico", "codigo"],
   },
   {
@@ -57,4 +63,4 @@ export const DEFAULT_TEMPLATES: { event: NotificationEvent; name: string; body: 
 ];
 
 /** Eventos que geram mensagem ao cliente na V1. */
-export const V1_WHATSAPP_EVENTS: NotificationEvent[] = ["APPOINTMENT_CREATED", "APPOINTMENT_UPDATED", "APPOINTMENT_CANCELLED", "APPOINTMENT_REMINDER", "RENTAL_CONFIRMED", "RETURN_OVERDUE"];
+export const V1_WHATSAPP_EVENTS: NotificationEvent[] = ["APPOINTMENT_CREATED", "APPOINTMENT_CONFIRMED", "APPOINTMENT_UPDATED", "APPOINTMENT_CANCELLED", "APPOINTMENT_REMINDER", "RENTAL_CONFIRMED", "RETURN_OVERDUE"];

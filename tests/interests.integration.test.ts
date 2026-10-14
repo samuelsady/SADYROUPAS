@@ -48,13 +48,23 @@ describe("Interessados", () => {
     await expect(InterestService.createFromWebsite(lead({ items: [] }), actor)).rejects.toThrow();
   });
 
-  it("ao agendar, o interesse sai de 'pediram contato' e vai para 'vão provar'", async () => {
+  it("ao pedir horário, o interesse sai de 'pediram contato' e vai para 'aguardando confirmação'; confirmar move para 'confirmados'", async () => {
     await InterestService.createFromWebsite(lead(), actor);
-    await AppointmentService.createFromWebsite({ name: "Carlos Lima", whatsapp: "86999991111", serviceId, date: addDaysKey(today, 2), time: "10:00", items: [{ slug: "terno-azul", size: "48" }] }, actor);
-    const board = await InterestService.board();
+    const { appointment } = await AppointmentService.createFromWebsite(
+      { name: "Carlos Lima", whatsapp: "86999991111", serviceId, date: addDaysKey(today, 2), time: "10:00", items: [{ slug: "terno-azul", size: "48" }], eventRole: "noivo", eventDate: addDaysKey(today, 30), piecesNeeded: ["terno", "colete"] },
+      actor,
+    );
+    let board = await InterestService.board();
     expect(board.novos).toHaveLength(0);
+    expect(board.pedidos).toHaveLength(1);
+    expect(board.pedidos[0]).toMatchObject({ eventRole: "noivo", piecesNeeded: ["terno", "colete"] });
+    expect(board.pedidos[0]!.pieces[0]!.name).toBe("Terno Azul");
+    expect((await InterestService.counts()).pedidos).toBe(1);
+
+    await AppointmentService.changeStatus(appointment.id, "CONFIRMED", actor);
+    board = await InterestService.board();
+    expect(board.pedidos).toHaveLength(0);
     expect(board.agendados).toHaveLength(1);
-    expect(board.agendados[0]!.pieces[0]!.name).toBe("Terno Azul");
   });
 
   it("provou e não alugou aparece para retorno até alugar ou registrar o retorno", async () => {
