@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EVENT_ROLES, PIECES_NEEDED, type EventRole, type PieceNeeded } from "./event-roles";
 import { isDateKey, isTimeKey } from "@/utils/datetime";
 import { normalizePhone } from "@/utils/phone";
 import { OCCASIONS } from "./occasions";
@@ -57,10 +58,31 @@ export const publicBookingSchema = z.object({
     .array(z.object({ slug: z.string().trim().min(1).max(120), size: optionalText(10) }))
     .max(12, "No máximo 12 peças na lista de provas.")
     .default([]),
+  /** Para quem é a roupa, data do evento e peças que precisa */
+  eventRole: z.enum(EVENT_ROLES.map((r) => r.id) as [EventRole, ...EventRole[]]).optional().nullable(),
+  eventDate: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => (v ? v : null))
+    .refine((v) => v === null || isDateKey(v), "Data do evento inválida."),
+  piecesNeeded: z.array(z.enum(PIECES_NEEDED.map((p) => p.id) as [PieceNeeded, ...PieceNeeded[]])).max(PIECES_NEEDED.length).default([]),
   /** Honeypot anti-robô: humanos não veem este campo. */
   company: z.string().max(0, "Requisição inválida.").optional(),
 });
 export type PublicBookingInput = z.input<typeof publicBookingSchema>;
+
+/** "Quero que a loja me chame": contato + lista de provas, sem agendar. */
+export const publicInterestSchema = z.object({
+  name: nameSchema,
+  whatsapp: phoneSchema,
+  message: optionalText(500),
+  items: z
+    .array(z.object({ slug: z.string().trim().min(1).max(120), size: optionalText(10) }))
+    .min(1, "Adicione ao menos uma peça à lista.")
+    .max(12, "No máximo 12 peças na lista de provas."),
+  company: z.string().max(0, "Requisição inválida.").optional(),
+});
 
 export const appointmentSourceSchema = z.enum(["WEBSITE", "ADMIN", "WHATSAPP", "PHONE", "WALK_IN"]);
 

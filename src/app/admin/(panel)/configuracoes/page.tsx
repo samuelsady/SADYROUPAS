@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Checkbox, Field, Input, Select, Textarea } from "@/components/ui/form";
 import { db } from "@/database/client";
+import { LinkButton } from "@/components/ui/button";
 import { requirePageUser } from "@/lib/auth/session";
 import { env } from "@/lib/env";
 import { notificationEventLabel, roleLabel } from "@/lib/labels";
@@ -29,7 +30,7 @@ const TABS = [
   ["bloqueios", "Bloqueios"],
   ["whatsapp", "WhatsApp"],
   ["impressora", "Impressora"],
-  ["locacao", "Locação (V2)"],
+  ["locacao", "Locação"],
   ["usuarios", "Usuários"],
 ] as const;
 
@@ -42,7 +43,11 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader title="Configurações" description="Ajustes da loja, agenda, mensagens e impressão." />
+      <PageHeader
+        title="Configurações"
+        description="Ajustes da loja, agenda, mensagens e impressão."
+        actions={<><LinkButton href="/admin/impressoes" variant="outline" size="sm">Fila de impressão</LinkButton><LinkButton href="/admin/notificacoes" variant="outline" size="sm">Mensagens enviadas</LinkButton><LinkButton href="/admin/auditoria" variant="outline" size="sm">Histórico de ações</LinkButton></>}
+      />
       <div className="mb-6 flex gap-1 overflow-x-auto border-b border-line">
         {TABS.map(([k, label]) => (
           <Link key={k} href={`/admin/configuracoes?aba=${k}`} className={cn("whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold", tab === k ? "border-gold text-ink" : "border-transparent text-muted-foreground hover:text-ink")}>{label}</Link>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Columns2, Columns3, Columns4, X } from "lucide-react";
+import { Columns2, Columns3, Columns4, Sparkles, X } from "lucide-react";
 import { FilterDrawer } from "@/components/site/catalog/filter-drawer";
 import { SortSelect } from "@/components/site/catalog/sort-select";
 import { ProductCard } from "@/components/site/product-card";
@@ -151,7 +151,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: SP }
   return (
     <>
       {/* Cabeçalho da coleção */}
-      <section className="aura grain -mt-px pb-10 pt-14 text-ivory sm:pb-14 sm:pt-20">
+      <section className="aura grain -mt-px pb-8 pt-10 text-ivory sm:pb-10 sm:pt-14">
         <div className="container-site">
           <nav aria-label="Trilha" className="text-[11px] font-semibold uppercase tracking-[0.24em] text-ivory/45">
             <Link href="/" className="hover:text-gold-light">Início</Link> <span className="mx-2">/</span>
@@ -160,13 +160,18 @@ export default async function CatalogPage({ searchParams }: { searchParams: SP }
           </nav>
           <div className="mt-6 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
             <div>
-              <h1 className="display text-5xl leading-[0.95] sm:text-7xl lg:text-8xl">{title}</h1>
+              <h1 className="display text-4xl leading-[0.95] sm:text-6xl">{title}</h1>
               <p className="mt-4 max-w-xl text-ivory/65">{subtitle}</p>
             </div>
-            <p className="font-display text-2xl text-gold-light">{products.length} {products.length === 1 ? "traje" : "trajes"}</p>
+            <div className="flex flex-wrap items-center gap-4">
+              <p className="font-display text-2xl text-gold-light">{products.length} {products.length === 1 ? "traje" : "trajes"}</p>
+              <Link href="/monte-seu-terno" className="inline-flex h-10 items-center gap-2 rounded-full border border-gold-light/40 px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-gold-light transition hover:bg-gold-light hover:text-ink">
+                <Sparkles className="h-3.5 w-3.5" /> Monte seu terno
+              </Link>
+            </div>
           </div>
           {/* Ocasiões em destaque */}
-          <div className="-mx-5 mt-10 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+          <div className="-mx-5 mt-7 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
             <Link href={hrefWith({ ocasiao: undefined })} className={cn("whitespace-nowrap rounded-full border px-5 py-2.5 text-xs font-bold uppercase tracking-[0.16em] transition", !filters.ocasiao ? "border-gold-light bg-gold-light text-ink" : "border-white/20 text-ivory/80 hover:border-gold-light hover:text-gold-light")}>
               Todas as ocasiões
             </Link>

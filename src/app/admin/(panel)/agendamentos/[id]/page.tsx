@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { eventRoleLabel, pieceLabel } from "@/lib/event-roles";
 import Link from "next/link";
 import { FileDown, MessageCircle, Pencil, Printer } from "lucide-react";
 import { ActionButton } from "@/components/admin/action-button";
@@ -16,7 +17,7 @@ import { appointmentSourceLabel, notificationEventLabel } from "@/lib/labels";
 import { AppointmentService } from "@/services/appointment.service";
 import { FittingService } from "@/services/fitting.service";
 import { SettingsService } from "@/services/settings.service";
-import { formatDate, formatDateTime, formatLongDateKey, toDateKey, toTimeKey } from "@/utils/datetime";
+import { formatDate, formatDateTime, formatLongDateKey, toDateKey, toTimeKey, formatDateKey } from "@/utils/datetime";
 import { formatPhone, whatsappLink } from "@/utils/phone";
 import { reprintAppointmentAction, retryNotificationAction, updateAppointmentAction } from "../../_actions/appointments";
 
@@ -67,6 +68,13 @@ export default async function AppointmentDetailPage({ params, searchParams }: { 
               <div><dt className="text-xs text-muted-foreground">Horário</dt><dd className="font-semibold">{toTimeKey(a.startsAt, tz)} – {toTimeKey(a.endsAt, tz)}</dd></div>
               <div><dt className="text-xs text-muted-foreground">Serviço</dt><dd className="font-semibold">{a.service.name}</dd></div>
               <div><dt className="text-xs text-muted-foreground">Peça de interesse</dt><dd className="font-semibold">{a.product ? <Link href={`/catalogo/${a.product.slug}`} target="_blank" className="hover:text-gold-dark">{a.product.name}</Link> : "—"}</dd></div>
+              {(a.eventRole || a.eventDate || a.piecesNeeded.length > 0) && (
+                <>
+                  <div><dt className="text-xs text-muted-foreground">A roupa é para</dt><dd className="font-medium">{eventRoleLabel(a.eventRole) ?? "—"}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Data do evento</dt><dd className="font-medium">{a.eventDate ? formatDateKey(a.eventDate.toISOString().slice(0, 10)) : "—"}</dd></div>
+                  <div className="sm:col-span-2"><dt className="text-xs text-muted-foreground">Peças que precisa</dt><dd className="font-medium">{a.piecesNeeded.length ? a.piecesNeeded.map(pieceLabel).join(", ") : "—"}</dd></div>
+                </>
+              )}
               <div className="sm:col-span-2"><dt className="text-xs text-muted-foreground">Observações</dt><dd className="whitespace-pre-wrap">{a.notes || "—"}</dd></div>
               {a.internalNotes && <div className="sm:col-span-2"><dt className="text-xs text-muted-foreground">Observações internas</dt><dd className="whitespace-pre-wrap rounded-md bg-amber-50 p-2">{a.internalNotes}</dd></div>}
               {a.cancelReason && <div className="sm:col-span-2"><dt className="text-xs text-muted-foreground">Motivo do cancelamento</dt><dd>{a.cancelReason}</dd></div>}

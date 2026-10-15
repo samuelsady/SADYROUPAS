@@ -157,6 +157,27 @@ O link da confirmação, que também vai na mensagem de WhatsApp pela variável 
 - **Leitor de QR Code** (`/admin/estoque/leitor`): pela câmera do celular (Chrome/Android), por um leitor USB ou digitando o código. Abre a peça em **modo balcão**, com botões grandes para mudar o status em um toque.
 - **Grade tamanho × status** em cada produto e alerta de **tamanhos esgotados** no dashboard.
 
+## Pedido de agendamento pelo WhatsApp
+
+No site, o cliente escolhe o **dia e o horário de interesse** (só aparecem horários livres), diz **para quem é a roupa** (noivo, padrinho, pai dos noivos, formando, pajem, convidado), a **data do evento**, as **peças que precisa** e, se quiser, as roupas do catálogo. Ao enviar:
+
+1. O pedido fica no sistema como **Aguardando confirmação** (o horário fica reservado para não haver dois pedidos iguais).
+2. O WhatsApp do cliente abre sozinho com uma **mensagem pronta para a loja** com nome, número, papel, data do evento, dia e horário, peças e código do pedido. É nessa conversa que a equipe (ou o agente de IA, quando existir) responde.
+3. No painel, em **Interessados → Aguardando confirmação**, a equipe toca em **Confirmar** (o cliente recebe a confirmação) ou em **Outro horário** para remarcar.
+
+Agendamentos criados pela equipe no painel já nascem confirmados.
+
+## Interessados
+
+Menu **Interessados** (`/admin/interessados`): quem mostrou interesse e precisa de retorno, em quatro grupos:
+
+- **Pediram contato**: no site, a pessoa monta a lista de provas e toca em **"Quero que a loja me chame"** (nome + WhatsApp, sem marcar horário). A loja recebe um aviso no WhatsApp e no sino do painel.
+- **Vão provar**: atendimentos marcados, com as roupas que querem experimentar.
+- **Provaram e não alugaram**: atendimentos concluídos nos últimos 60 dias sem locação depois. Botões para chamar no WhatsApp, criar a locação ou registrar o retorno.
+- **Alugaram**: locações dos últimos 30 dias.
+
+Cada linha tem o botão de WhatsApp com mensagem pronta. Quem pediu contato e depois agenda sai sozinho de "Pediram contato". O número ao lado do menu soma os que aguardam ação.
+
 ## Locações (baixa automática no estoque)
 
 Menu **Locações** no painel (`/admin/locacoes`), com abas Ativas, Retiradas próximas, Devoluções próximas, Atrasadas e Todas.

@@ -23,7 +23,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   ]);
   return (
     <>
-      <PageHeader title="Auditoria" description="Quem fez, o quê, quando e em qual registro. Os 200 eventos mais recentes." />
+      <PageHeader back={{ href: "/admin/configuracoes", label: "Configurações" }} title="Histórico de ações" description="Quem fez, o quê, quando e em qual registro. Os 200 eventos mais recentes." />
       <Card>
         <form className="flex gap-2 border-b border-line p-3">
           <Input name="q" defaultValue={q} placeholder="Filtrar por ação, resumo ou pessoa" className="max-w-md" />

@@ -10,6 +10,7 @@ import { CloudApiWhatsAppProvider } from "./providers/cloud-api";
 import { SimulatedWhatsAppProvider } from "./providers/simulated";
 import type { WhatsAppProvider } from "./providers/types";
 import { DEFAULT_TEMPLATES } from "./templates";
+import { bookingRequestLines } from "./booking-request";
 
 /**
  * Sistema → Evento → NotificationService → WhatsApp API → Cliente
@@ -85,11 +86,7 @@ export const NotificationService = {
    */
   async enqueueOwnerAlert(tx: Tx, appointment: AppointmentWithRelations & { items?: { size: string | null; product: { name: string } }[] }, settings: StoreSettings) {
     if (!settings.ownerAlertWhatsapp || !settings.whatsapp || !settings.whatsappEnabled) return null;
-    const v = appointmentVars(appointment, settings);
-    const pieces = appointment.items?.length
-      ? `\n👔 Quer provar: ${appointment.items.map((i) => `${i.product.name}${i.size ? ` (${i.size})` : ""}`).join(", ")}`
-      : "";
-    const body = `🔔 Novo agendamento pelo site\n\n👤 ${appointment.customer.name}\n📞 ${formatPhone(appointment.customer.whatsapp)}\n📌 ${v.servico}\n📅 ${v.data} às ${v.horario}\n🔖 ${v.codigo}${pieces}${appointment.notes ? `\n📝 ${appointment.notes}` : ""}`;
+    const body = `🔔 Novo pedido de agendamento pelo site (aguardando confirmação)\n\n${bookingRequestLines(appointment, settings).join("\n")}`;
     return tx.notification.create({
       data: { channel: "WHATSAPP", event: "APPOINTMENT_CREATED", status: "PENDING", recipient: settings.whatsapp, title: "Aviso para a loja", body, appointmentId: appointment.id },
     });

@@ -9,6 +9,8 @@ import { Field, Input, Textarea } from "@/components/ui/form";
 import { buttonClass } from "@/components/ui/button";
 import { useOpenDays, useSlots } from "@/hooks/use-availability";
 import { fittingList, useFittingList } from "@/hooks/use-fitting-list";
+import { EVENT_ROLES, PIECES_NEEDED } from "@/lib/event-roles";
+import { maskPhoneInput } from "@/utils/phone";
 import { cn } from "@/utils/cn";
 import { formatDateKey, monthName, weekdayName, weekdayOfKey } from "@/utils/datetime";
 
@@ -23,14 +25,6 @@ function StepTitle({ n, title, done }: { n: number; title: string; done?: boolea
   );
 }
 
-function maskPhoneInput(v: string) {
-  const d = v.replace(/\D/g, "").slice(0, 11);
-  if (d.length <= 2) return d;
-  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
-  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
-  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
-}
-
 export function BookingForm({ services, product, initialServiceId }: { services: ServiceOption[]; product: { slug: string; name: string } | null; initialServiceId?: string }) {
   const router = useRouter();
   const [serviceId, setServiceId] = useState<string | null>(initialServiceId ?? (services.length === 1 ? services[0]!.id : null));
@@ -38,6 +32,10 @@ export function BookingForm({ services, product, initialServiceId }: { services:
   const [time, setTime] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [form, setForm] = useState({ name: "", whatsapp: "", email: "", notes: "" });
+  const [eventRole, setEventRole] = useState<string | null>(null);
+  const [eventDate, setEventDate] = useState("");
+  const [piecesNeeded, setPiecesNeeded] = useState<string[]>([]);
+  const togglePiece = (id: string) => setPiecesNeeded((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,7 +72,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
       const res = await fetch("/api/public/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, serviceId, date, time, productSlug: product?.slug, items: fitting.map((f) => ({ slug: f.slug, size: f.size })), company: honeypot }),
+        body: JSON.stringify({ ...form, serviceId, date, time, eventRole, eventDate: eventDate || null, piecesNeeded, productSlug: product?.slug, items: fitting.map((f) => ({ slug: f.slug, size: f.size })), company: honeypot }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -83,12 +81,12 @@ export function BookingForm({ services, product, initialServiceId }: { services:
           setRefreshKey((k) => k + 1);
         }
         if (json.issues) setErrors(Object.fromEntries(json.issues.map((i: { path: string; message: string }) => [i.path, i.message])));
-        throw new Error(json.error ?? "Não foi possível concluir o agendamento.");
+        throw new Error(json.error ?? "Não foi possível enviar o pedido.");
       }
       fittingList.clear();
       router.push(`/agendamento/confirmado/${json.token}?novo=1`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Não foi possível concluir o agendamento.");
+      setError(e instanceof Error ? e.message : "Não foi possível enviar o pedido.");
       setSubmitting(false);
     }
   }
@@ -137,7 +135,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
 
       {serviceId && (
         <section className="animate-fade-up">
-          <StepTitle n={2} title="Escolha a data" done={Boolean(date)} />
+          <StepTitle n={2} title="Dia que você quer vir" done={Boolean(date)} />
           {days.loading ? (
             <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando datas…</p>
           ) : days.error ? (
@@ -163,7 +161,7 @@ export function BookingForm({ services, product, initialServiceId }: { services:
 
       {serviceId && date && (
         <section className="animate-fade-up">
-          <StepTitle n={3} title="Escolha o horário" done={Boolean(time)} />
+          <StepTitle n={3} title="Horário de interesse" done={Boolean(time)} />
           {slots.loading ? (
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6" aria-label="Carregando horários">
               {Array.from({ length: 12 }, (_, i) => <div key={i} className="skeleton h-12 rounded-md" />)}
@@ -186,18 +184,51 @@ export function BookingForm({ services, product, initialServiceId }: { services:
 
       {serviceId && date && time && (
         <section className="animate-fade-up">
-          <StepTitle n={4} title="Seus dados" />
+          <StepTitle n={4} title="Sobre o seu evento" done={Boolean(eventRole)} />
+          <div className="space-y-5">
+            <div>
+              <p className="mb-2 text-sm font-semibold">A roupa é para</p>
+              <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="A roupa é para">
+                {EVENT_ROLES.map((r) => (
+                  <button key={r.id} type="button" role="radio" aria-checked={eventRole === r.id} onClick={() => setEventRole(eventRole === r.id ? null : r.id)}
+                    className={cn("rounded-full border px-4 py-2 text-sm font-medium transition", eventRole === r.id ? "border-ink bg-ink text-ivory" : "border-line bg-white hover:border-ink/40")}>
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Field label="Data do evento (opcional)" htmlFor="eventDate" error={errors.eventDate} className="max-w-xs">
+              <Input id="eventDate" type="date" value={eventDate} min={date} onChange={(e) => setEventDate(e.target.value)} />
+            </Field>
+            <div>
+              <p className="mb-2 text-sm font-semibold">Peças que você precisa</p>
+              <div className="flex flex-wrap gap-2">
+                {PIECES_NEEDED.map((pc) => (
+                  <button key={pc.id} type="button" aria-pressed={piecesNeeded.includes(pc.id)} onClick={() => togglePiece(pc.id)}
+                    className={cn("inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition", piecesNeeded.includes(pc.id) ? "border-gold bg-[#fbf6ec] text-ink ring-1 ring-gold" : "border-line bg-white hover:border-ink/40")}>
+                    {piecesNeeded.includes(pc.id) && <Check className="h-3.5 w-3.5 text-gold-dark" />} {pc.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {serviceId && date && time && (
+        <section className="animate-fade-up">
+          <StepTitle n={5} title="Seus dados" />
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Nome completo" htmlFor="name" required error={errors.name} className="sm:col-span-2">
               <Input id="name" autoComplete="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} aria-invalid={Boolean(errors.name)} maxLength={120} />
             </Field>
-            <Field label="WhatsApp" htmlFor="whatsapp" required error={errors.whatsapp} hint="Enviaremos a confirmação por WhatsApp.">
+            <Field label="WhatsApp" htmlFor="whatsapp" required error={errors.whatsapp} hint="A confirmação do horário chega por WhatsApp.">
               <Input id="whatsapp" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="(86) 99999-0000" value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: maskPhoneInput(e.target.value) })} aria-invalid={Boolean(errors.whatsapp)} />
             </Field>
             <Field label="E-mail (opcional)" htmlFor="email" error={errors.email}>
               <Input id="email" type="email" autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} aria-invalid={Boolean(errors.email)} maxLength={160} />
             </Field>
-            <Field label="Observações (opcional)" htmlFor="notes" className="sm:col-span-2" hint="Ex.: tipo de evento, data do evento, tamanho que costuma usar.">
+            <Field label="Observações (opcional)" htmlFor="notes" className="sm:col-span-2" hint="Ex.: tamanho que costuma usar, cor que prefere.">
               <Textarea id="notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} maxLength={1000} rows={3} />
             </Field>
             {/* honeypot anti-robô: invisível para pessoas */}
@@ -207,16 +238,17 @@ export function BookingForm({ services, product, initialServiceId }: { services:
           </div>
 
           <div className="mt-8 rounded-lg bg-ivory p-5 text-sm">
-            <p className="font-semibold">Resumo</p>
+            <p className="font-semibold">Resumo do pedido</p>
             <p className="mt-1 text-muted-foreground">
               {selectedService?.name} — {weekdayName(weekdayOfKey(date))}, {formatDateKey(date)} às {time}
             </p>
+            <p className="mt-2 text-xs text-muted-foreground">Ao enviar, abrimos o WhatsApp com uma mensagem pronta para a loja. A Sady confirma se o horário está disponível.</p>
           </div>
 
           {error && <div role="alert" className="mt-5 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>}
 
           <button type="submit" disabled={submitting} className={buttonClass("primary", "xl", "mt-6 w-full")}>
-            {submitting ? <><Loader2 className="h-5 w-5 animate-spin" /> Confirmando…</> : "Confirmar agendamento"}
+            {submitting ? <><Loader2 className="h-5 w-5 animate-spin" /> Enviando…</> : "Enviar pedido pelo WhatsApp"}
           </button>
           <p className="mt-3 text-center text-xs text-muted-foreground">Seus dados são usados apenas para este atendimento.</p>
         </section>

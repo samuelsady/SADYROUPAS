@@ -14,11 +14,11 @@ export function MobileBottomNav() {
     { label: "Início", icon: Home, href: "/" },
     { label: "Catálogo", icon: LayoutGrid, href: "/catalogo" },
     { label: "Provador", icon: Shirt, onClick: () => window.dispatchEvent(new Event(OPEN_FITTING_EVENT)), badge: fitting.length || undefined },
-    { label: "Agendar", icon: CalendarCheck, href: "/agendamento" },
     { label: "Montar", icon: Sparkles, href: "/monte-seu-terno" },
+    { label: "Agendar", icon: CalendarCheck, href: "/agendamento" },
   ];
   const active =
-    pathname === "/" ? 0 : pathname.startsWith("/catalogo") ? 1 : pathname.startsWith("/agendamento") ? 3 : pathname.startsWith("/monte-seu-terno") ? 4 : -1;
+    pathname === "/" ? 0 : pathname.startsWith("/catalogo") ? 1 : pathname.startsWith("/monte-seu-terno") ? 3 : pathname.startsWith("/agendamento") ? 4 : -1;
 
   return (
     <div className="no-print fixed inset-x-0 bottom-3 z-40 flex justify-center px-3 pb-[env(safe-area-inset-bottom)] md:hidden">

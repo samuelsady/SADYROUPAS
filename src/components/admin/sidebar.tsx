@@ -1,60 +1,54 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
-import {
-  BarChart3, Bell, Boxes, Sheet, CalendarDays, ClipboardList, FileSignature, LayoutDashboard, Menu, PackageCheck, Printer, Scissors, Settings, Shirt, ShieldCheck, Undo2, Users, Wallet, WashingMachine, X,
-} from "lucide-react";
+import { Boxes, CalendarDays, FileSignature, LayoutDashboard, Menu, Printer, Settings, Sheet, Sparkles, Users, X } from "lucide-react";
 import { Wordmark } from "@/components/ui/wordmark";
 import { cn } from "@/utils/cn";
 import type { NavItem } from "./nav";
 
-const ICONS = { BarChart3, Bell, Boxes, Sheet, CalendarDays, ClipboardList, FileSignature, LayoutDashboard, PackageCheck, Printer, Scissors, Settings, Shirt, ShieldCheck, Undo2, Users, Wallet, WashingMachine };
+const ICONS = { Boxes, CalendarDays, FileSignature, LayoutDashboard, Printer, Settings, Sheet, Sparkles, Users };
 
-function NavList({ nav, pathname }: { nav: { section: string; items: NavItem[] }[]; pathname: string }) {
-  const currentQuery = useSearchParams().toString();
+export type Badges = Partial<Record<NonNullable<NavItem["badgeKey"]>, number>>;
+
+function NavList({ nav, pathname, badges }: { nav: NavItem[]; pathname: string; badges: Badges }) {
   return (
-    <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5" aria-label="Painel">
-      {nav.map((group) => (
-        <div key={group.section}>
-          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ivory/35">{group.section}</p>
-          <ul className="space-y-0.5">
-            {group.items.map((item) => {
-              const Icon = ICONS[item.icon as keyof typeof ICONS] ?? LayoutDashboard;
-              const [path, query] = item.href.split("?");
-              const active = item.href === "/admin" ? pathname === "/admin" : query ? pathname === path && currentQuery === query : pathname.startsWith(path!) && !(path === "/admin/locacoes" && currentQuery.startsWith("aba=") && /aba=(retiradas|devolucoes)/.test(currentQuery));
-              return (
-                <li key={item.href}>
-                  <Link href={item.href} aria-current={active ? "page" : undefined}
-                    className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition", active ? "bg-white/10 text-ivory" : item.future ? "text-ivory/35 hover:text-ivory/60" : "text-ivory/70 hover:bg-white/5 hover:text-ivory")}>
-                    <Icon className={cn("h-4 w-4", active ? "text-gold-light" : "")} strokeWidth={1.75} />
-                    <span className="flex-1">{item.label}</span>
-                    {item.future && <span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] uppercase tracking-wider">V2</span>}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
+    <nav className="flex-1 overflow-y-auto px-3 py-5" aria-label="Painel">
+      <ul className="space-y-0.5">
+        {nav.map((item) => {
+          const Icon = ICONS[item.icon as keyof typeof ICONS] ?? LayoutDashboard;
+          const active = item.href === "/admin" ? pathname === "/admin" : [item.href, ...(item.also ?? [])].some((p) => pathname.startsWith(p));
+          const badge = item.badgeKey ? badges[item.badgeKey] : undefined;
+          return (
+            <li key={item.href}>
+              <Link href={item.href} aria-current={active ? "page" : undefined}
+                className={cn("flex items-center gap-3 rounded-md px-3 py-2.5 text-[14px] font-medium transition", active ? "bg-white/10 text-ivory" : "text-ivory/70 hover:bg-white/5 hover:text-ivory")}>
+                <Icon className={cn("h-4 w-4", active ? "text-gold-light" : "")} strokeWidth={1.75} />
+                <span className="flex-1">{item.label}</span>
+                {badge ? <span className="rounded-full bg-gold px-2 py-0.5 text-[10px] font-bold tabular-nums text-ink">{badge}</span> : null}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </nav>
   );
 }
 
-type Nav = { section: string; items: NavItem[] }[];
+type Nav = NavItem[];
 
-export function Sidebar({ nav }: { nav: Nav }) {
+export function Sidebar({ nav, badges }: { nav: Nav; badges: Badges }) {
   const pathname = usePathname();
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-ink lg:flex">
       <Link href="/admin" className="flex h-16 items-center px-6 text-sm"><Wordmark tone="light" /></Link>
-      <NavList nav={nav} pathname={pathname} />
+      <NavList nav={nav} pathname={pathname} badges={badges} />
     </aside>
   );
 }
 
-export function MobileSidebar({ nav }: { nav: Nav }) {
+export function MobileSidebar({ nav, badges }: { nav: Nav; badges: Badges }) {
   const pathname = usePathname();
   // O menu fica aberto apenas na página em que foi aberto: navegar fecha automaticamente
   const [openOn, setOpenOn] = useState<string | null>(null);
@@ -74,7 +68,7 @@ export function MobileSidebar({ nav }: { nav: Nav }) {
               <Wordmark tone="light" />
               <button type="button" onClick={() => setOpen(false)} className="text-ivory" aria-label="Fechar menu"><X className="h-5 w-5" /></button>
             </div>
-            <NavList nav={nav} pathname={pathname} />
+            <NavList nav={nav} pathname={pathname} badges={badges} />
           </aside>
         </div>
       )}

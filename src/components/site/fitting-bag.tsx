@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Shirt, Trash2, X } from "lucide-react";
 import { fittingList, OPEN_FITTING_EVENT, useFittingList } from "@/hooks/use-fitting-list";
+import { CallMeForm } from "./call-me-form";
 import { cn } from "@/utils/cn";
 
 /** Ícone da lista de provas no topo + painel lateral. */
@@ -79,6 +80,9 @@ export function FittingBag() {
                 </ul>
                 <div className={cn("border-t border-line p-5")}>
                   <Link href="/agendamento" className="flex h-12 items-center justify-center rounded-md bg-ink text-sm font-semibold text-ivory hover:bg-ink-3">Agendar prova ({list.length} {list.length === 1 ? "peça" : "peças"})</Link>
+                  <div className="mt-2.5">
+                    <CallMeForm items={list} />
+                  </div>
                   <button type="button" onClick={() => fittingList.clear()} className="mt-3 w-full text-xs font-semibold text-muted-foreground hover:text-ink">Limpar lista</button>
                 </div>
               </>

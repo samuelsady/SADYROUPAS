@@ -11,7 +11,7 @@ import type {
 
 /** Rótulos em português para os enums do banco. */
 export const appointmentStatusLabel: Record<AppointmentStatus, string> = {
-  SCHEDULED: "Agendado",
+  SCHEDULED: "Aguardando confirmação",
   CONFIRMED: "Confirmado",
   COMPLETED: "Concluído",
   CANCELLED: "Cancelado",
@@ -57,12 +57,14 @@ export const notificationStatusLabel: Record<NotificationStatus, string> = {
 };
 
 export const notificationEventLabel: Record<NotificationEvent, string> = {
-  APPOINTMENT_CREATED: "Agendamento criado",
+  APPOINTMENT_CONFIRMED: "Agendamento confirmado",
+  APPOINTMENT_CREATED: "Pedido recebido",
   APPOINTMENT_UPDATED: "Agendamento alterado",
   APPOINTMENT_CANCELLED: "Agendamento cancelado",
   APPOINTMENT_REMINDER: "Lembrete de atendimento",
   PRINT_FAILED: "Falha de impressão",
   RENTAL_CONFIRMED: "Locação confirmada",
+  INTEREST_CREATED: "Novo interessado",
   PICKUP_REMINDER: "Lembrete de retirada",
   RETURN_REMINDER: "Lembrete de devolução",
   RETURN_OVERDUE: "Devolução atrasada",
@@ -89,7 +91,7 @@ export const roleLabel: Record<UserRole, string> = {
 export type Tone = "neutral" | "gold" | "green" | "blue" | "red" | "amber" | "gray" | "purple";
 
 export const appointmentStatusTone: Record<AppointmentStatus, Tone> = {
-  SCHEDULED: "blue",
+  SCHEDULED: "amber",
   CONFIRMED: "green",
   COMPLETED: "gray",
   CANCELLED: "red",

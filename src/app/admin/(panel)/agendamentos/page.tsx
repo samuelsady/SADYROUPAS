@@ -39,7 +39,7 @@ export default async function AppointmentsPage({ searchParams }: { searchParams:
 
   return (
     <>
-      <PageHeader title="Agendamentos" description="Todos os atendimentos — site, WhatsApp, telefone e balcão." actions={<LinkButton href="/admin/agendamentos/novo"><Plus className="h-4 w-4" /> Novo agendamento</LinkButton>} />
+      <PageHeader back={{ href: "/admin/agenda", label: "Agenda" }} title="Agendamentos" description="Todos os atendimentos — site, WhatsApp, telefone e balcão." actions={<LinkButton href="/admin/agendamentos/novo"><Plus className="h-4 w-4" /> Novo agendamento</LinkButton>} />
       <Card>
         <form className="grid gap-2 border-b border-line p-3 sm:grid-cols-[1fr_160px_160px_150px_150px_auto]">
           <Input name="q" defaultValue={sp.q} placeholder="Código, nome ou WhatsApp" aria-label="Buscar" />

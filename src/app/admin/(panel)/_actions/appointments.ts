@@ -16,6 +16,8 @@ function revalidateAppointments(id?: string) {
   revalidatePath("/admin");
   revalidatePath("/admin/agenda");
   revalidatePath("/admin/agendamentos");
+  revalidatePath("/admin/interessados");
+  revalidatePath("/admin/planilha");
   if (id) revalidatePath(`/admin/agendamentos/${id}`);
 }
 

@@ -8,10 +8,14 @@ import { AnimatedCheck } from "@/components/ui/animated-check";
 import { buttonClass } from "@/components/ui/button";
 import { AppointmentService } from "@/services/appointment.service";
 import { SettingsService } from "@/services/settings.service";
-import { formatDate, toTimeKey } from "@/utils/datetime";
+import { formatDate, formatDateKey, toTimeKey } from "@/utils/datetime";
 import { googleCalendarUrl } from "@/utils/ics";
 import { whatsappLink } from "@/utils/phone";
 import { selfServiceState } from "@/utils/self-service";
+import { WhatsAppAutoOpen } from "@/components/site/whatsapp-auto-open";
+import { eventRoleLabel, pieceLabel } from "@/lib/event-roles";
+import { appointmentStatusLabel } from "@/lib/labels";
+import { bookingRequestMessage } from "@/services/notification/booking-request";
 
 export const metadata: Metadata = { title: "Meu agendamento", robots: { index: false } };
 
@@ -25,7 +29,10 @@ export default async function ConfirmedPage({ params, searchParams }: { params: 
   const time = toTimeKey(appointment.startsAt, tz);
   const cancelled = appointment.status === "CANCELLED";
   const { active, past, canChange } = selfServiceState(appointment, settings.selfServiceCutoffHours);
+  const pending = appointment.status === "SCHEDULED";
   const wa = whatsappLink(settings.whatsapp, `Olá! Tenho um agendamento na Sady Roupas: código ${appointment.code}, ${date} às ${time}.`);
+  // Pedido ainda não confirmado: mensagem pronta com tudo o que o cliente informou
+  const requestWa = pending ? whatsappLink(settings.whatsapp, bookingRequestMessage(appointment, settings)) : null;
   const gcal = googleCalendarUrl({ uid: appointment.code, start: appointment.startsAt, end: appointment.endsAt, title: `${appointment.service.name} — Sady Roupas`, description: `Código: ${appointment.code}`, location: settings.address ?? "Sady Roupas" });
 
   const rows = [
@@ -34,6 +41,10 @@ export default async function ConfirmedPage({ params, searchParams }: { params: 
     ["Serviço", appointment.service.name],
     ["Data", date],
     ["Horário", time],
+    ...(eventRoleLabel(appointment.eventRole) ? [["Para", eventRoleLabel(appointment.eventRole)!]] : []),
+    ...(appointment.eventDate ? [["Data do evento", formatDateKey(appointment.eventDate.toISOString().slice(0, 10))]] : []),
+    ...(appointment.piecesNeeded.length ? [["Peças", appointment.piecesNeeded.map(pieceLabel).join(", ")]] : []),
+    ["Situação", pending ? "Aguardando confirmação da loja" : appointment.status === "CONFIRMED" ? "Confirmado" : appointmentStatusLabel[appointment.status]],
   ];
 
   return (
@@ -49,9 +60,16 @@ export default async function ConfirmedPage({ params, searchParams }: { params: 
             <>
               {novo ? <AnimatedCheck className="mx-auto h-16 w-16 text-gold" /> : <p className="eyebrow">Meu agendamento</p>}
               <h1 className={`display mt-4 text-4xl ${novo ? "pop-in" : ""}`} style={novo ? { animationDelay: "0.5s" } : undefined}>
-                {novo ? "Agendamento confirmado!" : past ? "Atendimento realizado" : appointment.status === "CONFIRMED" ? "Atendimento confirmado" : "Atendimento agendado"}
+                {past ? "Atendimento realizado" : pending ? (novo ? "Pedido enviado!" : "Aguardando confirmação") : "Atendimento confirmado"}
               </h1>
-              <p className="mt-2 text-sm text-muted-foreground">{novo ? "Guarde seu código. Você também receberá a confirmação pelo WhatsApp." : "Guarde este link para consultar, remarcar ou cancelar."}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {pending ? "Agora é só enviar a mensagem no WhatsApp: a Sady confirma se o horário está disponível ou combina outro com você." : "Guarde este link para consultar, remarcar ou cancelar."}
+              </p>
+              {requestWa && !past && (
+                <div className="mt-6">
+                  <WhatsAppAutoOpen href={requestWa} auto={Boolean(novo)} onceKey={appointment.code} />
+                </div>
+              )}
             </>
           )}
           <dl className="mt-8 divide-y divide-line rounded-lg border border-line text-left text-sm">
@@ -80,12 +98,12 @@ export default async function ConfirmedPage({ params, searchParams }: { params: 
               </ul>
             </div>
           )}
-          {active && !past && (
+          {active && !past && !pending && (
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               <a href={`/api/public/appointments/${token}/ics`} className={buttonClass("primary", "lg")}>
                 <CalendarPlus className="h-4 w-4" /> Adicionar ao calendário
               </a>
-              {wa && (
+              {wa && !pending && (
                 <a href={wa} target="_blank" rel="noopener noreferrer" className={buttonClass("outline", "lg")}>
                   <MessageCircle className="h-4 w-4" /> Falar no WhatsApp
                 </a>
