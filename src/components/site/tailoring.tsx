@@ -1,50 +1,9 @@
 /**
- * Assinatura visual de alfaiataria da Sady: fita métrica, botão de terno e
- * selo com monograma. Peças pequenas, usadas como detalhe — não como enfeite
+ * Assinatura visual de alfaiataria da Sady: botão de terno e selo com
+ * monograma. Peças pequenas, usadas como detalhe — não como enfeite
  * em todo canto.
  */
 import { cn } from "@/lib/utils";
-
-/** Fita métrica que desliza devagar — divisória entre seções. */
-export function TapeMeasure({ className, tone = "light" }: { className?: string; tone?: "light" | "dark" }) {
-  const dark = tone === "dark";
-  const cm = 150;
-  const step = 12; // px por centímetro
-  const tape = (
-    <svg width={cm * step} height="34" viewBox={`0 0 ${cm * step} 34`} aria-hidden className="block shrink-0">
-      {Array.from({ length: cm }, (_, i) => {
-        const x = i * step;
-        const big = i % 10 === 0;
-        const mid = i % 5 === 0;
-        return (
-          <g key={i}>
-            <line x1={x} y1="0" x2={x} y2={big ? 15 : mid ? 10 : 6} stroke="currentColor" strokeWidth={big ? 1.2 : 0.8} />
-            {big && (
-              <text x={x + 3} y="27" fontSize="10" fontFamily="var(--font-manrope)" fill="currentColor" opacity="0.85">
-                {i}
-              </text>
-            )}
-          </g>
-        );
-      })}
-    </svg>
-  );
-  return (
-    <div
-      aria-hidden
-      className={cn(
-        "relative overflow-hidden border-y",
-        dark ? "border-white/10 bg-[#1a1612] text-gold-light/70" : "border-gold/30 bg-[linear-gradient(180deg,#f3e7cf,#ead9b8)] text-gold-deep",
-        className,
-      )}
-    >
-      <div className="tape-slide flex w-max">
-        {tape}
-        {tape}
-      </div>
-    </div>
-  );
-}
 
 /** Botão de terno (4 furos) — marcador dourado. */
 export function TailorButton({ className, size = 16 }: { className?: string; size?: number }) {

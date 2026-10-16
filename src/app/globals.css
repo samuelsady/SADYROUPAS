@@ -415,7 +415,7 @@
 
 
 /* =============================================================================
-   Assinatura de alfaiataria: costura pespontada, fita métrica, selo
+   Assinatura de alfaiataria: costura pespontada, selo
    ========================================================================== */
 
 /* Pesponto: linha tracejada por dentro da borda, como costura de lapela */
@@ -434,6 +434,16 @@
   border-color: rgb(226 199 147 / 0.35);
 }
 
+/* Barra de progresso do carrossel do topo */
+@keyframes hero-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
 /* Selo girando devagar */
 @keyframes seal-spin {
   to {
@@ -443,16 +453,6 @@
 .seal-spin {
   transform-origin: 50% 50%;
   animation: seal-spin 28s linear infinite;
-}
-
-/* Fita métrica deslizando */
-@keyframes tape-slide {
-  to {
-    transform: translateX(-50%);
-  }
-}
-.tape-slide {
-  animation: tape-slide 60s linear infinite;
 }
 
 /* Cursor de linha dourada (só com mouse) */
@@ -479,7 +479,6 @@
   }
   .marquee,
   .seal-spin,
-  .tape-slide,
   .aura::before,
   .aura-light::before,
   .text-gold-shine {
