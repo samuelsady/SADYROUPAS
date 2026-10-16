@@ -167,6 +167,13 @@ No site, o cliente escolhe o **dia e o horário de interesse** (só aparecem hor
 
 Agendamentos criados pela equipe no painel já nascem confirmados.
 
+## Identidade, fotos e vídeos reais
+
+- **Assinatura de alfaiataria** (`src/components/site/tailoring.tsx`): fita métrica deslizando entre seções, costura pespontada nos cartões (`.stitch`), botões dourados como marcadores, selo "S" girando e cursor de linha dourada (só com mouse; desligado para quem prefere menos movimento).
+- **Abertura com fotos reais e vídeo da loja** (`src/content/site-media.ts`): com 3+ fotos do manequim sendo vestido em `public/abertura`, a abertura passa a usar as fotos; com um vídeo em `public/loja`, a página inicial ganha a faixa "Por dentro da Sady". As instruções de como fotografar estão no próprio arquivo.
+- **Depoimentos**: cadastrados em **Configurações → Depoimentos** (nome, detalhe, texto e foto opcional). A seção só aparece na página inicial quando houver depoimentos ativos — use apenas depoimentos reais, com autorização.
+- **Contagem regressiva**: na página do pedido, "faltam N dias para o seu casamento / a sua formatura" quando a data do evento foi informada.
+
 ## Interessados
 
 Menu **Interessados** (`/admin/interessados`): quem mostrou interesse e precisa de retorno, em quatro grupos:

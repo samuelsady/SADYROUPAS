@@ -19,7 +19,7 @@ type ServiceOption = { id: string; name: string; description: string | null };
 function StepTitle({ n, title, done }: { n: number; title: string; done?: boolean }) {
   return (
     <div className="mb-5 flex items-center gap-3">
-      <span className={cn("flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold", done ? "bg-gold text-ink" : "bg-ink text-ivory")}>{done ? <Check className="h-4 w-4" /> : n}</span>
+      <span className={cn("relative flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold ring-1 ring-offset-2 ring-offset-paper", done ? "bg-gold text-ink ring-gold" : "bg-ink text-ivory ring-ink/30")} style={{ outline: "1px dashed rgb(194 160 106 / 0.7)", outlineOffset: "-5px" }}>{done ? <Check className="h-4 w-4" /> : n}</span>
       <h2 className="display text-2xl sm:text-[1.7rem]">{title}</h2>
     </div>
   );

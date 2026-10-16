@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { GoldCursor } from "@/components/site/gold-cursor";
 import { IntroSplash } from "@/components/site/intro-splash";
 import { INTRO_KEY } from "@/lib/intro";
 import { MobileBottomNav } from "@/components/site/mobile-bottom-nav";
@@ -25,6 +26,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       {/* Quem já viu a abertura nesta sessão não a vê de novo (antes da pintura, sem piscar) */}
       <script dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem("${INTRO_KEY}"))document.documentElement.dataset.intro="seen"}catch(e){}` }} />
       <IntroSplash />
+      <GoldCursor />
       <SiteHeader
         categories={categories.filter((c) => c._count.products > 0).map((c) => ({ slug: c.slug, name: c.name, count: c._count.products }))}
         occasions={OCCASIONS.filter((o) => occasionCounts[o.slug]).map((o) => ({ slug: o.slug, name: o.name }))}

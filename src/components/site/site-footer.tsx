@@ -4,6 +4,7 @@ import { MapPin, Navigation, Phone } from "lucide-react";
 import { InstagramIcon, WhatsAppIcon } from "@/components/ui/brand-icons";
 import { LocationMap } from "@/components/ui/expanded-map";
 import { Wordmark } from "@/components/ui/wordmark";
+import { MonogramSeal, TailorButton, TapeMeasure } from "./tailoring";
 import { formatPhone, whatsappLink } from "@/utils/phone";
 import { weekdayName } from "@/utils/datetime";
 
@@ -32,9 +33,13 @@ export function SiteFooter({ settings, hours }: { settings: StoreSettings; hours
   const directions = settings.address ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(settings.address)}` : null;
   return (
     <footer id="contato" className="scroll-mt-16 bg-ink text-ivory/75">
+      <TapeMeasure tone="dark" />
       <div className="container-site grid gap-10 py-14 sm:py-16 lg:grid-cols-[1.2fr_1fr_0.8fr] lg:gap-14">
         <div className="space-y-5">
-          <Wordmark tone="light" className="text-2xl" />
+          <div className="flex items-center gap-4">
+            <MonogramSeal className="w-16" />
+            <Wordmark tone="light" className="text-2xl" />
+          </div>
           {settings.address && settings.latitude != null && settings.longitude != null ? (
             <LocationMap location="Visite a loja" subtitle={settings.address} latitude={settings.latitude} longitude={settings.longitude} zoom={16}>
               {directions && (
@@ -49,7 +54,7 @@ export function SiteFooter({ settings, hours }: { settings: StoreSettings; hours
         </div>
 
         <div>
-          <h3 className="eyebrow mb-4">Fale com a gente</h3>
+          <h3 className="eyebrow mb-4 flex items-center gap-2"><TailorButton size={13} /> Fale com a gente</h3>
           <div className="grid gap-2.5">
             {wa && (
               <a href={wa} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl bg-[#25D366] px-4 py-3 text-white transition hover:-translate-y-0.5 hover:bg-[#1ebe5b]">
@@ -73,7 +78,7 @@ export function SiteFooter({ settings, hours }: { settings: StoreSettings; hours
         </div>
 
         <div>
-          <h3 className="eyebrow mb-4">Horários</h3>
+          <h3 className="eyebrow mb-4 flex items-center gap-2"><TailorButton size={13} /> Horários</h3>
           <ul className="space-y-2 text-sm">
             {hoursSummary(hours).map((g) => (
               <li key={g.days} className="flex justify-between gap-4 border-b border-white/5 pb-2">

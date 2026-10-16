@@ -8,7 +8,7 @@ import { AnimatedCheck } from "@/components/ui/animated-check";
 import { buttonClass } from "@/components/ui/button";
 import { AppointmentService } from "@/services/appointment.service";
 import { SettingsService } from "@/services/settings.service";
-import { formatDate, formatDateKey, toTimeKey } from "@/utils/datetime";
+import { diffDaysKey, formatDate, formatDateKey, toTimeKey, todayKey } from "@/utils/datetime";
 import { googleCalendarUrl } from "@/utils/ics";
 import { whatsappLink } from "@/utils/phone";
 import { selfServiceState } from "@/utils/self-service";
@@ -30,6 +30,10 @@ export default async function ConfirmedPage({ params, searchParams }: { params: 
   const cancelled = appointment.status === "CANCELLED";
   const { active, past, canChange } = selfServiceState(appointment, settings.selfServiceCutoffHours);
   const pending = appointment.status === "SCHEDULED";
+  // Contagem regressiva para o evento
+  const eventKey = appointment.eventDate ? appointment.eventDate.toISOString().slice(0, 10) : null;
+  const daysToEvent = eventKey ? diffDaysKey(todayKey(tz), eventKey) : null;
+  const eventName = appointment.eventRole === "formando" ? "a sua formatura" : appointment.eventRole === "noivo" ? "o seu casamento" : ["padrinho", "pai-noivos", "pajem"].includes(appointment.eventRole ?? "") ? "o casamento" : "o seu evento";
   const wa = whatsappLink(settings.whatsapp, `Olá! Tenho um agendamento na Sady Roupas: código ${appointment.code}, ${date} às ${time}.`);
   // Pedido ainda não confirmado: mensagem pronta com tudo o que o cliente informou
   const requestWa = pending ? whatsappLink(settings.whatsapp, bookingRequestMessage(appointment, settings)) : null;
@@ -50,7 +54,7 @@ export default async function ConfirmedPage({ params, searchParams }: { params: 
   return (
     <div className="bg-ivory py-14 sm:py-20">
       <div className="container-site max-w-xl">
-        <div className="rounded-2xl border border-line bg-white p-6 text-center sm:p-10">
+        <div className="stitch rounded-2xl border border-line bg-white p-6 text-center sm:p-10">
           {cancelled ? (
             <>
               <p className="eyebrow text-red-700">Agendamento cancelado</p>
@@ -71,6 +75,14 @@ export default async function ConfirmedPage({ params, searchParams }: { params: 
                 </div>
               )}
             </>
+          )}
+          {daysToEvent !== null && daysToEvent >= 0 && !cancelled && (
+            <div className="mt-8 flex items-center justify-center gap-4 rounded-xl bg-ink px-5 py-4 text-ivory">
+              <span className="font-display text-5xl leading-none text-gold-light tabular-nums">{daysToEvent}</span>
+              <span className="text-left text-sm leading-snug text-ivory/80">
+                {daysToEvent === 0 ? <>É hoje! Que {eventName} seja inesquecível.</> : <>{daysToEvent === 1 ? "dia falta" : "dias faltam"} para<br /><span className="font-semibold text-ivory">{eventName}</span></>}
+              </span>
+            </div>
           )}
           <dl className="mt-8 divide-y divide-line rounded-lg border border-line text-left text-sm">
             {rows.map(([k, v]) => (

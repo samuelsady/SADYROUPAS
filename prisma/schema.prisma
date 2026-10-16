@@ -836,3 +836,22 @@ model InterestItem {
 
   @@index([interestId])
 }
+
+// =============================================================================
+// Depoimentos reais de clientes (cadastrados pela loja no painel)
+// =============================================================================
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  /// Ex.: "Noivo · Casamento em 2025"
+  detail    String?
+  text      String
+  photoUrl  String?
+  photoKey  String?
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([active, sortOrder])
+}

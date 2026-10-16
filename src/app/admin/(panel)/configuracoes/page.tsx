@@ -13,6 +13,8 @@ import { env } from "@/lib/env";
 import { notificationEventLabel, roleLabel } from "@/lib/labels";
 import { parseRentalPolicy } from "@/services/rental.service";
 import { SettingsService } from "@/services/settings.service";
+import { TestimonialService } from "@/services/testimonial.service";
+import { createTestimonialAction, removeTestimonialAction, toggleTestimonialAction } from "../_actions/testimonials";
 import { V1_WHATSAPP_EVENTS } from "@/services/notification/templates";
 import { formatDateTime, weekdayName } from "@/utils/datetime";
 import { formatPhone } from "@/utils/phone";
@@ -31,6 +33,7 @@ const TABS = [
   ["whatsapp", "WhatsApp"],
   ["impressora", "Impressora"],
   ["locacao", "Locação"],
+  ["depoimentos", "Depoimentos"],
   ["usuarios", "Usuários"],
 ] as const;
 
@@ -120,6 +123,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       )}
 
       {tab === "locacao" && <RentalTab policyJson={settings.rentalPolicy} />}
+      {tab === "depoimentos" && <TestimonialsTab />}
       {tab === "usuarios" && <UsersTab meId={me.id} tz={tz} />}
     </>
   );
@@ -218,6 +222,50 @@ async function BlockedTab({ tz }: { tz: string }) {
               <li key={b.id} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
                 <span>{formatDateTime(b.startsAt, tz)} → {formatDateTime(b.endsAt, tz)}<span className="block text-xs text-muted-foreground">{b.reason ?? "Sem motivo"}</span></span>
                 <ActionButton action={removeBlockedPeriodAction} fields={{ id: b.id }} variant="danger-outline" confirm="Remover este bloqueio?">Remover</ActionButton>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+async function TestimonialsTab() {
+  const list = await TestimonialService.listAll();
+  return (
+    <div className="grid max-w-5xl gap-6 lg:grid-cols-[1fr_1.2fr]">
+      <Card className="p-5">
+        <p className="text-sm font-semibold">Novo depoimento</p>
+        <p className="mb-4 mt-1 text-xs text-muted-foreground">Use apenas depoimentos reais, com autorização do cliente para aparecer no site. A seção só aparece na página inicial quando houver pelo menos um depoimento ativo.</p>
+        <SimpleForm action={createTestimonialAction} submitLabel="Adicionar">
+          <Field label="Nome do cliente" required><Input name="name" required maxLength={80} placeholder="Ex.: Rafael Lima" /></Field>
+          <Field label="Detalhe" hint="Ex.: Noivo · Casamento em 2025"><Input name="detail" maxLength={80} /></Field>
+          <Field label="Depoimento" required><Textarea name="text" required rows={4} maxLength={600} /></Field>
+          <Field label="Foto (opcional)" hint="JPG, PNG ou WEBP até 5 MB"><Input name="photo" type="file" accept="image/jpeg,image/png,image/webp" /></Field>
+        </SimpleForm>
+      </Card>
+      <Card>
+        <CardHeader title="Depoimentos" description={`${list.filter((t) => t.active).length} visível(is) no site`} />
+        {list.length === 0 ? <p className="px-5 py-5 text-sm text-muted-foreground">Nenhum depoimento ainda.</p> : (
+          <ul className="divide-y divide-line">
+            {list.map((t) => (
+              <li key={t.id} className="flex gap-3 px-5 py-4 text-sm">
+                {t.photoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- miniatura de imagem enviada (local ou Supabase)
+                  <img src={t.photoUrl} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" />
+                ) : (
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sand font-display text-lg">{t.name.charAt(0)}</span>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">{t.name} {!t.active && <Badge tone="gray">Oculto</Badge>}</p>
+                  {t.detail && <p className="text-xs text-muted-foreground">{t.detail}</p>}
+                  <p className="mt-1 line-clamp-3 text-muted-foreground">“{t.text}”</p>
+                  <div className="mt-2 flex gap-2">
+                    <ActionButton action={toggleTestimonialAction} fields={{ id: t.id }}>{t.active ? "Ocultar" : "Mostrar no site"}</ActionButton>
+                    <ActionButton action={removeTestimonialAction} fields={{ id: t.id }} variant="danger-outline" confirm="Remover este depoimento?">Remover</ActionButton>
+                  </div>
+                </div>
               </li>
             ))}
           </ul>
