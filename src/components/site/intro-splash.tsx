@@ -20,7 +20,25 @@ import {
 } from "@/components/site/atelie/suit-config";
 
 import { INTRO_KEY } from "@/lib/intro";
-const DURATION = 4300;
+import { INTRO_PHOTOS } from "@/content/site-media";
+
+/** Com fotos reais do manequim (src/content/site-media.ts), a abertura usa as fotos. */
+const PHOTO_MODE = INTRO_PHOTOS.length >= 3;
+const PHOTO_STEP = 0.55;
+const DURATION = PHOTO_MODE
+  ? Math.round((0.4 + INTRO_PHOTOS.length * PHOTO_STEP + 1.5) * 1000)
+  : 4300;
+const PHOTO_CAPTIONS = INTRO_PHOTOS.flatMap((p, i) =>
+  p.caption
+    ? [
+        {
+          at: 0.4 + i * PHOTO_STEP,
+          side: i % 2 ? "right" : "left",
+          ...p.caption,
+        },
+      ]
+    : [],
+);
 const LOOK: SuitConfig = {
   ...DEFAULT_CONFIG,
   suit: "preto",
@@ -132,39 +150,67 @@ export function IntroSplash() {
             />
             <div className="pointer-events-none absolute bottom-[8%] left-1/2 h-10 w-[min(70vw,420px)] -translate-x-1/2 rounded-[50%] bg-gold/15 blur-2xl" />
 
-            <SuitDefs />
-            <div className="relative h-[min(68vh,560px)] aspect-[400/620]">
-              {layers.map((l) => {
-                const { from, delay } = entrance(l.id);
-                return (
+            {PHOTO_MODE ? (
+              <div className="relative aspect-[4/5] h-[min(72vh,640px)]">
+                {INTRO_PHOTOS.map((p, i) => (
                   <motion.div
-                    key={l.id}
+                    key={p.src}
                     className="absolute inset-0"
-                    initial={from}
-                    animate={{
-                      opacity: l.id === "manequim" ? 0.9 : 1,
-                      x: 0,
-                      y: 0,
-                      scale: 1,
-                      rotate: 0,
-                      filter: "blur(0px)",
+                    initial={{ opacity: 0, scale: 1.06, filter: "blur(16px)" }}
+                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                    transition={{
+                      delay: 0.4 + i * PHOTO_STEP,
+                      duration: 0.9,
+                      ease: EASE,
                     }}
-                    transition={{ delay, duration: 0.85, ease: EASE }}
                   >
-                    <svg
-                      viewBox="0 0 400 620"
-                      className="h-full w-full overflow-visible"
-                    >
-                      {l.node}
-                    </svg>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- fotos locais pré-carregadas na abertura */}
+                    <img
+                      src={p.src}
+                      alt=""
+                      className="h-full w-full object-contain"
+                      fetchPriority={i < 2 ? "high" : "auto"}
+                    />
                   </motion.div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                <SuitDefs />
+                <div className="relative h-[min(68vh,560px)] aspect-[400/620]">
+                  {layers.map((l) => {
+                    const { from, delay } = entrance(l.id);
+                    return (
+                      <motion.div
+                        key={l.id}
+                        className="absolute inset-0"
+                        initial={from}
+                        animate={{
+                          opacity: l.id === "manequim" ? 0.9 : 1,
+                          x: 0,
+                          y: 0,
+                          scale: 1,
+                          rotate: 0,
+                          filter: "blur(0px)",
+                        }}
+                        transition={{ delay, duration: 0.85, ease: EASE }}
+                      >
+                        <svg
+                          viewBox="0 0 400 620"
+                          className="h-full w-full overflow-visible"
+                        >
+                          {l.node}
+                        </svg>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
 
             {/* legendas editoriais, como numa vitrine */}
-            {CAPTIONS.map((c, i) => {
-              const next = CAPTIONS[i + 1]?.at ?? 4;
+            {(PHOTO_MODE ? PHOTO_CAPTIONS : CAPTIONS).map((c, i, all) => {
+              const next = all[i + 1]?.at ?? DURATION / 1000 - 0.3;
               return (
                 <motion.div
                   key={c.text}
@@ -197,7 +243,11 @@ export function IntroSplash() {
               className="pointer-events-none absolute bottom-[5%] left-1/2 -translate-x-1/2 text-center"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 3.05, duration: 0.8, ease: EASE }}
+              transition={{
+                delay: DURATION / 1000 - 1.25,
+                duration: 0.8,
+                ease: EASE,
+              }}
             >
               <p className="font-display text-3xl tracking-[0.18em] text-gold-shine">
                 SADY
@@ -206,7 +256,11 @@ export function IntroSplash() {
                 className="hairline-gold mx-auto mt-1 w-24"
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
-                transition={{ delay: 3.25, duration: 0.8, ease: EASE }}
+                transition={{
+                  delay: DURATION / 1000 - 1.05,
+                  duration: 0.8,
+                  ease: EASE,
+                }}
               />
               <p className="mt-1.5 text-[9px] font-semibold uppercase tracking-[0.5em] text-ivory/60">
                 Roupas · desde 2008
