@@ -4,7 +4,7 @@ import { MapPin, Navigation, Phone } from "lucide-react";
 import { InstagramIcon, WhatsAppIcon } from "@/components/ui/brand-icons";
 import { LocationMap } from "@/components/ui/expanded-map";
 import { Wordmark } from "@/components/ui/wordmark";
-import { MonogramSeal, TailorButton, TapeMeasure } from "./tailoring";
+import { MonogramSeal, TailorButton } from "./tailoring";
 import { formatPhone, whatsappLink } from "@/utils/phone";
 import { weekdayName } from "@/utils/datetime";
 
@@ -32,8 +32,7 @@ export function SiteFooter({ settings, hours }: { settings: StoreSettings; hours
   const wa = whatsappLink(settings.whatsapp, "Olá! Vim pelo site da Sady Roupas.");
   const directions = settings.address ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(settings.address)}` : null;
   return (
-    <footer id="contato" className="scroll-mt-16 bg-ink text-ivory/75">
-      <TapeMeasure tone="dark" />
+    <footer id="contato" className="scroll-mt-16 border-t border-white/5 bg-ink text-ivory/75">
       <div className="container-site grid gap-10 py-14 sm:py-16 lg:grid-cols-[1.2fr_1fr_0.8fr] lg:gap-14">
         <div className="space-y-5">
           <div className="flex items-center gap-4">
