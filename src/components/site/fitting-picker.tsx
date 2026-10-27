@@ -1,35 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Plus, Shirt } from "lucide-react";
-import { fittingList, useFittingList } from "@/hooks/use-fitting-list";
-import { toast } from "@/lib/toast";
+import { WhatsAppIcon } from "@/components/ui/brand-icons";
+import { bookingWhatsapp } from "@/lib/whatsapp-messages";
 import { cn } from "@/utils/cn";
 
 type Props = {
-  product: { slug: string; name: string; image: string | null; sizes: string[] };
+  product: { name: string; sizes: string[] };
   availability: Record<string, number>;
   hasInventory: boolean;
+  whatsapp: string | null;
 };
 
-/** Escolha de tamanho + "Quero provar" (adiciona à lista de provas do cliente). */
-export function FittingPicker({ product, availability, hasInventory }: Props) {
-  const list = useFittingList();
-  const [size, setSize] = useState<string | null>(null);
-  const needsSize = product.sizes.length > 1;
-  const inList = list.some((e) => e.slug === product.slug && e.size === (size ?? (needsSize ? undefined : product.sizes[0] ?? null)));
-
-  function add() {
-    if (needsSize && !size) {
-      toast("Escolha um tamanho para provar.", "info");
-      return;
-    }
-    const chosen = size ?? product.sizes[0] ?? null;
-    const r = fittingList.add({ slug: product.slug, name: product.name, size: chosen, image: product.image });
-    if (r === "full") toast("Sua lista já tem 12 peças. Remova alguma para adicionar.", "error");
-    else if (r === "exists") toast("Essa peça já está na sua lista de provas.", "info", { label: "Agendar", href: "/agendamento" });
-    else toast(`${product.name}${chosen ? ` (tam. ${chosen})` : ""} adicionado à lista de provas.`, "success", { label: "Agendar", href: "/agendamento" });
-  }
+/** Escolha de tamanho + "Agendar prova pelo WhatsApp" com a peça e o tamanho na mensagem. */
+export function FittingPicker({ product, availability, hasInventory, whatsapp }: Props) {
+  const [size, setSize] = useState<string | null>(product.sizes.length === 1 ? product.sizes[0]! : null);
+  const href = bookingWhatsapp(whatsapp, { name: product.name, size });
 
   return (
     <div className="mt-7">
@@ -66,11 +52,14 @@ export function FittingPicker({ product, availability, hasInventory }: Props) {
           {hasInventory && <p className="mt-2 text-xs text-muted-foreground">Riscado = reservado ou alugado agora. <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-gold" /> última peça.</span></p>}
         </>
       )}
-      <button type="button" onClick={add} className={cn("mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-full border text-[12px] font-bold uppercase tracking-[0.16em] transition", inList ? "border-gold bg-[#fbf6ec] text-gold-dark" : "border-gold bg-gold text-ink hover:bg-gold-light")}>
-        {inList ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-        {inList ? "Na sua lista de provas" : "Quero provar esta peça"}
-      </button>
-      <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><Shirt className="h-3.5 w-3.5 text-gold" /> Monte sua lista e agende: separamos as peças antes de você chegar.</p>
+      {href && (
+        <a href={href} target="_blank" rel="noopener noreferrer" className="mt-6 flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-[#25D366] text-[13px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_14px_30px_-16px_rgb(37_211_102/0.9)] transition hover:bg-[#1ebe5b]">
+          <WhatsAppIcon className="h-5 w-5" /> Agendar prova pelo WhatsApp
+        </a>
+      )}
+      <p className="mt-2 text-xs text-muted-foreground">
+        {product.sizes.length > 1 && !size ? "Escolha o tamanho para ele ir na mensagem — ou envie sem tamanho e defina na prova." : "A mensagem já vai pronta com a peça e o tamanho. Respondemos na hora."}
+      </p>
     </div>
   );
 }

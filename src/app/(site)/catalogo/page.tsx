@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Columns2, Columns3, Columns4, Sparkles, X } from "lucide-react";
+import { Columns2, Columns3, Columns4, X } from "lucide-react";
 import { FilterDrawer } from "@/components/site/catalog/filter-drawer";
 import { SortSelect } from "@/components/site/catalog/sort-select";
 import { ProductCard } from "@/components/site/product-card";
@@ -60,7 +60,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: SP }
   ].filter(Boolean) as { label: string; href: string }[];
 
   const title = activeOccasion?.name ?? activeCategory?.name ?? "Todos os trajes";
-  const subtitle = activeOccasion?.description ?? activeCategory?.description ?? "Ternos, smokings, becas e acessórios para alugar. Escolha, monte sua lista de provas e agende.";
+  const subtitle = activeOccasion?.description ?? activeCategory?.description ?? "Ternos, smokings, becas e acessórios para alugar. Escolha a peça e agende a prova pelo WhatsApp.";
 
   const groupTitle = "mb-4 text-[11px] font-bold uppercase tracking-[0.24em] text-ink";
   const filterPanel = (
@@ -165,9 +165,6 @@ export default async function CatalogPage({ searchParams }: { searchParams: SP }
             </div>
             <div className="flex flex-wrap items-center gap-4">
               <p className="font-display text-2xl text-gold-light">{products.length} {products.length === 1 ? "traje" : "trajes"}</p>
-              <Link href="/monte-seu-terno" className="inline-flex h-10 items-center gap-2 rounded-full border border-gold-light/40 px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-gold-light transition hover:bg-gold-light hover:text-ink">
-                <Sparkles className="h-3.5 w-3.5" /> Monte seu terno
-              </Link>
             </div>
           </div>
           {/* Ocasiões em destaque */}
@@ -219,7 +216,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: SP }
               <EmptyState
                 title="Nenhum traje com esses filtros"
                 description="Tente outro tamanho ou cor — ou agende um atendimento: temos opções que ainda não estão no catálogo online."
-                action={<LinkButton href="/agendamento" variant="gold">Agendar atendimento</LinkButton>}
+                action={<LinkButton href="/agendamento" variant="gold">Falar com a Sady no WhatsApp</LinkButton>}
               />
             ) : (
               <div className={cn("grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6", gridCols)}>

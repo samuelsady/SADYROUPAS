@@ -138,14 +138,6 @@ Um **produto** (ex.: *Terno Slim Preto*) tem várias **peças físicas**, cada u
 
 ---
 
-## Lista de provas → estoque
-
-1. No catálogo, o cliente escolhe o tamanho e toca em **"Quero provar"**. A lista fica no navegador (ícone de cabide no topo) e vai junto com o agendamento.
-2. O servidor revalida produtos e tamanhos e grava a lista em `AppointmentItem`. O comprovante impresso lista as peças.
-3. No painel, o dashboard mostra **"Peças para separar"** (hoje e amanhã) e a agenda mostra quantas peças de cada atendimento já foram separadas.
-4. Na ficha do agendamento, a equipe escolhe a peça física e toca em **Separar**. A peça fica **RESERVADA**, com o nome do cliente no histórico. A reserva é condicional ao status DISPONÍVEL, então duas pessoas nunca separam a mesma peça.
-5. Se o atendimento for **cancelado** ou o cliente **não comparecer**, as peças separadas voltam sozinhas para **DISPONÍVEL**.
-
 ## Autoatendimento do cliente
 
 O link da confirmação, que também vai na mensagem de WhatsApp pela variável `{link}`, abre a página **"Meu agendamento"**, onde o cliente pode **remarcar** (mesmas regras de horário do site) ou **cancelar**. Isso vale até X horas antes do horário, configurável em **Configurações → Horários** (padrão: 3h). A equipe recebe um alerta no sino, e o cliente recebe a mensagem de alteração ou cancelamento.
@@ -157,29 +149,25 @@ O link da confirmação, que também vai na mensagem de WhatsApp pela variável 
 - **Leitor de QR Code** (`/admin/estoque/leitor`): pela câmera do celular (Chrome/Android), por um leitor USB ou digitando o código. Abre a peça em **modo balcão**, com botões grandes para mudar o status em um toque.
 - **Grade tamanho × status** em cada produto e alerta de **tamanhos esgotados** no dashboard.
 
-## Pedido de agendamento pelo WhatsApp
+## Site público (simples e direto)
 
-No site, o cliente escolhe o **dia e o horário de interesse** (só aparecem horários livres), diz **para quem é a roupa** (noivo, padrinho, pai dos noivos, formando, pajem, convidado), a **data do evento**, as **peças que precisa** e, se quiser, as roupas do catálogo. Ao enviar:
+O site tem uma função: mostrar o **catálogo**, a **localização** e levar o cliente ao **WhatsApp da Sady**, onde o agente de IA (ou a equipe) responde e marca a prova.
 
-1. O pedido fica no sistema como **Aguardando confirmação** (o horário fica reservado para não haver dois pedidos iguais).
-2. O WhatsApp do cliente abre sozinho com uma **mensagem pronta para a loja** com nome, número, papel, data do evento, dia e horário, peças e código do pedido. É nessa conversa que a equipe (ou o agente de IA, quando existir) responde.
-3. No painel, em **Interessados → Aguardando confirmação**, a equipe toca em **Confirmar** (o cliente recebe a confirmação) ou em **Outro horário** para remarcar.
+- **Página inicial** (`src/app/(site)/page.tsx`), no formato de landing page: topo com o botão "Agendar prova pelo WhatsApp", números, catálogo por ocasião e mais procurados, como funciona (3 passos), diferenciais e a Ana Claudia, depoimentos (só os cadastrados no painel), perguntas frequentes e chamada final. Localização, contatos e horários ficam no rodapé (`/#contato`).
+- **Catálogo e página da peça**: na peça, o cliente escolhe o tamanho e toca em **"Agendar prova pelo WhatsApp"**; a mensagem já vai com o nome da peça e o tamanho.
+- **Mensagens prontas**: `src/lib/whatsapp-messages.ts`. O endereço `/agendamento` redireciona para o WhatsApp.
+- O painel da loja continua igual: os agendamentos são lançados lá pela equipe (ou pelo agente, quando for integrado).
 
-Agendamentos criados pela equipe no painel já nascem confirmados.
+## Fotos, vídeo e depoimentos
 
-## Identidade, fotos e vídeos reais
-
-- **Topo da página inicial** (`components/site/home/aura-hero.tsx`): vitrine escura com foco de luz e fumaça dourada; os trajes em destaque surgem do desfocado para o nítido, com legendas nas laterais e troca automática.
-- **Assinatura de alfaiataria** (`src/components/site/tailoring.tsx`): costura pespontada nos cartões (`.stitch`), botões dourados como marcadores, selo "S" girando e cursor de linha dourada (só com mouse; desligado para quem prefere menos movimento).
-- **Abertura com fotos reais e vídeo da loja** (`src/content/site-media.ts`): com 3+ fotos do manequim sendo vestido em `public/abertura`, a abertura passa a usar as fotos; com um vídeo em `public/loja`, a página inicial ganha a faixa "Por dentro da Sady". As instruções de como fotografar estão no próprio arquivo.
-- **Depoimentos**: cadastrados em **Configurações → Depoimentos** (nome, detalhe, texto e foto opcional). A seção só aparece na página inicial quando houver depoimentos ativos — use apenas depoimentos reais, com autorização.
-- **Contagem regressiva**: na página do pedido, "faltam N dias para o seu casamento / a sua formatura" quando a data do evento foi informada.
+- **Vídeo da loja** (opcional, `src/content/site-media.ts`): com um vídeo em `public/loja`, ele aparece no bloco "Quem cuida de você" da página inicial no lugar da foto.
+- **Depoimentos**: cadastrados em **Configurações → Depoimentos**; a seção só aparece quando houver depoimentos ativos — use apenas depoimentos reais, com autorização.
 
 ## Interessados
 
 Menu **Interessados** (`/admin/interessados`): quem mostrou interesse e precisa de retorno, em quatro grupos:
 
-- **Pediram contato**: no site, a pessoa monta a lista de provas e toca em **"Quero que a loja me chame"** (nome + WhatsApp, sem marcar horário). A loja recebe um aviso no WhatsApp e no sino do painel.
+- **Pediram contato**: pedidos de contato antigos feitos pelo site (o site atual leva direto ao WhatsApp; a equipe pode registrar os interessados pelo painel).
 - **Vão provar**: atendimentos marcados, com as roupas que querem experimentar.
 - **Provaram e não alugaram**: atendimentos concluídos nos últimos 60 dias sem locação depois. Botões para chamar no WhatsApp, criar a locação ou registrar o retorno.
 - **Alugaram**: locações dos últimos 30 dias.
@@ -202,10 +190,6 @@ Menu **Locações** no painel (`/admin/locacoes`), com abas Ativas, Retiradas pr
 
 - **Baixar esta aba**: `.xlsx` com os mesmos filtros da tela.
 - **Planilha completa**: um arquivo com as quatro abas (`/api/admin/export/completa`), com cabeçalho fixo, filtros, datas em dd/mm/aaaa e valores em R$.
-
-## Aviso para a loja a cada agendamento do site
-
-Quando alguém agenda pelo site, além da confirmação para o cliente, o **WhatsApp da loja** (Configurações → Dados da loja) recebe um resumo: nome, telefone, atendimento, data e hora, código e peças da lista de provas. Liga e desliga em **Configurações → WhatsApp → Avisar a loja**.
 
 ## WhatsApp
 

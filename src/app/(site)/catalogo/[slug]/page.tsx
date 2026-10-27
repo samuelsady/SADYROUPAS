@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarCheck, ChevronDown, MessageCircle } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { ProductRail } from "@/components/site/home/product-rail";
 import { FittingPicker } from "@/components/site/fitting-picker";
 import { ProductGallery } from "@/components/site/product-gallery";
@@ -10,7 +10,6 @@ import { occasionName } from "@/lib/occasions";
 import { CatalogService } from "@/services/catalog.service";
 import { SettingsService } from "@/services/settings.service";
 import { swatchFor } from "@/utils/colors";
-import { whatsappLink } from "@/utils/phone";
 
 type Params = Promise<{ slug: string }>;
 
@@ -38,7 +37,6 @@ export default async function ProductPage({ params }: { params: Params }) {
   const product = await CatalogService.publicBySlug(slug);
   if (!product) notFound();
   const [related, settings] = await Promise.all([CatalogService.related(product, 8), SettingsService.get()]);
-  const wa = whatsappLink(settings.whatsapp, `Olá! Gostaria de saber a disponibilidade do ${product.name}.`);
 
   return (
     <>
@@ -81,32 +79,17 @@ export default async function ProductPage({ params }: { params: Params }) {
 
           {product.description && <p className="mt-6 leading-relaxed text-ink/75">{product.description}</p>}
 
-          <FittingPicker
-            product={{ slug: product.slug, name: product.name, image: product.images[0]?.url ?? null, sizes: product.sizes }}
-            availability={product.availability}
-            hasInventory={product.hasInventory}
-          />
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Link href={`/agendamento?produto=${product.slug}`} className="btn-shine inline-flex h-14 items-center justify-center gap-2 rounded-full bg-ink px-6 text-[12px] font-bold uppercase tracking-[0.16em] text-ivory transition hover:bg-ink-3">
-              <CalendarCheck className="h-4 w-4" /> Agendar prova
-            </Link>
-            {wa && (
-              <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-ink/20 px-6 text-[12px] font-bold uppercase tracking-[0.16em] transition hover:border-ink">
-                <MessageCircle className="h-4 w-4" /> WhatsApp
-              </a>
-            )}
-          </div>
+          <FittingPicker product={{ name: product.name, sizes: product.sizes }} availability={product.availability} hasInventory={product.hasInventory} whatsapp={settings.whatsapp} />
 
           <div className="mt-8 border-t border-line">
             <Accordion title="Detalhes" open>
               {product.details ?? "Consulte a equipe para detalhes de tecido e caimento."}
             </Accordion>
             <Accordion title="Como funciona o aluguel">
-              Agende um horário, prove com orientação da equipe e reserve as peças para a data do evento. Na retirada o traje é conferido; depois do evento, é só devolver na data combinada.
+              Chame a Sady no WhatsApp para marcar a prova, prove com orientação da equipe e reserve as peças para a data do evento. Na retirada o traje é conferido; depois do evento, é só devolver na data combinada.
             </Accordion>
             <Accordion title="Ajustes e tamanhos">
-              Barra e manga podem ser ajustadas na prova, conforme disponibilidade. Os tamanhos indicados são os que temos no acervo — na dúvida, agende e prove mais de um.
+              Barra e manga podem ser ajustadas na prova, conforme disponibilidade. Os tamanhos indicados são os que temos no acervo — na dúvida, prove mais de um na loja.
             </Accordion>
           </div>
         </div>
