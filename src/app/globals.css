@@ -434,16 +434,6 @@
   border-color: rgb(226 199 147 / 0.35);
 }
 
-/* Barra de progresso do carrossel do topo */
-@keyframes hero-progress {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
-  }
-}
-
 /* Selo girando devagar */
 @keyframes seal-spin {
   to {
@@ -455,19 +445,6 @@
   animation: seal-spin 28s linear infinite;
 }
 
-/* Cursor de linha dourada (só com mouse) */
-.gold-cursor {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 90;
-  pointer-events: none;
-}
-@media (hover: none), (pointer: coarse) {
-  .gold-cursor {
-    display: none;
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .js .reveal {
@@ -493,15 +470,12 @@
   }
 }
 
-/* Abertura do site: escondida para quem já viu nesta sessão ou prefere menos movimento */
-[data-intro="seen"] .intro-splash {
+/* Entrada do site: escondida para quem já viu nesta sessão ou prefere menos movimento */
+[data-intro="seen"] .site-intro {
   display: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .gold-cursor {
-    display: none;
-  }
-  .intro-splash {
+  .site-intro {
     display: none;
   }
 }

@@ -1,24 +1,19 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { CalendarCheck, Home, LayoutGrid, Shirt, Sparkles } from "lucide-react";
+import { Home, LayoutGrid, MapPin, MessageCircle } from "lucide-react";
 import { BottomNavBar, type BottomNavItem } from "@/components/ui/bottom-nav-bar";
-import { OPEN_FITTING_EVENT } from "@/hooks/use-fitting-list";
-import { useFittingList } from "@/hooks/use-fitting-list";
 
-/** Navegação principal no celular: pílula fixa no rodapé da tela. */
-export function MobileBottomNav() {
+/** Navegação no celular: início, catálogo, agendar pelo WhatsApp e localização. */
+export function MobileBottomNav({ bookingHref }: { bookingHref: string | null }) {
   const pathname = usePathname();
-  const fitting = useFittingList();
   const items: BottomNavItem[] = [
     { label: "Início", icon: Home, href: "/" },
     { label: "Catálogo", icon: LayoutGrid, href: "/catalogo" },
-    { label: "Provador", icon: Shirt, onClick: () => window.dispatchEvent(new Event(OPEN_FITTING_EVENT)), badge: fitting.length || undefined },
-    { label: "Montar", icon: Sparkles, href: "/monte-seu-terno" },
-    { label: "Agendar", icon: CalendarCheck, href: "/agendamento" },
+    ...(bookingHref ? [{ label: "Agendar", icon: MessageCircle, onClick: () => window.open(bookingHref, "_blank", "noopener") }] : []),
+    { label: "Loja", icon: MapPin, href: "/#contato" },
   ];
-  const active =
-    pathname === "/" ? 0 : pathname.startsWith("/catalogo") ? 1 : pathname.startsWith("/monte-seu-terno") ? 3 : pathname.startsWith("/agendamento") ? 4 : -1;
+  const active = pathname === "/" ? 0 : pathname.startsWith("/catalogo") ? 1 : -1;
 
   return (
     <div className="no-print fixed inset-x-0 bottom-3 z-40 flex justify-center px-3 pb-[env(safe-area-inset-bottom)] md:hidden">
