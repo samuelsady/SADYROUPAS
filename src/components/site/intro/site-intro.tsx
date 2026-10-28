@@ -1,32 +1,33 @@
 "use client";
 
 /**
- * Entrada do site: a logo da Sady sendo assinada ao lado de um terno sendo
- * vestido, sobre o vidro dourado animado. Uma vez por sessão, com "Pular";
- * desligada para quem prefere menos movimento. O script em (site)/layout.tsx
- * marca a sessão antes da pintura, então quem já viu não vê nem por um instante.
+ * Entrada do site: ao fundo, a foto real de um terno do acervo se monta faixa
+ * por faixa (da barra da calça até a gola); na frente, a logo SADY ROUPAS é
+ * montada como tipografia — filetes, letras encaixando, o Y dourado por último.
+ * Uma vez por sessão, com "Pular"; desligada para quem prefere menos movimento.
+ * O script em (site)/layout.tsx marca a sessão antes da pintura, então quem já
+ * viu não vê nem por um instante.
  */
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion, type TargetAndTransition } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { GlassFold } from "@/components/ui/glass-fold";
+import Image from "@/components/ui/sady-image";
 import { INTRO_KEY } from "@/lib/intro";
-import { DEFAULT_CONFIG, type SuitConfig } from "./suit-config";
-import { SuitDefs, suitLayers, VIEWBOX } from "./suit-figure";
 
-const DURATION = 4600;
+const DURATION = 4800;
 const EASE = [0.22, 1, 0.36, 1] as const;
-const LOOK: SuitConfig = { ...DEFAULT_CONFIG, suit: "preto", fabric: "liso", lapel: "entalhada", shirt: "branca", tieStyle: "gravata", tie: "dourada", vest: "terno" };
+const PHOTO = "/catalogo/smoking-tradicional-1-bota-o-foto-1.jpg";
+const BANDS = 7;
 
-/** De onde cada peça "chega" e quando. */
-function entrance(id: string): { from: TargetAndTransition; delay: number } {
-  if (id === "manequim") return { from: { opacity: 0, y: 20 }, delay: 0.15 };
-  if (id === "camisa" || id === "colarinho") return { from: { opacity: 0, y: 70, filter: "blur(12px)" }, delay: 0.45 };
-  if (id.startsWith("calca")) return { from: { opacity: 0, y: 60, filter: "blur(10px)" }, delay: 0.85 };
-  if (id === "gravata") return { from: { opacity: 0, y: -30, filter: "blur(8px)" }, delay: 1.15 };
-  if (id === "colete") return { from: { opacity: 0, x: -80, filter: "blur(10px)" }, delay: 1.4 };
-  if (id === "lenco") return { from: { opacity: 0, scale: 0.6 }, delay: 2.5 };
-  return { from: { opacity: 0, y: -110, scale: 1.05, filter: "blur(14px)" }, delay: 1.85 }; // blazer
-}
+/** Faixas da foto, de baixo para cima: cada uma chega de um lado. */
+const bands = Array.from({ length: BANDS }, (_, i) => {
+  const top = Math.max(0, (100 / BANDS) * i - 0.2);
+  const bottom = Math.max(0, 100 - (100 / BANDS) * (i + 1) - 0.2);
+  const order = BANDS - 1 - i;
+  return { i, clip: `inset(${top}% 0% ${bottom}% 0%)`, from: i % 2 ? 90 : -90, delay: 0.15 + order * 0.2 };
+});
+
+const LETTERS = ["S", "A", "D"];
 
 export function SiteIntro() {
   const [show, setShow] = useState(true);
@@ -52,8 +53,6 @@ export function SiteIntro() {
     } catch {}
   };
 
-  const layers = suitLayers(LOOK).sort((a, b) => a.z - b.z);
-
   return (
     <AnimatePresence onExitComplete={finish}>
       {show && (
@@ -65,70 +64,96 @@ export function SiteIntro() {
           role="dialog"
           aria-label="Entrada do site"
         >
-          <GlassFold color1="#5a4426" color2="#0b0907" color3="#e9cf98" speed={0.35} scale={0.9} noise={0.1} className="absolute inset-0 opacity-70" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgb(11_9_7/0.65)_100%)]" />
+          <GlassFold color1="#5a4426" color2="#0b0907" color3="#e9cf98" speed={0.35} scale={0.9} noise={0.1} className="absolute inset-0 opacity-50" />
 
-          <div className="relative flex h-full flex-col items-center justify-center gap-4 px-6 md:flex-row md:gap-16">
-            {/* O terno sendo vestido */}
-            <SuitDefs />
-            <div className="relative aspect-[400/620] h-[42vh] md:h-[64vh] md:max-h-[560px]">
-              {layers.map((l) => {
-                const { from, delay } = entrance(l.id);
-                return (
-                  <motion.div
-                    key={l.id}
-                    className="absolute inset-0"
-                    initial={from}
-                    animate={{ opacity: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)" }}
-                    transition={{ delay, duration: 0.85, ease: EASE }}
-                  >
-                    <svg viewBox={VIEWBOX} className="h-full w-full overflow-visible drop-shadow-[0_30px_40px_rgb(0_0_0/0.45)]">
-                      {l.node}
-                    </svg>
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            {/* A logo sendo assinada */}
-            <div className="flex flex-col items-center md:items-start">
-              <svg viewBox="0 0 520 210" className="w-[min(78vw,460px)] overflow-visible" role="img" aria-label="Sady">
-                <motion.text
-                  x="10"
-                  y="160"
-                  fontFamily="var(--font-signature), cursive"
-                  fontSize="190"
-                  fill="#e9cf98"
-                  stroke="#e9cf98"
-                  strokeWidth="1.4"
-                  strokeDasharray="2400"
-                  initial={{ strokeDashoffset: 2400, fillOpacity: 0 }}
-                  animate={{ strokeDashoffset: 0, fillOpacity: 1 }}
-                  transition={{ strokeDashoffset: { delay: 0.6, duration: 2.2, ease: "easeInOut" }, fillOpacity: { delay: 2.2, duration: 0.8 } }}
-                >
-                  Sady
-                </motion.text>
-                {/* traço final da assinatura */}
-                <motion.path
-                  d="M40 186 C 160 172, 320 176, 500 160"
-                  fill="none"
-                  stroke="#c2a06a"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ delay: 2.5, duration: 0.8, ease: "easeOut" }}
-                />
-              </svg>
-              <motion.p
-                className="mt-2 pl-1 text-[11px] font-semibold uppercase tracking-[0.6em] text-ivory/75 md:text-xs"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2.9, duration: 0.8, ease: EASE }}
+          {/* O terno, montado ao fundo */}
+          <motion.div
+            aria-hidden
+            className="absolute inset-y-0 left-1/2 aspect-[1463/2048] h-full -translate-x-1/2 [mask-image:radial-gradient(ellipse_50%_50%_at_50%_45%,#000_40%,transparent_100%)]"
+            initial={{ scale: 1.08 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: DURATION / 1000, ease: "easeOut" }}
+          >
+            {bands.map((b) => (
+              <motion.div
+                key={b.i}
+                className="absolute inset-0"
+                style={{ clipPath: b.clip }}
+                initial={{ x: b.from, opacity: 0, filter: "blur(14px)" }}
+                animate={{ x: 0, opacity: 1, filter: "blur(0px)" }}
+                transition={{ delay: b.delay, duration: 0.9, ease: EASE }}
               >
-                Roupas · desde 2008
-              </motion.p>
+                <Image src={PHOTO} alt="" fill priority sizes="(min-width: 768px) 60vh, 100vw" className="object-cover [filter:grayscale(0.35)_brightness(0.45)_contrast(1.15)_sepia(0.25)]" />
+              </motion.div>
+            ))}
+            {/* linha de costura que sobe enquanto as faixas encaixam */}
+            <motion.span
+              className="absolute inset-x-[12%] h-px bg-gradient-to-r from-transparent via-gold-light to-transparent shadow-[0_0_12px_#e2c793]"
+              initial={{ top: "100%", opacity: 0 }}
+              animate={{ top: ["100%", "0%"], opacity: [0, 1, 1, 0] }}
+              transition={{ delay: 0.15, duration: 0.2 * BANDS + 0.6, ease: "easeInOut" }}
+            />
+          </motion.div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgb(11_9_7/0.35)_0%,rgb(11_9_7/0.8)_75%)]" />
+
+          {/* A logo, montada */}
+          <div className="relative flex h-full flex-col items-center justify-center px-6" aria-label="Sady Roupas" role="img">
+            <motion.span
+              className="h-px w-[min(70vw,380px)] origin-center bg-gradient-to-r from-transparent via-gold to-transparent"
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 1.2, duration: 0.8, ease: EASE }}
+            />
+
+            <div className="mt-5 flex font-display text-[clamp(4.5rem,19vw,9.5rem)] font-medium leading-[0.9] tracking-[0.04em]" aria-hidden>
+              {LETTERS.map((l, i) => (
+                <span key={l} className="overflow-hidden pb-[0.06em]">
+                  <motion.span
+                    className="inline-block"
+                    initial={{ y: "105%" }}
+                    animate={{ y: 0 }}
+                    transition={{ delay: 1.45 + i * 0.14, duration: 0.75, ease: EASE }}
+                  >
+                    {l}
+                  </motion.span>
+                </span>
+              ))}
+              <span className="overflow-hidden pb-[0.06em]">
+                <motion.span
+                  className="text-gold-shine inline-block"
+                  initial={{ y: "-105%" }}
+                  animate={{ y: 0 }}
+                  transition={{ delay: 2.05, duration: 0.8, ease: EASE }}
+                >
+                  Y
+                </motion.span>
+              </span>
             </div>
+
+            <motion.span
+              className="mt-3 block pl-[0.55em] font-sans text-[clamp(0.85rem,3.6vw,1.6rem)] font-semibold"
+              initial={{ opacity: 0, letterSpacing: "1.6em" }}
+              animate={{ opacity: 1, letterSpacing: "0.55em" }}
+              transition={{ delay: 2.4, duration: 1.1, ease: EASE }}
+              aria-hidden
+            >
+              ROUPAS
+            </motion.span>
+
+            <motion.span
+              className="mt-6 h-px w-[min(70vw,380px)] origin-center bg-gradient-to-r from-transparent via-gold to-transparent"
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 1.2, duration: 0.8, ease: EASE }}
+            />
+            <motion.p
+              className="mt-4 text-[10px] font-semibold uppercase tracking-[0.45em] text-ivory/70 md:text-[11px]"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 3.1, duration: 0.7, ease: EASE }}
+            >
+              Teresina · desde 2008
+            </motion.p>
           </div>
 
           <button
