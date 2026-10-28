@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Cormorant_Garamond, Great_Vibes, Manrope } from "next/font/google";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({ subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"], variable: "--font-cormorant", display: "swap" });
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
+// Assinatura da logo na entrada do site
+const signature = Great_Vibes({ subsets: ["latin"], weight: "400", variable: "--font-signature", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
@@ -17,7 +19,7 @@ export const viewport: Viewport = { themeColor: "#13110f", width: "device-width"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" data-scroll-behavior="smooth" suppressHydrationWarning className={`${cormorant.variable} ${manrope.variable}`}>
+    <html lang="pt-BR" data-scroll-behavior="smooth" suppressHydrationWarning className={`${cormorant.variable} ${manrope.variable} ${signature.variable}`}>
       <body>
         {/* Marca que o JS está ativo: animações de revelação só escondem conteúdo nesse caso */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />

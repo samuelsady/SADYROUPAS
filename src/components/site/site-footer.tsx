@@ -95,7 +95,6 @@ export function SiteFooter({ settings, hours }: { settings: StoreSettings; hours
           <span>© {new Date().getFullYear()} {settings.companyName} · Desde 2008 · Teresina — PI</span>
           <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label="Rodapé">
             <Link href="/catalogo" className="hover:text-ivory">Catálogo</Link>
-            <Link href="/#como-funciona" className="hover:text-ivory">Como funciona</Link>
             <Link href="/admin" className="hover:text-ivory">Área da equipe</Link>
           </nav>
         </div>

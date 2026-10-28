@@ -151,17 +151,11 @@ O link da confirmação, que também vai na mensagem de WhatsApp pela variável 
 
 ## Site público (simples e direto)
 
-O site tem uma função: mostrar o **catálogo**, a **localização** e levar o cliente ao **WhatsApp da Sady**, onde o agente de IA (ou a equipe) responde e marca a prova.
+O site é só uma apresentação: o que é a Sady, o **catálogo**, a **localização** e o botão para **agendar pelo WhatsApp**, onde o agente de IA (ou a equipe) responde e marca a prova.
 
-- **Página inicial** (`src/app/(site)/page.tsx`), no formato de landing page: topo com o botão "Agendar prova pelo WhatsApp", números, catálogo por ocasião e mais procurados, como funciona (3 passos), diferenciais e a Ana Claudia, depoimentos (só os cadastrados no painel), perguntas frequentes e chamada final. Localização, contatos e horários ficam no rodapé (`/#contato`).
-- **Catálogo e página da peça**: na peça, o cliente escolhe o tamanho e toca em **"Agendar prova pelo WhatsApp"**; a mensagem já vai com o nome da peça e o tamanho.
-- **Mensagens prontas**: `src/lib/whatsapp-messages.ts`. O endereço `/agendamento` redireciona para o WhatsApp.
-- O painel da loja continua igual: os agendamentos são lançados lá pela equipe (ou pelo agente, quando for integrado).
-
-## Fotos, vídeo e depoimentos
-
-- **Vídeo da loja** (opcional, `src/content/site-media.ts`): com um vídeo em `public/loja`, ele aparece no bloco "Quem cuida de você" da página inicial no lugar da foto.
-- **Depoimentos**: cadastrados em **Configurações → Depoimentos**; a seção só aparece quando houver depoimentos ativos — use apenas depoimentos reais, com autorização.
+- **Entrada** (`components/site/intro/site-intro.tsx`): a logo "Sady" sendo assinada ao lado de um terno sendo vestido, sobre o vidro dourado animado. Uma vez por sessão, com "Pular"; desligada para quem prefere menos movimento.
+- **Página inicial** (`src/app/(site)/page.tsx`): uma tela sobre o fundo `components/ui/glass-fold.tsx` (WebGL, cores da Sady), com a frase principal, "Agendar pelo WhatsApp", "Ver catálogo" e três cartões (Catálogo, Agendar, Onde estamos). Mapa, contatos e horários no rodapé (`/#contato`).
+- **Página da peça**: escolhe o tamanho e toca em "Agendar prova pelo WhatsApp"; a mensagem leva a peça e o tamanho (`src/lib/whatsapp-messages.ts`). `/agendamento` redireciona para o WhatsApp.
 
 ## Interessados
 
